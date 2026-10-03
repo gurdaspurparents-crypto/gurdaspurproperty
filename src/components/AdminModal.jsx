@@ -15,7 +15,11 @@ import {
   CheckCircle2,
   Save,
   Tag,
-  Camera
+  Camera,
+  Video,
+  Play,
+  Film,
+  ExternalLink
 } from 'lucide-react';
 import { 
   getLeads, 
@@ -57,6 +61,8 @@ export default function AdminModal({
     description: '',
     amenities: '30 Ft Wide Road, Immediate Registry, Clear Mutation',
     imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80',
+    images: [],
+    videoUrl: '',
     badge: 'Hot Deal',
     verified: true,
     facing: 'East'
@@ -121,6 +127,8 @@ export default function AdminModal({
       description: prop.description,
       amenities: prop.amenities?.join(', ') || '',
       imageUrl: prop.images?.[0] || '',
+      images: prop.images || [],
+      videoUrl: prop.videoUrl || '',
       badge: prop.badge || 'Hot Deal',
       verified: prop.verified !== false,
       facing: prop.facing || 'East'
@@ -135,6 +143,13 @@ export default function AdminModal({
     const unitName = lead.size && lead.size.includes('Kanal') ? 'Kanal' : 'Marla';
     const priceNum = parseFloat(lead.price) || 0;
     
+    const leadImages = (lead.images && lead.images.length > 0) ? lead.images : [];
+    const defaultCover = lead.category === 'kothi' 
+      ? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80'
+      : lead.category === 'commercial'
+      ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80'
+      : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80';
+
     setPropForm({
       title: `${lead.size || '10 Marla'} ${lead.category === 'plot' ? 'Residential Plot' : lead.category === 'kothi' ? 'Modern Kothi' : lead.category === 'commercial' ? 'Commercial Space' : 'Land'} in ${lead.locality || 'Gurdaspur'}`,
       category: lead.category || 'plot',
@@ -148,13 +163,9 @@ export default function AdminModal({
       cityArea: lead.subArea ? `${lead.subArea}, ${lead.locality}, Gurdaspur` : `Near ${lead.locality}, Gurdaspur`,
       description: lead.notes || `Prime verified ${lead.category || 'property'} located on ${lead.locality}. Road width: ${lead.roadWidth || '30 Feet'}. Pucca registry with clear inteqaal. Direct deals handled via Travelx Gurdaspur Property Consultants.`,
       amenities: `${lead.roadWidth || '30 Ft Road'}, Immediate Registry, 100% Clear Inteqaal, Verified Title`,
-      imageUrl: (lead.images && lead.images.length > 0)
-        ? lead.images[0]
-        : lead.category === 'kothi' 
-        ? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80'
-        : lead.category === 'commercial'
-        ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80'
-        : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80',
+      imageUrl: leadImages.length > 0 ? leadImages[0] : defaultCover,
+      images: leadImages.length > 0 ? leadImages : [defaultCover],
+      videoUrl: lead.videoUrl || '',
       badge: 'Direct Listing',
       verified: true,
       facing: lead.facing || 'East'
@@ -168,6 +179,13 @@ export default function AdminModal({
     const numericPrice = parseFloat(propForm.price) || 0;
     const numericSize = parseFloat(propForm.size) || 0;
     const numericSqft = parseFloat(propForm.sqft) || (propForm.unit === 'Marla' ? numericSize * 225 : numericSize * 5445);
+    const resolvedImages = (propForm.images && propForm.images.length > 0)
+      ? propForm.images
+      : [propForm.imageUrl];
+
+    if (propForm.imageUrl && resolvedImages[0] !== propForm.imageUrl) {
+      resolvedImages[0] = propForm.imageUrl;
+    }
 
     if (editingPropertyId) {
       const updated = properties.map(p => {
@@ -179,7 +197,8 @@ export default function AdminModal({
             size: numericSize,
             sqft: numericSqft,
             amenities: amenitiesArray,
-            images: [propForm.imageUrl]
+            images: resolvedImages,
+            videoUrl: propForm.videoUrl || ''
           };
         }
         return p;
@@ -195,7 +214,8 @@ export default function AdminModal({
         size: numericSize,
         sqft: numericSqft,
         amenities: amenitiesArray,
-        images: [propForm.imageUrl],
+        images: resolvedImages,
+        videoUrl: propForm.videoUrl || '',
         status: 'available',
         dateAdded: new Date().toISOString().split('T')[0]
       };
@@ -363,6 +383,8 @@ export default function AdminModal({
                           description: '',
                           amenities: '30 Ft Road, Immediate Registry, Clear Mutation',
                           imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80',
+                          images: [],
+                          videoUrl: '',
                           badge: 'Hot Deal',
                           verified: true,
                           facing: 'East'
@@ -503,15 +525,28 @@ export default function AdminModal({
                           </div>
                         </div>
 
-                        <div>
-                          <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Image URL</label>
-                          <input
-                            type="text"
-                            placeholder="https://..."
-                            value={propForm.imageUrl}
-                            onChange={(e) => setPropForm({ ...propForm, imageUrl: e.target.value })}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Image URL (Cover Photo)</label>
+                            <input
+                              type="text"
+                              placeholder="https://..."
+                              value={propForm.imageUrl}
+                              onChange={(e) => setPropForm({ ...propForm, imageUrl: e.target.value })}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Video Walkthrough URL (Optional)</label>
+                            <input
+                              type="text"
+                              placeholder="https://youtu.be/... or Google Drive"
+                              value={propForm.videoUrl || ''}
+                              onChange={(e) => setPropForm({ ...propForm, videoUrl: e.target.value })}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800"
+                            />
+                          </div>
                         </div>
 
                         <div>
@@ -682,27 +717,97 @@ export default function AdminModal({
                               </div>
                             )}
 
-                            {/* Customer Uploaded Photos Preview */}
+                            {/* Customer Uploaded Photos Preview (up to 15 photos) */}
                             {lead.images && lead.images.length > 0 && (
-                              <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                                <div className="text-[10px] uppercase font-bold text-slate-600 flex items-center gap-1.5">
-                                  <Camera className="w-3.5 h-3.5 text-blue-600" />
-                                  <span>Customer Uploaded Photos ({lead.images.length}):</span>
+                              <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <div className="text-[10px] uppercase font-bold text-slate-600 flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    <Camera className="w-3.5 h-3.5 text-blue-600" />
+                                    <span>Customer Uploaded Photos ({lead.images.length} / 15 Photos):</span>
+                                  </div>
+                                  <span className="text-[10px] text-slate-400">Click photo to view full resolution</span>
                                 </div>
-                                <div className="flex flex-wrap gap-2 pt-1">
+                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 pt-1">
                                   {lead.images.map((img, i) => (
                                     <a 
                                       key={i} 
                                       href={img} 
                                       target="_blank" 
                                       rel="noopener noreferrer" 
-                                      className="w-14 h-14 rounded-lg overflow-hidden border border-slate-300 block shadow-2xs hover:scale-105 transition-transform bg-slate-900"
-                                      title={`View Photo ${i + 1}`}
+                                      className="relative aspect-square rounded-lg overflow-hidden border border-slate-300 block shadow-2xs hover:scale-105 transition-transform bg-slate-900 group"
+                                      title={`View Photo #${i + 1}`}
                                     >
                                       <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
+                                      <span className="absolute bottom-0.5 right-0.5 bg-black/75 text-[8px] text-white px-1 rounded font-mono">
+                                        #{i + 1}
+                                      </span>
                                     </a>
                                   ))}
                                 </div>
+                              </div>
+                            )}
+
+                            {/* Customer Video Walkthrough Section */}
+                            {(lead.videoUrl || lead.videoFile) ? (
+                              <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-3 space-y-2">
+                                <div className="text-[10px] uppercase font-black text-purple-900 flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    <Video className="w-3.5 h-3.5 text-purple-600" />
+                                    <span>Customer Video Walkthrough</span>
+                                  </div>
+                                  <span className="bg-purple-200 text-purple-900 text-[9px] px-2 py-0.5 rounded-full font-bold">
+                                    Walkthrough Available
+                                  </span>
+                                </div>
+
+                                {lead.videoUrl && (
+                                  <div className="flex flex-wrap items-center justify-between gap-2 bg-white p-2.5 rounded-lg border border-purple-200">
+                                    <div className="text-xs text-slate-700 truncate font-mono text-[11px] max-w-sm">
+                                      {lead.videoUrl}
+                                    </div>
+                                    <a
+                                      href={lead.videoUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-lg shrink-0 shadow-xs"
+                                    >
+                                      <Play className="w-3.5 h-3.5 fill-white" />
+                                      <span>Watch Walkthrough Video</span>
+                                    </a>
+                                  </div>
+                                )}
+
+                                {lead.videoFile && (
+                                  <div className="bg-white p-2.5 rounded-lg border border-purple-200 space-y-2">
+                                    <div className="flex items-center justify-between text-xs">
+                                      <span className="font-bold text-slate-800 truncate">{lead.videoFile.name}</span>
+                                      <span className="text-[10px] text-slate-500 font-medium">{lead.videoFile.size}</span>
+                                    </div>
+                                    {lead.videoFile.dataUrl && (
+                                      <video 
+                                        src={lead.videoFile.dataUrl} 
+                                        controls 
+                                        className="w-full max-h-48 rounded-lg bg-black object-contain shadow-inner"
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                                <div className="flex items-center gap-1.5">
+                                  <Video className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>No video attached by customer yet.</span>
+                                </div>
+                                <a
+                                  href={`https://wa.me/${cleanLeadPhone}?text=${encodeURIComponent(`Hello ${lead.name}, please share a short video walkthrough of your property in ${lead.locality} on WhatsApp so we can attract serious verified buyers.`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[11px] font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                                >
+                                  <MessageCircle className="w-3 h-3 text-emerald-600" />
+                                  <span>Request Video on WhatsApp</span>
+                                </a>
                               </div>
                             )}
 

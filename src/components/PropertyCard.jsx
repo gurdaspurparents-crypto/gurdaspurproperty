@@ -10,7 +10,8 @@ import {
   ChevronRight,
   BadgeCheck,
   Compass,
-  FileCheck2
+  FileCheck2,
+  Play
 } from 'lucide-react';
 
 export default function PropertyCard({ 
@@ -100,6 +101,12 @@ export default function PropertyCard({
             <span className="text-[11px] font-bold bg-emerald-600/95 backdrop-blur-md text-white px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
               <BadgeCheck className="w-3.5 h-3.5" />
               Verified Title
+            </span>
+          )}
+          {property.videoUrl && (
+            <span className="text-[11px] font-bold bg-purple-700/95 backdrop-blur-md text-white px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
+              <Play className="w-3 h-3 fill-white" />
+              Video Tour
             </span>
           )}
         </div>

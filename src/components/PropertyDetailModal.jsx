@@ -12,7 +12,9 @@ import {
   CheckCircle2, 
   Share2,
   FileCheck,
-  Check
+  Check,
+  Play,
+  Video
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 
@@ -149,6 +151,30 @@ export default function PropertyDetailModal({
                     <img src={img} alt="thumb" className="w-full h-full object-cover" />
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Video Walkthrough Banner */}
+            {property.videoUrl && (
+              <div className="mt-3 flex items-center justify-between p-3 rounded-xl bg-purple-50 border border-purple-200 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0">
+                    <Play className="w-4 h-4 fill-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-purple-950">Property Video Walkthrough Available</div>
+                    <div className="text-[10px] text-purple-700">Watch verified virtual tour of this property</div>
+                  </div>
+                </div>
+                <a
+                  href={property.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+                >
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>Watch Video Tour</span>
+                </a>
               </div>
             )}
           </div>

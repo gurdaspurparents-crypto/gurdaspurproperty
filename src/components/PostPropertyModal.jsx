@@ -20,7 +20,13 @@ import {
   Info,
   Camera,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Video,
+  Play,
+  Film,
+  ExternalLink,
+  FileVideo,
+  Loader2
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
@@ -28,6 +34,8 @@ import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const [step, setStep] = useState(1); // Step 1: Property Specs | Step 2: Confidential Details
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [videoFile, setVideoFile] = useState(null); // { name, size, dataUrl }
   const [formData, setFormData] = useState({
     // Basic Property Details
     purpose: 'sell', // 'sell' | 'rent'
@@ -45,6 +53,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
     expectedPrice: '',
     isNegotiable: true,
     description: '',
+    videoUrl: '', // YouTube / Google Drive / Reel link
 
     // STRICTLY CONFIDENTIAL - ADMIN ONLY
     exactLocation: '', // House #, Street #, Khasra #
@@ -59,25 +68,94 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
   if (!isOpen) return null;
 
   const cleanAdminPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
+  const MAX_PHOTOS = 15;
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-
-    const remainingSlots = 5 - uploadedImages.length;
-    files.slice(0, remainingSlots).forEach(file => {
+  // Client-side image compression to support 15 high-res photos safely in storage
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setUploadedImages(prev => [...prev, reader.result]);
-        }
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          resolve(dataUrl);
+        };
+        img.onerror = () => resolve(event.target.result);
       };
+      reader.onerror = () => resolve(null);
       reader.readAsDataURL(file);
     });
   };
 
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const remainingSlots = MAX_PHOTOS - uploadedImages.length;
+    if (remainingSlots <= 0) {
+      alert("Aap maximum 15 photos add kar sakte hain.");
+      return;
+    }
+
+    setIsCompressing(true);
+    const selectedFiles = files.slice(0, remainingSlots);
+    const compressedList = await Promise.all(selectedFiles.map(compressImage));
+    const validImages = compressedList.filter(Boolean);
+
+    setUploadedImages(prev => [...prev, ...validImages]);
+    setIsCompressing(false);
+  };
+
   const handleRemoveImage = (indexToRemove) => {
     setUploadedImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleVideoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check size limit: 25MB for browser storage
+    if (file.size > 25 * 1024 * 1024) {
+      alert("Video file size 25MB se zyada hai. Badi videos ke liye YouTube/Drive link dalein ya WhatsApp par direct consultant ko share karein.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setVideoFile({
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+        dataUrl: reader.result
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoFile(null);
   };
 
   const handleNextStep = (e) => {
@@ -116,6 +194,8 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       isNegotiable: formData.isNegotiable,
       notes: formData.description,
       images: uploadedImages,
+      videoUrl: formData.videoUrl,
+      videoFile: videoFile ? { name: videoFile.name, size: videoFile.size, dataUrl: videoFile.dataUrl } : null,
       isConfidential: true
     });
 
@@ -124,6 +204,10 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
   };
 
   const handleSendToWhatsApp = () => {
+    const videoDetails = formData.videoUrl 
+      ? `• Video Walkthrough: ${formData.videoUrl}` 
+      : (videoFile ? `• Video Walkthrough: ${videoFile.name} attached` : '• Video Walkthrough: Will share on WhatsApp');
+
     const text = encodeURIComponent(
       `🔒 *CONFIDENTIAL PROPERTY SUBMISSION (Admin Eyes Only)*\n\n` +
       `👤 *Owner Details (PRIVATE):*\n` +
@@ -141,6 +225,8 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       `• Facing: ${formData.facing}\n` +
       `• Registry: ${formData.registryStatus}\n` +
       `• Demand: ₹${formData.expectedPrice} ${formData.isNegotiable ? '(Negotiable)' : '(Fixed)'}\n` +
+      `• Photos Attached: ${uploadedImages.length} Photos\n` +
+      `${videoDetails}\n` +
       `• Extra Notes: ${formData.description || 'N/A'}\n\n` +
       `⚠️ *Privacy Reminder:* As requested, keep my phone number & exact location confidential. Only coordinate deals via your office.`
     );
@@ -435,20 +521,26 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                     </div>
                   </div>
 
-                  {/* Property Photos Upload (99acres / MagicBricks Standard) */}
+                  {/* Property Photos Upload (10 to 15 Photos) */}
                   <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5">
                       <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                         <Camera className="w-4 h-4 text-[#005ca8]" />
-                        <span>Property Photos (Optional - Max 5 Photos)</span>
+                        <span>Property Photos (10 to 15 Photos)</span>
                       </label>
-                      <span className="text-[11px] font-bold text-slate-500">
-                        {uploadedImages.length}/5 Photos Added
+                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                        uploadedImages.length >= 10 
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                          : uploadedImages.length > 0 
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200' 
+                          : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {uploadedImages.length}/15 Photos Added {uploadedImages.length >= 10 ? '✓ Ready' : '(Min 10-15 Recommended)'}
                       </span>
                     </div>
 
                     <p className="text-[11px] text-slate-500">
-                      Upload front elevation, road view, boundary demarcation, or interior rooms.
+                      Gurdaspur ke buyers ko attract karne ke liye front elevation, road width, boundary demarcation, rooms, kitchen aur terrace ki <strong>10 se 15 photos</strong> upload karein.
                     </p>
 
                     {/* Image Preview Grid */}
@@ -465,8 +557,11 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                             >
                               <X className="w-3 h-3" />
                             </button>
+                            <span className="absolute bottom-1 right-1 bg-black/75 backdrop-blur-xs text-white text-[9px] font-mono px-1 rounded">
+                              #{idx + 1}
+                            </span>
                             {idx === 0 && (
-                              <span className="absolute bottom-1 left-1 bg-[#005ca8] text-white text-[8px] font-black uppercase px-1 rounded">
+                              <span className="absolute bottom-1 left-1 bg-[#005ca8] text-white text-[8px] font-black uppercase px-1 rounded shadow-xs">
                                 Cover
                               </span>
                             )}
@@ -476,28 +571,121 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                     )}
 
                     {/* Upload File Input / Dropzone */}
-                    {uploadedImages.length < 5 && (
+                    {uploadedImages.length < MAX_PHOTOS && (
                       <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-[#005ca8] rounded-xl p-4 bg-white hover:bg-blue-50/40 transition-all cursor-pointer group">
-                        <Upload className="w-6 h-6 text-slate-400 group-hover:text-[#005ca8] mb-1 transition-colors" />
-                        <span className="text-xs font-bold text-slate-700 group-hover:text-[#005ca8] transition-colors">
-                          Click to Add Photos from Mobile / PC
-                        </span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">
-                          Supports JPG, PNG (Max 5 photos)
-                        </span>
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                        />
+                        {isCompressing ? (
+                          <div className="flex items-center gap-2 text-xs font-bold text-[#005ca8] py-2">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Compressing & optimizing photos...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload className="w-6 h-6 text-slate-400 group-hover:text-[#005ca8] mb-1 transition-colors" />
+                            <span className="text-xs font-bold text-slate-700 group-hover:text-[#005ca8] transition-colors">
+                              Click to Add Photos (Up to 15 Photos)
+                            </span>
+                            <span className="text-[10px] text-slate-400 mt-0.5">
+                              Supports multi-select JPG, PNG ({MAX_PHOTOS - uploadedImages.length} slots left)
+                            </span>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                          </>
+                        )}
                       </label>
                     )}
 
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-100">
                       <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Photos device par nahi hain? Aap submit karne ke baad consultant ko direct WhatsApp par bhi bhej sakte hain.</span>
+                      <span>Photos phone gallery mein hain? Form submit karne ke baad aap 1-click se WhatsApp par bhi saari photos bhej sakte hain.</span>
+                    </div>
+                  </div>
+
+                  {/* Property Video Walkthrough (Video Clip / Link Option) */}
+                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5">
+                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Video className="w-4 h-4 text-rose-600" />
+                        <span>Property Video Walkthrough (Video Option)</span>
+                      </label>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full">
+                        High Buyer Response
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-slate-500">
+                      Property ka live video walkthrough add karein. Video dekhne wale buyers 3x jaldi deal final karte hain.
+                    </p>
+
+                    {/* Option 1: Walkthrough Video Link (YouTube / Google Drive / Instagram) */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                        <ExternalLink className="w-3 h-3 text-[#005ca8]" />
+                        <span>Walkthrough Video Link (YouTube / Google Drive / Reels):</span>
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://youtu.be/... ya Google Drive video link"
+                        value={formData.videoUrl}
+                        onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    {/* Option 2: Upload Video File or Send Directly on WhatsApp */}
+                    <div className="pt-2 border-t border-slate-200/70">
+                      <div className="text-[11px] font-bold text-slate-700 mb-2 flex items-center gap-1">
+                        <FileVideo className="w-3 h-3 text-purple-600" />
+                        <span>Ya Phone Se Direct Video Attach Karein:</span>
+                      </div>
+
+                      {videoFile ? (
+                        <div className="bg-white p-3 rounded-xl border border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                          <div className="flex items-center gap-2.5 overflow-hidden w-full">
+                            <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                              <Film className="w-5 h-5" />
+                            </div>
+                            <div className="overflow-hidden">
+                              <div className="text-xs font-bold text-slate-900 truncate">{videoFile.name}</div>
+                              <div className="text-[10px] text-slate-500 font-medium">{videoFile.size} • Video clip attached successfully</div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleRemoveVideo}
+                            className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors shrink-0 cursor-pointer"
+                          >
+                            Remove Video
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <label className="flex items-center justify-center gap-2 border border-slate-300 hover:border-purple-500 rounded-xl p-3 bg-white hover:bg-purple-50/30 transition-all cursor-pointer">
+                            <Upload className="w-4 h-4 text-purple-600 shrink-0" />
+                            <span className="text-xs font-bold text-slate-700">Upload Video Clip (Max 25MB)</span>
+                            <input
+                              type="file"
+                              accept="video/*"
+                              onChange={handleVideoUpload}
+                              className="hidden"
+                            />
+                          </label>
+
+                          <a
+                            href={`https://wa.me/${cleanAdminPhone}?text=${encodeURIComponent(`Hello! I want to share my property video walkthrough directly on WhatsApp for listing on GurdaspurProperty.in.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 border border-emerald-200 hover:border-emerald-500 rounded-xl p-3 bg-emerald-50/50 hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-all text-center"
+                          >
+                            <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>Send 4K Video on WhatsApp</span>
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
 
