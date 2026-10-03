@@ -4,8 +4,12 @@ import Hero from './components/Hero';
 import PropertyCard from './components/PropertyCard';
 import PropertyDetailModal from './components/PropertyDetailModal';
 import PunjabLandCalculator from './components/PunjabLandCalculator';
+import PunjabStampDutyCalculator from './components/PunjabStampDutyCalculator';
 import PostPropertyModal from './components/PostPropertyModal';
+import LocalitiesGuide from './components/LocalitiesGuide';
+import NRIPropertyCorner from './components/NRIPropertyCorner';
 import ConsultantServices from './components/ConsultantServices';
+import Testimonials from './components/Testimonials';
 import AdminModal from './components/AdminModal';
 import Footer from './components/Footer';
 
@@ -27,7 +31,10 @@ import {
   MapPin, 
   SlidersHorizontal,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  FileCheck2,
+  Globe2,
+  ArrowUpRight
 } from 'lucide-react';
 
 export default function App() {
@@ -37,6 +44,7 @@ export default function App() {
   // Modals
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [isStampDutyOpen, setIsStampDutyOpen] = useState(false);
   const [isPostPropertyOpen, setIsPostPropertyOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
@@ -122,12 +130,13 @@ export default function App() {
         settings={settings}
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
+        onOpenStampDuty={() => setIsStampDutyOpen(true)}
         onOpenAdmin={() => setIsAdminOpen(true)}
         activeFilter={selectedCategory}
         setActiveFilter={setSelectedCategory}
       />
 
-      {/* Hero with Search Bar */}
+      {/* Hero Section with Search Engine */}
       <Hero
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -140,59 +149,61 @@ export default function App() {
         budgetRange={budgetRange}
         setBudgetRange={setBudgetRange}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
+        onOpenStampDuty={() => setIsStampDutyOpen(true)}
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
       />
 
       {/* Main Listings Section */}
-      <main id="listings" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex-1 w-full">
+      <main id="listings" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-1 w-full">
         
-        {/* Category Pills Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 scrollbar-none">
           {PROPERTY_TYPES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-5 py-3 rounded-2xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
                 selectedCategory === cat.id
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 scale-[1.02]'
+                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/25 scale-[1.02]'
                   : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
               }`}
             >
               <span>{cat.label}</span>
               {selectedCategory === cat.id && (
-                <span className="w-2 h-2 rounded-full bg-white"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
               )}
             </button>
           ))}
 
+          {/* Quick Registry Calculator shortcut button */}
           <button
-            onClick={() => setIsCalculatorOpen(true)}
-            className="ml-auto shrink-0 hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition-colors cursor-pointer"
+            onClick={() => setIsStampDutyOpen(true)}
+            className="ml-auto shrink-0 hidden lg:inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-emerald-50 text-emerald-950 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition-all cursor-pointer shadow-2xs"
           >
-            <Calculator className="w-4 h-4 text-amber-600" />
-            <span>Punjab Unit Converter (Marla/Kanal)</span>
+            <FileCheck2 className="w-4 h-4 text-emerald-700" />
+            <span>Punjab Registry & Stamp Duty Calculator</span>
           </button>
         </div>
 
-        {/* Section Header & Sort Controls */}
+        {/* Section Header & Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4 mb-8">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-extrabold text-slate-900 font-['Outfit']">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 font-['Outfit']">
                 Featured Properties in Gurdaspur
               </h2>
-              <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                {filteredProperties.length} Available
+              <span className="bg-emerald-100 text-emerald-900 text-xs font-black px-3 py-1 rounded-full">
+                {filteredProperties.length} Verified
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Showing verified listings across Tibri Road, Jail Road, Trimmu Road, Dinanagar & surrounding areas
+            <p className="text-xs text-slate-500 mt-1">
+              Title-checked properties with authentic revenue records across Tibri Road, Jail Road, Trimmu Road, Dinanagar & surrounding areas
             </p>
           </div>
 
           {/* Sort & Reset Buttons */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1 text-xs text-slate-500 font-bold">
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Sort:</span>
             </div>
@@ -200,7 +211,7 @@ export default function App() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-2xs"
             >
               <option value="featured">Featured First</option>
               <option value="price-low">Price: Low to High</option>
@@ -211,47 +222,47 @@ export default function App() {
             {(searchQuery || selectedCategory !== 'all' || selectedLocality !== 'All Localities' || selectedPurpose !== 'all' || budgetRange !== 'any') && (
               <button
                 onClick={resetFilters}
-                className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-2 rounded-xl font-bold transition-colors cursor-pointer border border-emerald-200"
               >
                 <RotateCcw className="w-3 h-3" />
-                Reset Filters
+                Reset
               </button>
             )}
           </div>
         </div>
 
-        {/* Listings Grid */}
+        {/* Listings Cards Grid */}
         {filteredProperties.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-xs max-w-lg mx-auto p-8">
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-xl mx-auto p-8">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
               <Building2 className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 font-['Outfit'] mb-1">
-              No Matching Properties Found
+            <h3 className="text-xl font-bold text-slate-900 font-['Outfit'] mb-2">
+              No Properties Found Matching Your Criteria
             </h3>
-            <p className="text-xs text-slate-500 mb-6">
-              We couldn't find any properties matching your current filter criteria in Gurdaspur. Try adjusting your filters or contact our consultant for off-market listings.
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+              We couldn't find active listings matching these exact filters in Gurdaspur. Many off-market plots and luxury kothis are kept private by owners.
             </p>
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={resetFilters}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
               >
                 Show All Properties
               </button>
               <a
-                href={`https://wa.me/${cleanPhone}?text=Hi,%20I%20am%20looking%20for%20a%20specific%20property%20in%20Gurdaspur.`}
+                href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property,%20I%20have%20a%20specific%20property%20requirement%20in%20Gurdaspur.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-md shadow-emerald-600/25"
               >
                 <MessageCircle className="w-4 h-4 fill-white" />
-                Ask on WhatsApp
+                Inquire on WhatsApp
               </a>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}
@@ -265,8 +276,24 @@ export default function App() {
 
       </main>
 
-      {/* Advisory & Tehsil Services Section */}
+      {/* Gurdaspur Locality Market Intelligence Guide */}
+      <LocalitiesGuide
+        onSelectLocality={(loc) => {
+          setSelectedLocality(loc);
+          setSelectedCategory('all');
+        }}
+      />
+
+      {/* Dedicated Overseas NRI Property Corner */}
+      <div id="nri-desk">
+        <NRIPropertyCorner settings={settings} />
+      </div>
+
+      {/* Tehsil Registry & Legal Advisory Services */}
       <ConsultantServices settings={settings} />
+
+      {/* Client Testimonials & Social Proof */}
+      <Testimonials />
 
       {/* Footer */}
       <Footer
@@ -280,17 +307,17 @@ export default function App() {
         }}
       />
 
-      {/* Floating Action Button: Quick WhatsApp Contact */}
+      {/* Floating Action Button: WhatsApp Contact */}
       <aside aria-label="Quick WhatsApp assistance" className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
         <a
-          href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property%20Consultant,%20I%20want%20to%20inquire%20about%20plots%20and%20houses%20in%20Gurdaspur.`}
+          href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property%20Consultants,%20I%20am%20looking%20for%20property%20in%20Gurdaspur.`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-2xl shadow-emerald-500/40 hover:scale-105 transition-all duration-300 group"
+          className="flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-2xl shadow-emerald-500/50 hover:scale-105 transition-all duration-300 group border-2 border-white/40"
           title="Direct WhatsApp with Consultant"
         >
           <div className="relative">
-            <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
+            <MessageCircle className="w-5 h-5 fill-slate-950 text-emerald-500" />
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-300 rounded-full animate-ping"></span>
           </div>
           <span className="hidden sm:inline">WhatsApp Consultant</span>
@@ -315,6 +342,13 @@ export default function App() {
         <PunjabLandCalculator
           isOpen={isCalculatorOpen}
           onClose={() => setIsCalculatorOpen(false)}
+        />
+      )}
+
+      {isStampDutyOpen && (
+        <PunjabStampDutyCalculator
+          isOpen={isStampDutyOpen}
+          onClose={() => setIsStampDutyOpen(false)}
         />
       )}
 

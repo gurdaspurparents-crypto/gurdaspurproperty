@@ -8,7 +8,11 @@ import {
   FileCheck, 
   CheckCircle2, 
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  Calculator,
+  FileCheck2,
+  BadgeCheck
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
@@ -24,46 +28,51 @@ export default function Hero({
   budgetRange, 
   setBudgetRange,
   onOpenCalculator,
+  onOpenStampDuty,
   onOpenPostProperty
 }) {
   return (
-    <div className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div className="relative bg-slate-950 text-white pt-14 pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[640px] flex flex-col justify-center">
       
-      {/* Background Decorative Pattern */}
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
-      
-      {/* Decorative Glow Blobs */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      {/* High-Resolution Luxury Real Estate Background with Dark Vignette */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85" 
+          alt="Luxury House Gurdaspur" 
+          className="w-full h-full object-cover object-center scale-105 opacity-25 filter brightness-90"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/90"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/30 via-transparent to-transparent"></div>
+      </div>
 
-      <div className="max-w-6xl mx-auto relative z-10 text-center">
+      <div className="max-w-6xl mx-auto relative z-10 text-center w-full">
         
-        {/* City Tagline pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-6 shadow-inner">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Gurdaspur's #1 Property & Registry Advisory Portal</span>
+        {/* Top Trust Pill */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-xl backdrop-blur-md">
+          <BadgeCheck className="w-4 h-4 text-emerald-400" />
+          <span>Gurdaspur's #1 Premier Real Estate & Tehsil Registry Network</span>
         </div>
 
-        {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-['Outfit'] leading-tight mb-4">
-          Apne Shehar <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 bg-clip-text text-transparent">Gurdaspur</span> Mein<br className="hidden sm:block"/>
-          Sahi Plot, Kothi Ya Zameen Chunein
+        {/* Grand Headline */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight font-['Outfit'] leading-[1.15] mb-5">
+          Apne Shehar <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-200 bg-clip-text text-transparent">Gurdaspur</span> Mein<br/>
+          Sahi Plot, Luxury Kothi Ya Zameen Chunein
         </h1>
 
-        <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-300 mb-10 font-normal">
-          Explore genuine, title-verified residential plots, luxury villas, highway commercial spaces, and agricultural land with direct consultant support.
+        <p className="max-w-3xl mx-auto text-sm sm:text-base text-slate-300 mb-10 font-normal leading-relaxed">
+          Title-verified residential plots on Tibri Road, luxury bungalows on Jail Road, highway commercial SCOs, and agricultural farm lands with complete Tehsil Gurdaspur registry verification.
         </p>
 
-        {/* Search & Filter Box */}
-        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-6 text-slate-900 border border-slate-100">
+        {/* Master Search Engine Card */}
+        <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-7 text-slate-900 border border-white/20">
           
           {/* Top Purpose Tabs */}
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-4 mb-5 overflow-x-auto">
+          <div className="flex items-center gap-2 border-b border-slate-200/80 pb-4 mb-6 overflow-x-auto scrollbar-none">
             <button
               onClick={() => setSelectedPurpose("all")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 selectedPurpose === "all"
-                  ? "bg-slate-900 text-white shadow-sm"
+                  ? "bg-slate-950 text-white shadow-md"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -71,9 +80,9 @@ export default function Hero({
             </button>
             <button
               onClick={() => setSelectedPurpose("buy")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 selectedPurpose === "buy"
-                  ? "bg-emerald-600 text-white shadow-sm"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -81,9 +90,9 @@ export default function Hero({
             </button>
             <button
               onClick={() => setSelectedPurpose("rent")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 selectedPurpose === "rent"
-                  ? "bg-emerald-600 text-white shadow-sm"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -91,23 +100,33 @@ export default function Hero({
             </button>
             <button
               onClick={() => { setSelectedCategory("plot"); setSelectedPurpose("buy"); }}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 selectedCategory === "plot"
-                  ? "bg-teal-700 text-white shadow-sm"
+                  ? "bg-teal-700 text-white shadow-md"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               📐 Plots Only
             </button>
             <button
-              onClick={() => { setSelectedCategory("land"); setSelectedPurpose("buy"); }}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                selectedCategory === "land"
-                  ? "bg-teal-700 text-white shadow-sm"
+              onClick={() => { setSelectedCategory("kothi"); setSelectedPurpose("buy"); }}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+                selectedCategory === "kothi"
+                  ? "bg-teal-700 text-white shadow-md"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              🚜 Agriculture Land
+              🏰 Luxury Kothis
+            </button>
+            <button
+              onClick={() => { setSelectedCategory("land"); setSelectedPurpose("buy"); }}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+                selectedCategory === "land"
+                  ? "bg-teal-700 text-white shadow-md"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              🚜 Agricultural Land
             </button>
           </div>
 
@@ -115,15 +134,15 @@ export default function Hero({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
             
             {/* Locality Selector */}
-            <div className="relative">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                 Gurdaspur Locality
               </label>
               <select
                 value={selectedLocality}
                 onChange={(e) => setSelectedLocality(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-2xs"
               >
                 {GURDASPUR_LOCALITIES.map((loc) => (
                   <option key={loc} value={loc}>
@@ -135,34 +154,34 @@ export default function Hero({
 
             {/* Property Type */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
                 <Home className="w-3.5 h-3.5 text-emerald-600" />
                 Property Type
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-2xs"
               >
                 <option value="all">All Types (Plot, Kothi, SCO)</option>
                 <option value="plot">Residential Plot</option>
-                <option value="kothi">Kothi / House</option>
-                <option value="commercial">Commercial / SCO / Shop</option>
-                <option value="land">Agricultural Land</option>
+                <option value="kothi">Luxury Kothi / House</option>
+                <option value="commercial">Commercial / SCO / Showroom</option>
+                <option value="land">Agricultural Land / Farmhouse</option>
                 <option value="rent">Rental Properties</option>
               </select>
             </div>
 
             {/* Budget Range */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
                 <IndianRupee className="w-3.5 h-3.5 text-emerald-600" />
                 Max Budget
               </label>
               <select
                 value={budgetRange}
                 onChange={(e) => setBudgetRange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-2xs"
               >
                 <option value="any">Any Budget</option>
                 <option value="20lakh">Under ₹20 Lakh</option>
@@ -172,11 +191,11 @@ export default function Hero({
               </select>
             </div>
 
-            {/* Search Keyword / Action */}
-            <div className="flex flex-col justify-end">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+            {/* Keyword / ID Search */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
                 <Search className="w-3.5 h-3.5 text-emerald-600" />
-                Search / ID
+                Keyword or Property ID
               </label>
               <div className="relative">
                 <input
@@ -184,12 +203,12 @@ export default function Hero({
                   placeholder="e.g. Tibri, 10 Marla, GP-101"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-10 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-10 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs"
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 text-xs"
                   >
                     ✕
                   </button>
@@ -199,79 +218,90 @@ export default function Hero({
 
           </div>
 
-          {/* Quick Shortcuts underneath */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-semibold text-slate-700">Quick Searches in Gurdaspur:</span>
+          {/* Quick Shortcuts & Calculators Row underneath */}
+          <div className="mt-5 pt-4 border-t border-slate-200/80 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-extrabold text-slate-900">Hot Localities:</span>
               <button 
                 onClick={() => { setSelectedLocality("Tibri Road"); setSelectedCategory("plot"); }}
-                className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium"
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 font-semibold transition-colors"
               >
                 Plots on Tibri Road
               </button>
               <button 
                 onClick={() => { setSelectedLocality("Jail Road"); setSelectedCategory("kothi"); }}
-                className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium"
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 font-semibold transition-colors"
               >
-                Kothi on Jail Road
+                Kothis on Jail Road
               </button>
               <button 
                 onClick={() => { setSelectedLocality("Hanuman Chowk"); setSelectedCategory("commercial"); }}
-                className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium"
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 font-semibold transition-colors"
               >
-                Shops near Hanuman Chowk
+                Hanuman Chowk Shops
               </button>
             </div>
 
-            <button
-              onClick={onOpenCalculator}
-              className="text-amber-700 font-bold hover:underline flex items-center gap-1"
-            >
-              Need to convert Marla to Sq.Ft? Check Punjab Land Calculator →
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onOpenStampDuty}
+                className="text-emerald-700 font-extrabold hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Punjab Registry Calculator</span>
+              </button>
+
+              <button
+                onClick={onOpenCalculator}
+                className="text-amber-800 font-extrabold hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <Calculator className="w-3.5 h-3.5 text-amber-600" />
+                <span>Marla / Kanal Tool</span>
+              </button>
+            </div>
           </div>
 
         </div>
 
-        {/* 4 Pillars of Trust */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 max-w-4xl mx-auto text-left">
-          <div className="bg-slate-800/60 backdrop-blur-xs border border-slate-700/60 rounded-xl p-3.5 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
-              <ShieldCheck className="w-5 h-5" />
+        {/* 4 Pillars of Authority Numbers */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-14 max-w-5xl mx-auto text-left">
+          <div className="glass-dark rounded-2xl p-4.5 flex items-center gap-3.5 border border-white/10 shadow-lg">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">100% Title Verified</p>
-              <p className="text-[11px] text-slate-400">Tehsil record checked</p>
+              <div className="text-xl font-black text-white font-['Outfit']">100% Verified</div>
+              <div className="text-[11px] text-slate-400">Tehsil Registry & Inteqaal</div>
             </div>
           </div>
 
-          <div className="bg-slate-800/60 backdrop-blur-xs border border-slate-700/60 rounded-xl p-3.5 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-teal-500/20 text-teal-400">
-              <FileCheck className="w-5 h-5" />
+          <div className="glass-dark rounded-2xl p-4.5 flex items-center gap-3.5 border border-white/10 shadow-lg">
+            <div className="w-11 h-11 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0">
+              <IndianRupee className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">Full Registry Support</p>
-              <p className="text-[11px] text-slate-400">Inteqaal & legal help</p>
+              <div className="text-xl font-black text-white font-['Outfit']">₹120 Cr+</div>
+              <div className="text-[11px] text-slate-400">Property Deals Closed</div>
             </div>
           </div>
 
-          <div className="bg-slate-800/60 backdrop-blur-xs border border-slate-700/60 rounded-xl p-3.5 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400">
-              <TrendingUp className="w-5 h-5" />
+          <div className="glass-dark rounded-2xl p-4.5 flex items-center gap-3.5 border border-white/10 shadow-lg">
+            <div className="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">True Market Valuation</p>
-              <p className="text-[11px] text-slate-400">Fair DC vs market rate</p>
+              <div className="text-xl font-black text-white font-['Outfit']">500+ Families</div>
+              <div className="text-[11px] text-slate-400">Happy Gurdaspur Clients</div>
             </div>
           </div>
 
-          <div className="bg-slate-800/60 backdrop-blur-xs border border-slate-700/60 rounded-xl p-3.5 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
-              <CheckCircle2 className="w-5 h-5" />
+          <div className="glass-dark rounded-2xl p-4.5 flex items-center gap-3.5 border border-white/10 shadow-lg">
+            <div className="w-11 h-11 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">NRI Services</p>
-              <p className="text-[11px] text-slate-400">Care & dispute checks</p>
+              <div className="text-xl font-black text-white font-['Outfit']">15+ Years</div>
+              <div className="text-[11px] text-slate-400">Local Market Experience</div>
             </div>
           </div>
         </div>
