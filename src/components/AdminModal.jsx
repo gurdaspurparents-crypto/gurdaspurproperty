@@ -14,7 +14,8 @@ import {
   RefreshCcw, 
   CheckCircle2,
   Save,
-  Tag
+  Tag,
+  Camera
 } from 'lucide-react';
 import { 
   getLeads, 
@@ -147,7 +148,9 @@ export default function AdminModal({
       cityArea: lead.subArea ? `${lead.subArea}, ${lead.locality}, Gurdaspur` : `Near ${lead.locality}, Gurdaspur`,
       description: lead.notes || `Prime verified ${lead.category || 'property'} located on ${lead.locality}. Road width: ${lead.roadWidth || '30 Feet'}. Pucca registry with clear inteqaal. Direct deals handled via Travelx Gurdaspur Property Consultants.`,
       amenities: `${lead.roadWidth || '30 Ft Road'}, Immediate Registry, 100% Clear Inteqaal, Verified Title`,
-      imageUrl: lead.category === 'kothi' 
+      imageUrl: (lead.images && lead.images.length > 0)
+        ? lead.images[0]
+        : lead.category === 'kothi' 
         ? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80'
         : lead.category === 'commercial'
         ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80'
@@ -676,6 +679,30 @@ export default function AdminModal({
                             {lead.notes && (
                               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs text-slate-600 italic">
                                 "{lead.notes}"
+                              </div>
+                            )}
+
+                            {/* Customer Uploaded Photos Preview */}
+                            {lead.images && lead.images.length > 0 && (
+                              <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                <div className="text-[10px] uppercase font-bold text-slate-600 flex items-center gap-1.5">
+                                  <Camera className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>Customer Uploaded Photos ({lead.images.length}):</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                  {lead.images.map((img, i) => (
+                                    <a 
+                                      key={i} 
+                                      href={img} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="w-14 h-14 rounded-lg overflow-hidden border border-slate-300 block shadow-2xs hover:scale-105 transition-transform bg-slate-900"
+                                      title={`View Photo ${i + 1}`}
+                                    >
+                                      <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
+                                    </a>
+                                  ))}
+                                </div>
                               </div>
                             )}
 

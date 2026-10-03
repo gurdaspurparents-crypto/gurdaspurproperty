@@ -17,13 +17,17 @@ import {
   Compass,
   ArrowRight,
   Layers,
-  Info
+  Info,
+  Camera,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
 export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const [step, setStep] = useState(1); // Step 1: Property Specs | Step 2: Confidential Details
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [formData, setFormData] = useState({
     // Basic Property Details
     purpose: 'sell', // 'sell' | 'rent'
@@ -55,6 +59,26 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
   if (!isOpen) return null;
 
   const cleanAdminPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const remainingSlots = 5 - uploadedImages.length;
+    files.slice(0, remainingSlots).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setUploadedImages(prev => [...prev, reader.result]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setUploadedImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
 
   const handleNextStep = (e) => {
     e.preventDefault();
@@ -91,6 +115,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       price: formData.expectedPrice,
       isNegotiable: formData.isNegotiable,
       notes: formData.description,
+      images: uploadedImages,
       isConfidential: true
     });
 
@@ -407,6 +432,72 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                         />
                         <span>Negotiable</span>
                       </label>
+                    </div>
+                  </div>
+
+                  {/* Property Photos Upload (99acres / MagicBricks Standard) */}
+                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Camera className="w-4 h-4 text-[#005ca8]" />
+                        <span>Property Photos (Optional - Max 5 Photos)</span>
+                      </label>
+                      <span className="text-[11px] font-bold text-slate-500">
+                        {uploadedImages.length}/5 Photos Added
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-slate-500">
+                      Upload front elevation, road view, boundary demarcation, or interior rooms.
+                    </p>
+
+                    {/* Image Preview Grid */}
+                    {uploadedImages.length > 0 && (
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                        {uploadedImages.map((imgSrc, idx) => (
+                          <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-2xs group bg-slate-900">
+                            <img src={imgSrc} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(idx)}
+                              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-slate-900/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm cursor-pointer"
+                              title="Remove Photo"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                            {idx === 0 && (
+                              <span className="absolute bottom-1 left-1 bg-[#005ca8] text-white text-[8px] font-black uppercase px-1 rounded">
+                                Cover
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Upload File Input / Dropzone */}
+                    {uploadedImages.length < 5 && (
+                      <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-[#005ca8] rounded-xl p-4 bg-white hover:bg-blue-50/40 transition-all cursor-pointer group">
+                        <Upload className="w-6 h-6 text-slate-400 group-hover:text-[#005ca8] mb-1 transition-colors" />
+                        <span className="text-xs font-bold text-slate-700 group-hover:text-[#005ca8] transition-colors">
+                          Click to Add Photos from Mobile / PC
+                        </span>
+                        <span className="text-[10px] text-slate-400 mt-0.5">
+                          Supports JPG, PNG (Max 5 photos)
+                        </span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-100">
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Photos device par nahi hain? Aap submit karne ke baad consultant ko direct WhatsApp par bhi bhej sakte hain.</span>
                     </div>
                   </div>
 
