@@ -22,7 +22,7 @@ export default function ExploringRealEstateOptions({
     {
       id: "buying",
       title: "Buying a home",
-      subtitle: "Kothis & Villas",
+      subtitle: "Villas & Houses",
       image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=500&q=80",
       action: () => {
         onSelectPurpose("buy");

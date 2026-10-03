@@ -74,74 +74,69 @@ export default function Hero({
   return (
     <div className="relative bg-[#071a33] text-white">
       
-      {/* 99acres Top Panoramic Banner Area */}
-      <div className="relative pt-6 pb-20 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[290px] sm:min-h-[320px] flex flex-col justify-start">
+      {/* 99acres Top Panoramic Architectural Banner */}
+      <div className="relative pt-5 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[220px] sm:min-h-[250px] flex flex-col justify-start">
         
-        {/* Background Night Architecture Image on Left */}
-        <div className="absolute inset-0 z-0 flex items-center justify-between pointer-events-none opacity-40">
+        {/* Background Architectural Luxury Skyline with Soft Vignette */}
+        <div className="absolute inset-0 z-0 flex items-center justify-between pointer-events-none">
           <img 
-            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80" 
-            alt="Architecture" 
-            className="w-1/2 h-full object-cover object-left mask-image-gradient"
-            style={{ maskImage: 'linear-gradient(to right, black, transparent)', WebkitMaskImage: 'linear-gradient(to right, black, transparent)' }}
+            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=85" 
+            alt="Luxury Architecture" 
+            className="w-full h-full object-cover object-left opacity-30"
           />
-          <div className="w-1/2 h-full bg-gradient-to-l from-[#071a33] to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071a33]/95 via-[#071a33]/70 to-[#071a33]/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#071a33]/40 via-transparent to-[#071a33]"></div>
         </div>
 
-        {/* Ambient Top Glow */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#071a33]/60 via-transparent to-[#071a33] pointer-events-none"></div>
-
-        {/* Content Container (Matches 99acres Dubai Luxe Fest Header Announcement) */}
-        <div className="max-w-6xl mx-auto relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-6 pt-2">
+        {/* Content Container (Matches 99acres Banner Layout) */}
+        <div className="max-w-6xl mx-auto relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 pt-1">
           
-          {/* Left: Clean Brand Headline (Subtle & Elegant, not clunky) */}
-          <div className="text-left max-w-lg">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-900/60 border border-blue-400/30 text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-2">
+          {/* Left: Sleek Portal Badge & Title */}
+          <div className="text-left max-w-md">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-900/60 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Gurdaspur Real Estate Portal
+              <span>Gurdaspur Real Estate Portal</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-['Outfit'] text-white tracking-tight">
-              Find Your Ideal Property in <span className="text-emerald-400">Gurdaspur</span>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-['Outfit'] text-white tracking-tight">
+              Find Verified Properties in <span className="text-emerald-400">Gurdaspur</span>
             </h1>
-            <p className="text-xs text-slate-300 mt-1 max-w-md">
-              Verified plots, luxury kothis, highway commercial SCOs & agricultural farm lands with authentic Tehsil registry records.
+            <p className="text-[11px] sm:text-xs text-slate-300 mt-1 max-w-sm">
+              Authentic plots, modern villas, commercial SCOs & farm land with verified Tehsil mutation records.
             </p>
           </div>
 
-          {/* Right: 99acres-Style Event / Office Announcement Box */}
-          <div className="bg-[#0b2447]/80 border border-blue-500/30 rounded-2xl p-4 sm:p-5 text-left max-w-md w-full shadow-2xl backdrop-blur-md">
+          {/* Right: 99acres-Style Elegant Lounge & Tehsil Desk Card */}
+          <div className="bg-[#0b2447]/70 border border-blue-400/25 rounded-2xl p-3.5 sm:p-4 text-left max-w-md w-full shadow-xl backdrop-blur-md">
             
-            {/* Crest / Badges Row */}
-            <div className="flex items-center gap-3 text-[10px] font-bold text-blue-200 uppercase tracking-wider pb-2 border-b border-blue-800/40">
-              <span className="text-amber-400 font-extrabold">★ TEHSIL DESK</span>
-              <span>•</span>
-              <span>TIBRI ROAD</span>
-              <span>•</span>
-              <span>JAIL ROAD</span>
-              <span>•</span>
-              <span>DINANAGAR</span>
+            {/* Developer / Desk Emblems */}
+            <div className="flex items-center justify-between text-[10px] font-extrabold text-blue-200 uppercase tracking-wider pb-1.5 border-b border-blue-800/40">
+              <span className="text-amber-400">★ TRAVELX ADVISORY</span>
+              <span className="text-slate-500">•</span>
+              <span>TEHSIL DESK</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-emerald-400">DIRECT VERIFICATION</span>
             </div>
 
-            <h3 className="text-sm sm:text-base font-extrabold text-white font-['Outfit'] mt-2.5">
+            <h3 className="text-xs sm:text-sm font-extrabold text-white font-['Outfit'] mt-2">
               Gurdaspur Property Consultation Center
             </h3>
             
-            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-              Travelx, Batala Road (Near Vishal Mega Mart), Punjab 143521.<br/>
-              Direct Tehsil registry guidance, Fard verification & collector rate analysis.
+            <p className="text-[10px] sm:text-[11px] text-slate-300 mt-0.5 leading-snug">
+              Travelx, Batala Road (Near Vishal Mega Mart), Gurdaspur, Punjab 143521.<br/>
+              Direct Tehsil registry legal guidance &amp; Punjab collector rate analysis.
             </p>
 
-            <div className="mt-3 flex items-center justify-between pt-2 border-t border-blue-800/40 text-xs">
+            <div className="mt-2.5 flex items-center justify-between pt-1.5 border-t border-blue-800/40 text-xs">
               <button
                 onClick={onOpenStampDuty}
-                className="font-bold text-blue-300 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-lg border border-blue-400/40 hover:bg-blue-600/20 text-blue-200 hover:text-white font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
               >
                 <span>Check Registry Rates</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3 h-3" />
               </button>
               <a
                 href="tel:+918146526257"
-                className="font-bold text-emerald-400 hover:text-emerald-300"
+                className="font-bold text-emerald-400 hover:text-emerald-300 text-[11px]"
               >
                 Call: +91 81465 26257
               </a>
