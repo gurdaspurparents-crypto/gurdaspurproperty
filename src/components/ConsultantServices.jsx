@@ -94,6 +94,10 @@ export default function ConsultantServices({ settings }) {
             <p className="text-xs sm:text-sm text-emerald-200 mt-1">
               Direct baat karein hamare property consultant se aur free guidance lein.
             </p>
+            <div className="flex items-center gap-1.5 text-xs text-emerald-300 mt-2 font-medium">
+              <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Office: {settings.officeAddress}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
