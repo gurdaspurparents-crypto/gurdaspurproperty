@@ -39,48 +39,62 @@ export default function LocalitiesGuide({ onSelectLocality }) {
           {LOCALITY_TRENDS.map((loc, idx) => (
             <div 
               key={idx}
-              className="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 hover:border-emerald-500/60 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
+              className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 hover:border-emerald-500/60 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
             >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${loc.accent}`}>
+              {/* Locality Thumbnail with Zoom and Badges */}
+              <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+                <img 
+                  src={loc.image} 
+                  alt={loc.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-95"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-black/20 to-black/30"></div>
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg backdrop-blur-md shadow-sm ${loc.accent}`}>
                     {loc.tag}
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-black text-emerald-400 bg-slate-900/80 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-0.5 border border-emerald-500/30">
                     <TrendingUp className="w-3 h-3" />
                     {loc.growth}
                   </span>
                 </div>
-
-                <h3 className="text-lg font-bold text-slate-900 font-['Outfit'] group-hover:text-emerald-700 transition-colors mb-2">
-                  {loc.name}
-                </h3>
-
-                {/* Price Display */}
-                <div className="bg-white p-3 rounded-2xl border border-slate-200/60 mb-3 shadow-2xs">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">Current Market Range</div>
-                  <div className="text-base font-black text-slate-900 font-['Outfit'] mt-0.5">
-                    {loc.priceRange}
-                  </div>
+                <div className="absolute bottom-3 left-3 right-3">
+                  <h3 className="text-base font-extrabold text-white font-['Outfit'] drop-shadow-sm">
+                    {loc.name}
+                  </h3>
                 </div>
-
-                <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                  {loc.highlights}
-                </p>
               </div>
 
-              <button
-                onClick={() => {
-                  const areaKey = loc.name.split(' ')[0]; // 'Tibri', 'Jail', 'Dinanagar', 'Trimmu'
-                  onSelectLocality(areaKey);
-                  const el = document.getElementById('listings');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="w-full py-2.5 px-3 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all flex items-center justify-center gap-1 group/btn shadow-2xs cursor-pointer"
-              >
-                <span>Explore Properties Here</span>
-                <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-              </button>
+              {/* Card Body */}
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  {/* Price Display */}
+                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 mb-3 shadow-2xs">
+                    <div className="text-[10px] uppercase font-bold text-slate-400">Current Market Range</div>
+                    <div className="text-base font-black text-emerald-800 font-['Outfit'] mt-0.5">
+                      {loc.priceRange}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                    {loc.highlights}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const areaKey = loc.name.split(' ')[0]; // 'Tibri', 'Jail', 'Dinanagar', 'Trimmu'
+                    onSelectLocality(areaKey);
+                    const el = document.getElementById('listings');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-900 text-white border border-slate-900 text-xs font-bold hover:bg-emerald-600 hover:border-emerald-600 transition-all flex items-center justify-center gap-1 group/btn shadow-xs cursor-pointer"
+                >
+                  <span>Explore Properties Here</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

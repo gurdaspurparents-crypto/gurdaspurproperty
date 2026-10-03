@@ -201,14 +201,16 @@ export default function AdminModal({
       >
         
         {/* Header */}
-        <div className="bg-slate-900 text-white px-6 py-4 rounded-t-3xl flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white">
-              <Lock className="w-4 h-4" />
-            </div>
+        <div className="bg-slate-900 text-white px-6 py-4 rounded-t-3xl flex items-center justify-between border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/logo.svg" 
+              alt="Gurdaspur Property" 
+              className="h-10 w-auto object-contain brightness-110 shrink-0"
+            />
             <div>
-              <h2 className="text-base font-bold font-['Outfit']">Gurdaspur Property Portal Admin</h2>
-              <p className="text-[11px] text-slate-400">Manage listings, WhatsApp leads & settings</p>
+              <h2 className="text-base font-bold font-['Outfit']">Gurdaspur Property Admin Panel</h2>
+              <p className="text-[11px] text-slate-400">Manage listings, WhatsApp leads & office settings</p>
             </div>
           </div>
 
@@ -223,9 +225,9 @@ export default function AdminModal({
         {/* Content Area */}
         <div className="p-6">
           {!isAuthenticated ? (
-            <div className="max-w-xs mx-auto py-12 text-center">
-              <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-700">
-                <Lock className="w-7 h-7" />
+            <div className="max-w-xs mx-auto py-10 text-center">
+              <div className="flex justify-center mb-4">
+                <img src="/logo.svg" alt="Gurdaspur Property" className="h-14 w-auto object-contain" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 font-['Outfit'] mb-1">
                 Admin Authentication

@@ -294,7 +294,8 @@ export const LOCALITY_TRENDS = [
     growth: "+18% in last 2 years",
     highlights: "Near Army Cantt, wide 35-40ft roads, clean gated societies, top English schools.",
     color: "from-emerald-500/20 to-teal-500/5",
-    accent: "text-emerald-700 bg-emerald-100"
+    accent: "text-emerald-700 bg-emerald-100",
+    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"
   },
   {
     name: "Jail Road (VIP Belt)",
@@ -303,7 +304,8 @@ export const LOCALITY_TRENDS = [
     growth: "+15% steady annual growth",
     highlights: "Close to DC Office, District Courts, Civil Hospital, and high-end residential bungalows.",
     color: "from-blue-500/20 to-indigo-500/5",
-    accent: "text-blue-700 bg-blue-100"
+    accent: "text-blue-700 bg-blue-100",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"
   },
   {
     name: "Dinanagar Bypass (NH-54)",
@@ -312,7 +314,8 @@ export const LOCALITY_TRENDS = [
     growth: "+24% commercial surge",
     highlights: "Four-lane highway connectivity to Amritsar-Pathankot, ideal for resorts, godowns & showrooms.",
     color: "from-amber-500/20 to-orange-500/5",
-    accent: "text-amber-700 bg-amber-100"
+    accent: "text-amber-700 bg-amber-100",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80"
   },
   {
     name: "Trimmu Road & Outskirts",
@@ -321,7 +324,8 @@ export const LOCALITY_TRENDS = [
     growth: "+12% annual appreciation",
     highlights: "Abundant canal water, fertile green land, peaceful farm villas, and pakka link roads.",
     color: "from-purple-500/20 to-pink-500/5",
-    accent: "text-purple-700 bg-purple-100"
+    accent: "text-purple-700 bg-purple-100",
+    image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?auto=format&fit=crop&w=800&q=80"
   }
 ];
 

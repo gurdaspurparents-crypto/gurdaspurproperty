@@ -29,13 +29,12 @@ export default function Footer({
           
           {/* Col 1: Brand & Office */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-md">
-                <Building2 className="w-5 h-5" />
-              </div>
-              <span className="text-xl font-black text-white font-['Outfit'] tracking-tight">
-                Gurdaspur<span className="text-emerald-500">Property</span>.in
-              </span>
+            <div className="flex items-center gap-3">
+              <img 
+                src="/logo.svg" 
+                alt="Gurdaspur Property" 
+                className="h-14 w-auto object-contain brightness-110"
+              />
             </div>
 
             <p className="text-slate-400 leading-relaxed max-w-sm">

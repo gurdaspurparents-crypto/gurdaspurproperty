@@ -86,6 +86,57 @@ export default function NRIPropertyCorner({ settings }) {
           })}
         </div>
 
+        {/* Drone & Ground Verification Visual Card */}
+        <div className="mb-16 bg-slate-900/90 rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
+            <div className="lg:col-span-6 relative h-64 sm:h-80 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1200&q=85" 
+                alt="NRI Drone Inspection in Gurdaspur"
+                className="w-full h-full object-cover brightness-90 hover:scale-105 transition-transform duration-700" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-slate-950/80 via-transparent to-transparent"></div>
+              <div className="absolute top-4 left-4">
+                <span className="bg-emerald-500 text-slate-950 font-black text-[11px] uppercase tracking-wider px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-md">
+                  <Camera className="w-3.5 h-3.5" />
+                  Live Ground & Drone Reconnaissance
+                </span>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 p-6 sm:p-8">
+              <span className="text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                Full Transparency for Non-Resident Indians
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold font-['Outfit'] text-white mt-1 mb-3">
+                Live Video Tours & Drone Reconnaissance
+              </h3>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                Before sending earnest money or registry payments, receive 4K drone videography showing current neighborhood development, approach road status, boundary pillars, and utility connections.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-xs font-semibold text-slate-200">GPS Demarcation</span>
+                </div>
+                <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span className="text-xs font-semibold text-slate-200">Live WhatsApp Call</span>
+                </div>
+                <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="text-xs font-semibold text-slate-200">Jamabandi Verification</span>
+                </div>
+                <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800 flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span className="text-xs font-semibold text-slate-200">POA Sale Legal Care</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* NRI VIP Contact Banner */}
         <div className="bg-gradient-to-r from-emerald-900/50 via-teal-900/40 to-slate-900/90 border border-emerald-500/30 rounded-3xl p-8 sm:p-10 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8 backdrop-blur-md">
           <div className="space-y-2 text-center lg:text-left">

@@ -76,11 +76,18 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       >
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-700 to-teal-800 text-white px-6 py-5 rounded-t-3xl flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">Free Property Listing</span>
-            <h2 className="text-xl font-bold font-['Outfit']">Post Your Property in Gurdaspur</h2>
-            <p className="text-xs text-emerald-100 mt-0.5">Apni plot, kothi ya zameen bechne ya kiraye par dene ke liye submit karein</p>
+        <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white px-6 py-5 rounded-t-3xl flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <img 
+              src="/logo.svg" 
+              alt="Gurdaspur Property" 
+              className="h-11 w-auto object-contain brightness-110 shrink-0"
+            />
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Free Direct Listing</span>
+              <h2 className="text-lg sm:text-xl font-bold font-['Outfit']">Post Your Property in Gurdaspur</h2>
+              <p className="text-xs text-emerald-100 mt-0.5">Plot, kothi ya zameen direct buyers aur verified investors tak pahunchayein</p>
+            </div>
           </div>
 
           <button 

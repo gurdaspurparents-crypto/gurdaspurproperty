@@ -83,22 +83,11 @@ export default function Navbar({
           {/* Logo */}
           <div className="flex items-center gap-3">
             <a href="#" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-emerald-700/20 group-hover:scale-105 transition-transform border border-emerald-500/20">
-                <Building2 className="w-6 h-6 text-emerald-300" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-['Outfit']">
-                    Gurdaspur<span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Property</span>
-                  </span>
-                  <span className="text-[11px] uppercase font-black tracking-widest px-2 py-0.5 rounded-md bg-emerald-600 text-white shadow-xs">
-                    .in
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 font-semibold tracking-wide hidden sm:block">
-                  Verified Land & Real Estate Advisory • Regd. Tehsil Gurdaspur
-                </p>
-              </div>
+              <img 
+                src="/logo.svg" 
+                alt="Gurdaspur Property" 
+                className="h-12 sm:h-14 w-auto object-contain group-hover:scale-105 transition-transform"
+              />
             </a>
           </div>
 
