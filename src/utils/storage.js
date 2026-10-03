@@ -1,0 +1,95 @@
+import { initialProperties } from "../data/initialProperties";
+
+const PROPERTIES_KEY = "gp_properties_v1";
+const LEADS_KEY = "gp_seller_leads_v1";
+const INQUIRIES_KEY = "gp_inquiries_v1";
+const SETTINGS_KEY = "gp_settings_v1";
+
+export const defaultSettings = {
+  consultantName: "Gurdaspur Property Consultants",
+  primaryPhone: "+91 98888 12345",
+  whatsappNumber: "919888812345",
+  officeAddress: "Near Hanuman Chowk, Main GT Road, Gurdaspur, Punjab 143521",
+  email: "contact@gurdaspurproperty.in",
+  workingHours: "9:00 AM - 8:00 PM (Monday - Sunday)",
+  adminPin: "1234"
+};
+
+export const getProperties = () => {
+  try {
+    const data = localStorage.getItem(PROPERTIES_KEY);
+    if (!data) {
+      localStorage.setItem(PROPERTIES_KEY, JSON.stringify(initialProperties));
+      return initialProperties;
+    }
+    return JSON.parse(data);
+  } catch (e) {
+    console.error("Error reading properties from storage", e);
+    return initialProperties;
+  }
+};
+
+export const saveProperties = (properties) => {
+  try {
+    localStorage.setItem(PROPERTIES_KEY, JSON.stringify(properties));
+  } catch (e) {
+    console.error("Error saving properties", e);
+  }
+};
+
+export const getSettings = () => {
+  try {
+    const data = localStorage.getItem(SETTINGS_KEY);
+    return data ? { ...defaultSettings, ...JSON.parse(data) } : defaultSettings;
+  } catch (e) {
+    return defaultSettings;
+  }
+};
+
+export const saveSettings = (newSettings) => {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
+  } catch (e) {
+    console.error("Error saving settings", e);
+  }
+};
+
+export const getLeads = () => {
+  try {
+    const data = localStorage.getItem(LEADS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+export const addLead = (lead) => {
+  try {
+    const leads = getLeads();
+    const newLead = {
+      ...lead,
+      id: "LEAD-" + Date.now().toString().slice(-6),
+      createdAt: new Date().toISOString(),
+      status: "new"
+    };
+    leads.unshift(newLead);
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
+    return newLead;
+  } catch (e) {
+    console.error("Error adding lead", e);
+  }
+};
+
+export const deleteLead = (leadId) => {
+  try {
+    const leads = getLeads().filter((l) => l.id !== leadId);
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
+  } catch (e) {
+    console.error("Error deleting lead", e);
+  }
+};
+
+export const resetToDefault = () => {
+  localStorage.setItem(PROPERTIES_KEY, JSON.stringify(initialProperties));
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
+};
