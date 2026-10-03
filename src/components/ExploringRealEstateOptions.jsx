@@ -59,7 +59,7 @@ export default function ExploringRealEstateOptions({
       id: "sell",
       title: "Sell/Rent your property",
       bannerText: "Sell faster at the right price!",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=500&q=80",
+      image: "https://images.unsplash.com/photo-1623510848605-3cf32d03059e?auto=format&fit=crop&w=500&q=80",
       action: onOpenPostProperty
     },
     {
@@ -79,7 +79,7 @@ export default function ExploringRealEstateOptions({
       subtitle: "Stamp Duty & Collector Rates",
       badge: "NEW",
       badgeColor: "bg-amber-500",
-      image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=500&q=80",
+      image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=500&q=80",
       action: onOpenStampDuty
     },
     {
