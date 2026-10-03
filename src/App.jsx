@@ -9,6 +9,7 @@ import PostPropertyModal from './components/PostPropertyModal';
 import LocalitiesGuide from './components/LocalitiesGuide';
 import NRIPropertyCorner from './components/NRIPropertyCorner';
 import ConsultantServices from './components/ConsultantServices';
+import ExploringRealEstateOptions from './components/ExploringRealEstateOptions';
 import Testimonials from './components/Testimonials';
 import AdminModal from './components/AdminModal';
 import Footer from './components/Footer';
@@ -125,7 +126,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
       
-      {/* Navigation */}
+      {/* Navigation (99acres Top Bar) */}
       <Navbar
         settings={settings}
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
@@ -134,9 +135,11 @@ export default function App() {
         onOpenAdmin={() => setIsAdminOpen(true)}
         activeFilter={selectedCategory}
         setActiveFilter={setSelectedCategory}
+        selectedLocality={selectedLocality}
+        setSelectedLocality={setSelectedLocality}
       />
 
-      {/* Hero Section with Search Engine */}
+      {/* Hero Section with 99acres Floating Search Widget */}
       <Hero
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -151,6 +154,15 @@ export default function App() {
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+      />
+
+      {/* 99acres Iconic "GET STARTED WITH EXPLORING REAL ESTATE OPTIONS" Carousel */}
+      <ExploringRealEstateOptions
+        onSelectCategory={setSelectedCategory}
+        onSelectPurpose={setSelectedPurpose}
+        onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+        onOpenStampDuty={() => setIsStampDutyOpen(true)}
+        onOpenCalculator={() => setIsCalculatorOpen(true)}
       />
 
       {/* Main Listings Section */}
