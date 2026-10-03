@@ -7,8 +7,8 @@ const SETTINGS_KEY = "gp_settings_v1";
 
 export const defaultSettings = {
   consultantName: "Gurdaspur Property Consultants",
-  primaryPhone: "+91 98888 12345",
-  whatsappNumber: "919888812345",
+  primaryPhone: "+91 81465 26257",
+  whatsappNumber: "918146526257",
   officeAddress: "Near Hanuman Chowk, Main GT Road, Gurdaspur, Punjab 143521",
   email: "contact@gurdaspurproperty.in",
   workingHours: "9:00 AM - 8:00 PM (Monday - Sunday)",
@@ -40,7 +40,14 @@ export const saveProperties = (properties) => {
 export const getSettings = () => {
   try {
     const data = localStorage.getItem(SETTINGS_KEY);
-    return data ? { ...defaultSettings, ...JSON.parse(data) } : defaultSettings;
+    if (!data) return defaultSettings;
+    const parsed = JSON.parse(data);
+    if (parsed.primaryPhone?.includes("98888") || parsed.whatsappNumber?.includes("98888")) {
+      parsed.primaryPhone = defaultSettings.primaryPhone;
+      parsed.whatsappNumber = defaultSettings.whatsappNumber;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
+    }
+    return { ...defaultSettings, ...parsed };
   } catch (e) {
     return defaultSettings;
   }
