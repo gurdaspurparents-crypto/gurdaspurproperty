@@ -97,7 +97,7 @@ export default function ExploringRealEstateOptions({
   ];
 
   return (
-    <section className="bg-white pt-8 pb-12 border-b border-slate-200">
+    <section className="bg-white pt-20 sm:pt-24 pb-12 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
