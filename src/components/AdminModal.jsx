@@ -60,7 +60,7 @@ export default function AdminModal({
     cityArea: '',
     description: '',
     amenities: '30 Ft Wide Road, Immediate Registry, Clear Mutation',
-    imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80',
+    imageUrl: '/images/properties/punjab_residential_plots.jpg',
     images: [],
     videoUrl: '',
     badge: 'Hot Deal',
@@ -145,10 +145,10 @@ export default function AdminModal({
     
     const leadImages = (lead.images && lead.images.length > 0) ? lead.images : [];
     const defaultCover = lead.category === 'kothi' 
-      ? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80'
+      ? '/images/properties/luxury_kothi_main.jpg'
       : lead.category === 'commercial'
-      ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80'
-      : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80';
+      ? '/images/properties/punjab_commercial_sco.jpg'
+      : '/images/properties/punjab_residential_plots.jpg';
 
     setPropForm({
       title: `${lead.size || '10 Marla'} ${lead.category === 'plot' ? 'Residential Plot' : lead.category === 'kothi' ? 'Modern Kothi' : lead.category === 'commercial' ? 'Commercial Space' : 'Land'} in ${lead.locality || 'Gurdaspur'}`,
