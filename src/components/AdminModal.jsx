@@ -127,6 +127,38 @@ export default function AdminModal({
     setShowPropertyForm(true);
   };
 
+  const handleConvertLeadToProperty = (lead) => {
+    setActiveTab('properties');
+    setEditingPropertyId(null);
+    const sizeNumber = lead.size ? lead.size.split(' ')[0] : '10';
+    const unitName = lead.size && lead.size.includes('Kanal') ? 'Kanal' : 'Marla';
+    const priceNum = parseFloat(lead.price) || 0;
+    
+    setPropForm({
+      title: `${lead.size || '10 Marla'} ${lead.category === 'plot' ? 'Residential Plot' : lead.category === 'kothi' ? 'Modern Kothi' : lead.category === 'commercial' ? 'Commercial Space' : 'Land'} in ${lead.locality || 'Gurdaspur'}`,
+      category: lead.category || 'plot',
+      purpose: lead.purpose || 'buy',
+      price: priceNum,
+      pricePerUnit: priceNum >= 10000000 ? `₹${(priceNum / 10000000).toFixed(2)} Cr` : `₹${(priceNum / 100000).toFixed(2)} Lakh`,
+      size: sizeNumber,
+      unit: unitName,
+      sqft: (parseFloat(sizeNumber) || 10) * (unitName === 'Marla' ? 225 : 5445),
+      location: lead.locality || 'Tibri Road',
+      cityArea: lead.subArea ? `${lead.subArea}, ${lead.locality}, Gurdaspur` : `Near ${lead.locality}, Gurdaspur`,
+      description: lead.notes || `Prime verified ${lead.category || 'property'} located on ${lead.locality}. Road width: ${lead.roadWidth || '30 Feet'}. Pucca registry with clear inteqaal. Direct deals handled via Travelx Gurdaspur Property Consultants.`,
+      amenities: `${lead.roadWidth || '30 Ft Road'}, Immediate Registry, 100% Clear Inteqaal, Verified Title`,
+      imageUrl: lead.category === 'kothi' 
+        ? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80'
+        : lead.category === 'commercial'
+        ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80'
+        : 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80',
+      badge: 'Direct Listing',
+      verified: true,
+      facing: lead.facing || 'East'
+    });
+    setShowPropertyForm(true);
+  };
+
   const handleSaveProperty = (e) => {
     e.preventDefault();
     const amenitiesArray = propForm.amenities.split(',').map(a => a.trim()).filter(Boolean);
@@ -594,51 +626,101 @@ export default function AdminModal({
                       {leads.map(lead => {
                         const cleanLeadPhone = lead.phone?.replace(/[^0-9]/g, '');
                         return (
-                          <div key={lead.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div>
+                          <div key={lead.id} className="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 transition-all shadow-xs space-y-3">
+                            
+                            {/* Top Badge & ID Row */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-sm text-slate-900">{lead.name}</span>
-                                <span className="text-[10px] uppercase font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
-                                  {lead.type || 'Seller Lead'}
+                                <span className="font-extrabold text-sm text-slate-900">{lead.name}</span>
+                                <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                  {lead.ownerRole || 'Owner'}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-mono">{lead.id}</span>
+                                <span className="text-[10px] font-mono text-slate-400">{lead.id}</span>
                               </div>
 
-                              <div className="text-xs text-slate-600 mt-1">
-                                <strong>Phone:</strong> {lead.phone} • <strong>Location:</strong> {lead.locality || lead.location || 'Gurdaspur'} • <strong>Size:</strong> {lead.size || 'N/A'} • <strong>Price:</strong> {lead.price || 'N/A'}
+                              <span className="text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-rose-600" />
+                                <span>Confidential Lead • Admin Only</span>
+                              </span>
+                            </div>
+
+                            {/* Middle Details Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700">
+                              
+                              {/* Left Specs */}
+                              <div className="space-y-1">
+                                <div><strong>Property Type:</strong> <span className="uppercase font-bold text-slate-900">{lead.category || 'plot'}</span> ({lead.purpose === 'rent' ? 'For Rent' : 'For Sale'})</div>
+                                <div><strong>General Locality:</strong> <span className="font-semibold text-slate-900">{lead.locality || 'Gurdaspur'}</span> {lead.subArea ? `(${lead.subArea})` : ''}</div>
+                                <div><strong>Size & Dimensions:</strong> <span className="font-bold text-slate-900">{lead.size || 'N/A'}</span> {lead.dimensions ? `• ${lead.dimensions}` : ''}</div>
+                                <div><strong>Expected Price:</strong> <span className="font-black text-emerald-700 text-sm">₹{lead.price || 'N/A'}</span> {lead.isNegotiable ? '(Negotiable)' : ''}</div>
                               </div>
 
-                              {lead.notes && (
-                                <p className="text-xs text-slate-500 italic mt-1">"{lead.notes}"</p>
-                              )}
+                              {/* Right Private Location & Documents */}
+                              <div className="space-y-1.5 bg-rose-50/70 border border-rose-200/80 rounded-xl p-2.5">
+                                <div className="text-[10px] uppercase font-black text-rose-700 flex items-center gap-1">
+                                  <Lock className="w-3 h-3 text-rose-600" />
+                                  <span>Strictly Private Location (Not on website):</span>
+                                </div>
+                                <div className="font-bold text-xs text-slate-900">
+                                  {lead.exactLocation || 'Shared on Call/WhatsApp'}
+                                </div>
+                                {lead.registryStatus && (
+                                  <div className="text-[11px] text-slate-600 pt-1 border-t border-rose-200/60">
+                                    <strong>Registry:</strong> {lead.registryStatus}
+                                  </div>
+                                )}
+                              </div>
+
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0">
-                              <a
-                                href={`https://wa.me/${cleanLeadPhone}?text=Hello%20${encodeURIComponent(lead.name)},%20I%20saw%20your%20property%20listing%20on%20GurdaspurProperty.in`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5 fill-white text-emerald-600" />
-                                WhatsApp
-                              </a>
+                            {lead.notes && (
+                              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs text-slate-600 italic">
+                                "{lead.notes}"
+                              </div>
+                            )}
 
-                              <a
-                                href={`tel:${lead.phone}`}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-200 text-slate-800 font-bold text-xs hover:bg-slate-300"
-                              >
-                                <Phone className="w-3.5 h-3.5" />
-                                Call
-                              </a>
+                            {/* Action Row */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                              <div className="flex items-center gap-2">
+                                <a
+                                  href={`https://wa.me/${cleanLeadPhone}?text=${encodeURIComponent(`Hello ${lead.name}, I am contacting you from Gurdaspur Property Consultants regarding your ${lead.size || ''} ${lead.category || 'property'} on ${lead.locality}.`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5 fill-white text-emerald-600" />
+                                  <span>WhatsApp Owner ({lead.phone})</span>
+                                </a>
 
-                              <button
-                                onClick={() => handleDeleteLead(lead.id)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                                <a
+                                  href={`tel:${lead.phone}`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs"
+                                >
+                                  <Phone className="w-3.5 h-3.5 text-slate-600" />
+                                  <span>Call</span>
+                                </a>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleConvertLeadToProperty(lead)}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-[#005ca8] hover:bg-blue-100 border border-blue-200 font-bold text-xs transition-colors cursor-pointer"
+                                  title="Add to website without customer phone or private house number"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>Publish Sanitized to Website</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleDeleteLead(lead.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Delete Lead"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
+
                           </div>
                         );
                       })}
