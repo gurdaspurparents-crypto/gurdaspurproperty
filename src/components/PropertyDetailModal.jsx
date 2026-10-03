@@ -316,7 +316,7 @@ export default function PropertyDetailModal({
                   <form onSubmit={handleInquirySubmit} className="space-y-3">
                     <input
                       type="text"
-                      placeholder="Your Name (Aapka Naam)"
+                      placeholder="Your Full Name *"
                       value={inquiryName}
                       onChange={(e) => setInquiryName(e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"

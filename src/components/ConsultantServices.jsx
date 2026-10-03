@@ -59,10 +59,10 @@ export default function ConsultantServices({ settings }) {
             Professional Real Estate Advisory
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-['Outfit'] mt-3 mb-4">
-            Kyun Chunein <span className="text-emerald-400">Gurdaspur Property Consultants</span>?
+            Why Choose <span className="text-emerald-400">Gurdaspur Property Consultants</span>?
           </h2>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Property khareedna ya bechna life ka sabse bada faisla hota hai. Hum ensure karte hain ki aapki deal 100% legal, safe aur transparent ho.
+            Buying or selling real estate is one of life's most significant investments. We ensure every transaction is 100% legally verified, completely secure, and fully transparent.
           </p>
         </div>
 

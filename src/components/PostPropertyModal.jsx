@@ -49,7 +49,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
     dimensions: '', // Front x Depth
     roadWidth: '30 Feet Road',
     facing: 'East',
-    registryStatus: '100% Pucca Registry & Clear Mutation',
+    registryStatus: '100% Clear Registry & Mutation',
     expectedPrice: '',
     isNegotiable: true,
     description: '',
@@ -116,7 +116,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
 
     const remainingSlots = MAX_PHOTOS - uploadedImages.length;
     if (remainingSlots <= 0) {
-      alert("Aap maximum 15 photos add kar sakte hain.");
+      alert("You can add a maximum of 15 photos.");
       return;
     }
 
@@ -139,7 +139,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
 
     // Check size limit: 25MB for browser storage
     if (file.size > 25 * 1024 * 1024) {
-      alert("Video file size 25MB se zyada hai. Badi videos ke liye YouTube/Drive link dalein ya WhatsApp par direct consultant ko share karein.");
+      alert("Video file size exceeds 25MB. For larger videos, please enter a YouTube/Drive link or send directly to the consultant via WhatsApp.");
       return;
     }
 
@@ -161,7 +161,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const handleNextStep = (e) => {
     e.preventDefault();
     if (!formData.size || !formData.expectedPrice) {
-      alert("Kripya property ka size aur expected price bharein.");
+      alert("Please enter the property size and expected price.");
       return;
     }
     setStep(2);
@@ -170,7 +170,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.phone || !formData.sellerName) {
-      alert("Kripya apna naam aur phone number zaroor bharein.");
+      alert("Please enter your full name and phone number.");
       return;
     }
 
@@ -277,7 +277,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-start gap-2.5 text-xs text-amber-900">
           <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
           <div className="leading-snug">
-            <strong>Customer Privacy Rule:</strong> Aapka mobile number aur exact makan/khasra number website par <strong>kabhi public nahi kiya jayega</strong>. Ye details sirf hamare verified consultant office (Admin) ke pass rahengi.
+            <strong>Customer Privacy Guarantee:</strong> Your mobile number and exact address/khasra number will <strong>never be made public on the website</strong>. These confidential details remain strictly secure with our verified principal consultant office.
           </div>
         </div>
 
@@ -298,10 +298,10 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
               </h3>
               
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto mt-2 mb-6 leading-relaxed">
-                Shukriya, <strong>{formData.sellerName}</strong>! Aapki property details hamare principal consultant ke pass secure database mein darj ho chuki hain. 
+                Thank you, <strong>{formData.sellerName}</strong>! Your property details have been securely recorded in our private consultant portal. 
                 <br/><br/>
                 <span className="font-semibold text-slate-800">
-                  Aapka contact number aur exact location kisi bhi visitor ko website par nahi dikhega.
+                  Your phone number and exact address will remain 100% confidential and hidden from website visitors.
                 </span>
               </p>
 
@@ -369,7 +369,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                             : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                         }`}
                       >
-                        🏡 Sell Property (Bechna Hai)
+                        🏡 Sell Property
                       </button>
                       <button
                         type="button"
@@ -380,7 +380,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                             : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                         }`}
                       >
-                        🔑 Rent Out (Kiraye Par Dena Hai)
+                        🔑 Rent Out
                       </button>
                     </div>
                   </div>
@@ -393,7 +393,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
                         { id: 'plot', label: 'Plot / Land', icon: '📐' },
-                        { id: 'kothi', label: 'Kothi / House', icon: '🏰' },
+                        { id: 'kothi', label: 'Villa / Kothi', icon: '🏰' },
                         { id: 'commercial', label: 'Commercial SCO', icon: '🏬' },
                         { id: 'land', label: 'Agricultural', icon: '🚜' }
                       ].map((cat) => (
@@ -540,7 +540,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                     </div>
 
                     <p className="text-[11px] text-slate-500">
-                      Gurdaspur ke buyers ko attract karne ke liye front elevation, road width, boundary demarcation, rooms, kitchen aur terrace ki <strong>10 se 15 photos</strong> upload karein.
+                      Upload <strong>10 to 15 high-quality photos</strong> (front elevation, road width, boundary demarcation, rooms, kitchen, and terrace) to attract genuine verified buyers.
                     </p>
 
                     {/* Image Preview Grid */}
@@ -601,7 +601,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
 
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-100">
                       <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Photos phone gallery mein hain? Form submit karne ke baad aap 1-click se WhatsApp par bhi saari photos bhej sakte hain.</span>
+                      <span>Photos in your mobile gallery? You can also forward all photos directly to our consultant on WhatsApp with 1 click after submission.</span>
                     </div>
                   </div>
 
@@ -618,7 +618,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                     </div>
 
                     <p className="text-[11px] text-slate-500">
-                      Property ka live video walkthrough add karein. Video dekhne wale buyers 3x jaldi deal final karte hain.
+                      Add a live video walkthrough. Properties with video tours receive 3x faster buyer inquiries and quicker deal closures.
                     </p>
 
                     {/* Option 1: Walkthrough Video Link (YouTube / Google Drive / Instagram) */}
@@ -629,7 +629,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                       </label>
                       <input
                         type="url"
-                        placeholder="https://youtu.be/... ya Google Drive video link"
+                        placeholder="https://youtu.be/... or Google Drive video link"
                         value={formData.videoUrl}
                         onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
@@ -640,7 +640,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                     <div className="pt-2 border-t border-slate-200/70">
                       <div className="text-[11px] font-bold text-slate-700 mb-2 flex items-center gap-1">
                         <FileVideo className="w-3 h-3 text-purple-600" />
-                        <span>Ya Phone Se Direct Video Attach Karein:</span>
+                        <span>Or Attach Video File Directly From Your Device:</span>
                       </div>
 
                       {videoFile ? (
@@ -714,7 +714,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                       <span>Strictly Confidential • Admin Eyes Only</span>
                     </div>
                     <p className="text-[11px] leading-relaxed text-rose-900">
-                      Neeche di gayi details (Aapka mobile number aur Makan/Khasra number) <strong>website par public kabhi nahi hogi</strong>. Sirf hamari official team aapse direct deal confirm karne ke liye contact karegi.
+                      The confidential details below (your phone number and exact house/khasra number) will <strong>never be published on the public website</strong>. Only our official verified consultant team will contact you directly to confirm genuine buyer proposals.
                     </p>
                   </div>
 
@@ -733,7 +733,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                       className="w-full bg-slate-50 border-2 border-rose-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-rose-500"
                     />
                     <span className="text-[10px] text-slate-400 mt-1 block">
-                      🔒 Ye exact address website par nahi aayega, sirf Admin ke private portal mein save hoga.
+                      🔒 This exact address will not appear on the website; it is strictly saved in the Admin private portal.
                     </span>
                   </div>
 
@@ -763,7 +763,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                         onChange={(e) => setFormData({ ...formData, ownerRole: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
                       >
-                        <option value="Owner (Malik)">Property Owner (Malik)</option>
+                        <option value="Property Owner">Property Owner</option>
                         <option value="Family Member">Family Member</option>
                         <option value="Power of Attorney Holder">Power of Attorney (POA) Holder</option>
                         <option value="NRI Representative">NRI Family Representative</option>
@@ -786,7 +786,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                       className="w-full bg-slate-50 border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-xs font-black text-slate-900 focus:outline-none focus:border-emerald-600"
                     />
                     <span className="text-[10px] text-emerald-700 mt-1 block font-medium">
-                      ✓ No spam: Sirf verified deals ke liye consultant aapse connect karega.
+                      ✓ 100% Spam-free: Only our official verified consultant will contact you regarding genuine buyer proposals.
                     </span>
                   </div>
 
@@ -802,9 +802,9 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                         onChange={(e) => setFormData({ ...formData, registryStatus: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
                       >
-                        <option value="100% Pucca Registry & Clear Mutation">100% Pucca Registry & Inteqaal</option>
+                        <option value="100% Clean Registry & Mutation">100% Clear Registry & Mutation (Inteqaal)</option>
                         <option value="Colony Demarcation (Plot Pillars Done)">Colony Demarcation & Pillars</option>
-                        <option value="Direct Registry from Farmer/Landlord">Direct Farmer/Landlord Registry</option>
+                        <option value="Direct Registry from Landlord">Direct Landlord Registry</option>
                         <option value="Power of Attorney (POA)">Power of Attorney (POA)</option>
                       </select>
                     </div>

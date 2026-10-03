@@ -13,7 +13,7 @@ export const initialProperties = [
     roadWidth: "35 Feet Concrete Road",
     location: "Tibri Road",
     cityArea: "Near Army Cantt & St. Soldier School, Tibri Road, Gurdaspur",
-    description: "East-facing prime corner plot situated in an upscale gated colony. The property is fully demarcated with boundary pillars. Features underground sewerage, 24x7 municipal water supply, street lighting, and wide 35-foot interlocking paver roads. 100% pucca registry with clear inteqaal (mutation). Immediate possession available.",
+    description: "East-facing prime corner plot situated in an upscale gated colony. The property is fully demarcated with boundary pillars. Features underground sewerage, 24x7 municipal water supply, street lighting, and wide 35-foot interlocking paver roads. 100% authentic government registry with verified mutation (Inteqaal). Immediate possession available.",
     amenities: [
       "Corner Plot (Double Side Open)",
       "35 Ft Wide Paver Road",
