@@ -8,31 +8,24 @@ import {
   IndianRupee, 
   Maximize2, 
   Sparkles,
-  ShieldCheck,
-  Lock,
-  EyeOff,
-  User,
-  Phone,
-  FileCheck2,
-  Compass,
-  ArrowRight,
-  Layers,
-  Info,
-  Camera,
-  Upload,
-  Image as ImageIcon,
-  Video,
-  Play,
-  Film,
-  ExternalLink,
-  FileVideo,
-  Loader2
+  User, 
+  Phone, 
+  FileCheck2, 
+  Compass, 
+  ArrowRight, 
+  Camera, 
+  Upload, 
+  Image as ImageIcon, 
+  Video, 
+  Film, 
+  ExternalLink, 
+  FileVideo, 
+  Loader2 
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
 export default function PostPropertyModal({ isOpen, onClose, settings }) {
-  const [step, setStep] = useState(1); // Step 1: Property Specs | Step 2: Confidential Details
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isCompressing, setIsCompressing] = useState(false);
   const [videoFile, setVideoFile] = useState(null); // { name, size, dataUrl }
@@ -41,7 +34,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
     purpose: 'sell', // 'sell' | 'rent'
     category: 'plot', // 'plot' | 'kothi' | 'commercial' | 'land'
     locality: 'Tibri Road',
-    subArea: '', // Public landmark (e.g., Near Army Cantt)
+    subArea: '', // Landmark / Colony name
     
     // Specifications
     size: '',
@@ -55,11 +48,11 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
     description: '',
     videoUrl: '', // YouTube / Google Drive / Reel link
 
-    // STRICTLY CONFIDENTIAL - ADMIN ONLY
+    // Owner Contact Details
     exactLocation: '', // House #, Street #, Khasra #
     sellerName: '',
     phone: '',
-    ownerRole: 'Owner' // 'Owner' | 'Family Member' | 'NRI Representative' | 'POA Holder'
+    ownerRole: 'Property Owner' // 'Property Owner' | 'Family Member' | 'NRI Representative' | 'Power of Attorney (POA) Holder'
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -70,7 +63,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const cleanAdminPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
   const MAX_PHOTOS = 15;
 
-  // Client-side image compression to support 15 high-res photos safely in storage
+  // Client-side image compression to support 15 photos safely in storage
   const compressImage = (file) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -158,19 +151,14 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
     setVideoFile(null);
   };
 
-  const handleNextStep = (e) => {
-    e.preventDefault();
-    if (!formData.size || !formData.expectedPrice) {
-      alert("Please enter the property size and expected price.");
-      return;
-    }
-    setStep(2);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.phone || !formData.sellerName) {
+    if (!formData.sellerName || !formData.phone) {
       alert("Please enter your full name and phone number.");
+      return;
+    }
+    if (!formData.size || !formData.expectedPrice) {
+      alert("Please enter the property size and expected price.");
       return;
     }
 
@@ -184,7 +172,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       category: formData.category,
       locality: formData.locality,
       subArea: formData.subArea,
-      exactLocation: formData.exactLocation || 'Shared on Call/WhatsApp', // STRICTLY CONFIDENTIAL
+      exactLocation: formData.exactLocation || 'Shared on Call/WhatsApp',
       size: `${formData.size} ${formData.unit}`,
       dimensions: formData.dimensions,
       roadWidth: formData.roadWidth,
@@ -209,17 +197,17 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       : (videoFile ? `• Video Walkthrough: ${videoFile.name} attached` : '• Video Walkthrough: Will share on WhatsApp');
 
     const text = encodeURIComponent(
-      `🔒 *CONFIDENTIAL PROPERTY SUBMISSION (Admin Eyes Only)*\n\n` +
-      `👤 *Owner Details (PRIVATE):*\n` +
+      `📋 *NEW PROPERTY LISTING - GURDASPUR*\n\n` +
+      `👤 *Owner Details:*\n` +
       `• Name: ${formData.sellerName}\n` +
       `• Mobile: ${formData.phone}\n` +
       `• Role: ${formData.ownerRole}\n\n` +
-      `📍 *Confidential Location (NOT FOR WEBSITE):*\n` +
-      `• Exact Address/Khasra: ${formData.exactLocation || 'Will share in private'}\n` +
-      `• General Locality: ${formData.locality} (${formData.subArea || 'Gurdaspur'})\n\n` +
+      `📍 *Location:*\n` +
+      `• Address / Khasra: ${formData.exactLocation || 'Shared on Call'}\n` +
+      `• Locality: ${formData.locality} (${formData.subArea || 'Gurdaspur'})\n\n` +
       `📐 *Property Specs:*\n` +
       `• Listing: ${formData.purpose === 'sell' ? 'For Sale' : 'For Rent'}\n` +
-      `• Type: ${formData.category.toUpperCase()}\n` +
+      `• Category: ${formData.category.toUpperCase()}\n` +
       `• Size: ${formData.size} ${formData.unit} ${formData.dimensions ? `(${formData.dimensions})` : ''}\n` +
       `• Road Width: ${formData.roadWidth}\n` +
       `• Facing: ${formData.facing}\n` +
@@ -227,8 +215,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       `• Demand: ₹${formData.expectedPrice} ${formData.isNegotiable ? '(Negotiable)' : '(Fixed)'}\n` +
       `• Photos Attached: ${uploadedImages.length} Photos\n` +
       `${videoDetails}\n` +
-      `• Extra Notes: ${formData.description || 'N/A'}\n\n` +
-      `⚠️ *Privacy Reminder:* As requested, keep my phone number & exact location confidential. Only coordinate deals via your office.`
+      `• Notes: ${formData.description || 'N/A'}`
     );
     window.open(`https://wa.me/${cleanAdminPhone}?text=${text}`, '_blank');
     onClose();
@@ -241,7 +228,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
         onClick={(e) => e.stopPropagation()}
       >
         
-        {/* 99acres-Style Modern Header */}
+        {/* Header */}
         <div className="bg-[#071c35] text-white px-6 py-5 rounded-t-3xl flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3.5">
             <img 
@@ -254,9 +241,8 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                 <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full">
                   0% Commission to List
                 </span>
-                <span className="text-[10px] font-bold text-slate-300 flex items-center gap-1">
-                  <Lock className="w-3 h-3 text-amber-400" />
-                  100% Privacy Protected
+                <span className="text-[10px] font-bold text-slate-300">
+                  Verified Real Estate Portal
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-extrabold font-['Outfit'] mt-1 text-white">
@@ -273,24 +259,16 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
           </button>
         </div>
 
-        {/* Confidentiality Assurance Notice Banner */}
-        <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-start gap-2.5 text-xs text-amber-900">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          <div className="leading-snug">
-            <strong>Customer Privacy Guarantee:</strong> Your mobile number and exact address/khasra number will <strong>never be made public on the website</strong>. These confidential details remain strictly secure with our verified principal consultant office.
-          </div>
-        </div>
-
         {/* Modal Body */}
         <div className="p-6">
           {submitted ? (
-            <div className="text-center py-6">
+            <div className="text-center py-8">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                Saved Privately in Admin Portal
+                Listing Received
               </span>
 
               <h3 className="text-2xl font-black text-slate-900 font-['Outfit'] mt-3">
@@ -298,11 +276,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
               </h3>
               
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto mt-2 mb-6 leading-relaxed">
-                Thank you, <strong>{formData.sellerName}</strong>! Your property details have been securely recorded in our private consultant portal. 
-                <br/><br/>
-                <span className="font-semibold text-slate-800">
-                  Your phone number and exact address will remain 100% confidential and hidden from website visitors.
-                </span>
+                Thank you, <strong>{formData.sellerName}</strong>! Your property details have been received. Our verified consultant team will review the details and connect with you shortly.
               </p>
 
               <div className="space-y-3 max-w-md mx-auto">
@@ -323,459 +297,467 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
               </div>
             </div>
           ) : (
-            <div>
+            <form onSubmit={handleSubmit} className="space-y-6">
               
-              {/* Step Progression Tabs (99acres Style) */}
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-6">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className={`text-xs font-bold pb-1 transition-colors flex items-center gap-1.5 ${
-                    step === 1 ? 'text-[#005ca8] border-b-2 border-[#005ca8]' : 'text-slate-400'
-                  }`}
-                >
-                  <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black">1</span>
-                  <span>Property Details & Specs</span>
-                </button>
+              {/* SECTION 1: Basic Property Details */}
+              <div className="space-y-4">
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
+                    <Home className="w-4 h-4 text-[#005ca8]" />
+                    <span>Property Details</span>
+                  </h3>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => formData.size && formData.expectedPrice && setStep(2)}
-                  className={`text-xs font-bold pb-1 transition-colors flex items-center gap-1.5 ${
-                    step === 2 ? 'text-[#005ca8] border-b-2 border-[#005ca8]' : 'text-slate-400'
-                  }`}
-                >
-                  <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black">2</span>
-                  <span>Confidential Owner Contact (Admin Only)</span>
-                </button>
-              </div>
-
-              {/* STEP 1: Property Specifications */}
-              {step === 1 && (
-                <form onSubmit={handleNextStep} className="space-y-4">
-                  
-                  {/* Purpose Toggle */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                      I Want To:
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, purpose: 'sell' })}
-                        className={`py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all border ${
-                          formData.purpose === 'sell'
-                            ? 'bg-[#005ca8] text-white border-[#005ca8] shadow-sm'
-                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        🏡 Sell Property
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, purpose: 'rent' })}
-                        className={`py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all border ${
-                          formData.purpose === 'rent'
-                            ? 'bg-[#005ca8] text-white border-[#005ca8] shadow-sm'
-                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        🔑 Rent Out
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Property Category */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                      Property Category:
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { id: 'plot', label: 'Plot / Land', icon: '📐' },
-                        { id: 'kothi', label: 'Villa / Kothi', icon: '🏰' },
-                        { id: 'commercial', label: 'Commercial SCO', icon: '🏬' },
-                        { id: 'land', label: 'Agricultural', icon: '🚜' }
-                      ].map((cat) => (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, category: cat.id })}
-                          className={`py-2.5 px-2 rounded-xl text-xs font-bold border transition-all text-center flex flex-col items-center gap-1 ${
-                            formData.category === cat.id
-                              ? 'bg-blue-50 text-[#005ca8] border-blue-400 shadow-2xs font-extrabold'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className="text-base">{cat.icon}</span>
-                          <span>{cat.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* General Locality & Public Landmark */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                        Gurdaspur Locality (Public)
-                      </label>
-                      <select
-                        value={formData.locality}
-                        onChange={(e) => setFormData({ ...formData, locality: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
-                      >
-                        {GURDASPUR_LOCALITIES.filter(l => l !== 'All Localities').map((loc) => (
-                          <option key={loc} value={loc}>
-                            {loc}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Nearest Landmark / Colony Name (Public)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Near St. Soldier School / Civil Lines"
-                        value={formData.subArea}
-                        onChange={(e) => setFormData({ ...formData, subArea: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Size & Units */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Property Size *
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          step="any"
-                          required
-                          placeholder="e.g. 10 or 1500"
-                          value={formData.size}
-                          onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
-                        />
-                        <select
-                          value={formData.unit}
-                          onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                          className="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800"
-                        >
-                          <option value="Marla">Marla</option>
-                          <option value="Kanal">Kanal</option>
-                          <option value="Gaj">Gaj (Sq. Yd)</option>
-                          <option value="Sq.Ft">Sq.Ft</option>
-                          <option value="Acre">Acre</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Dimensions (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 30 × 75 ft"
-                        value={formData.dimensions}
-                        onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Price & Demand */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Expected Total Demand / Price (₹) *
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <div className="relative flex-1">
-                        <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-xs">₹</span>
-                        <input
-                          type="number"
-                          required
-                          placeholder="e.g. 3500000 (35 Lakh) or 16000 for rent"
-                          value={formData.expectedPrice}
-                          onChange={(e) => setFormData({ ...formData, expectedPrice: e.target.value })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
-                        />
-                      </div>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.isNegotiable}
-                          onChange={(e) => setFormData({ ...formData, isNegotiable: e.target.checked })}
-                          className="w-4 h-4 text-blue-600 rounded"
-                        />
-                        <span>Negotiable</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Property Photos Upload (10 to 15 Photos) */}
-                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-1.5">
-                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <Camera className="w-4 h-4 text-[#005ca8]" />
-                        <span>Property Photos (10 to 15 Photos)</span>
-                      </label>
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                        uploadedImages.length >= 10 
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
-                          : uploadedImages.length > 0 
-                          ? 'bg-blue-100 text-blue-800 border border-blue-200' 
-                          : 'bg-slate-200 text-slate-700'
-                      }`}>
-                        {uploadedImages.length}/15 Photos Added {uploadedImages.length >= 10 ? '✓ Ready' : '(Min 10-15 Recommended)'}
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-slate-500">
-                      Upload <strong>10 to 15 high-quality photos</strong> (front elevation, road width, boundary demarcation, rooms, kitchen, and terrace) to attract genuine verified buyers.
-                    </p>
-
-                    {/* Image Preview Grid */}
-                    {uploadedImages.length > 0 && (
-                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
-                        {uploadedImages.map((imgSrc, idx) => (
-                          <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-2xs group bg-slate-900">
-                            <img src={imgSrc} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveImage(idx)}
-                              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-slate-900/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm cursor-pointer"
-                              title="Remove Photo"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                            <span className="absolute bottom-1 right-1 bg-black/75 backdrop-blur-xs text-white text-[9px] font-mono px-1 rounded">
-                              #{idx + 1}
-                            </span>
-                            {idx === 0 && (
-                              <span className="absolute bottom-1 left-1 bg-[#005ca8] text-white text-[8px] font-black uppercase px-1 rounded shadow-xs">
-                                Cover
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Upload File Input / Dropzone */}
-                    {uploadedImages.length < MAX_PHOTOS && (
-                      <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-[#005ca8] rounded-xl p-4 bg-white hover:bg-blue-50/40 transition-all cursor-pointer group">
-                        {isCompressing ? (
-                          <div className="flex items-center gap-2 text-xs font-bold text-[#005ca8] py-2">
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            <span>Compressing & optimizing photos...</span>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="w-6 h-6 text-slate-400 group-hover:text-[#005ca8] mb-1 transition-colors" />
-                            <span className="text-xs font-bold text-slate-700 group-hover:text-[#005ca8] transition-colors">
-                              Click to Add Photos (Up to 15 Photos)
-                            </span>
-                            <span className="text-[10px] text-slate-400 mt-0.5">
-                              Supports multi-select JPG, PNG ({MAX_PHOTOS - uploadedImages.length} slots left)
-                            </span>
-                            <input
-                              type="file"
-                              multiple
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                            />
-                          </>
-                        )}
-                      </label>
-                    )}
-
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-100">
-                      <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Photos in your mobile gallery? You can also forward all photos directly to our consultant on WhatsApp with 1 click after submission.</span>
-                    </div>
-                  </div>
-
-                  {/* Property Video Walkthrough (Video Clip / Link Option) */}
-                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-1.5">
-                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <Video className="w-4 h-4 text-rose-600" />
-                        <span>Property Video Walkthrough (Video Option)</span>
-                      </label>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full">
-                        High Buyer Response
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-slate-500">
-                      Add a live video walkthrough. Properties with video tours receive 3x faster buyer inquiries and quicker deal closures.
-                    </p>
-
-                    {/* Option 1: Walkthrough Video Link (YouTube / Google Drive / Instagram) */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
-                        <ExternalLink className="w-3 h-3 text-[#005ca8]" />
-                        <span>Walkthrough Video Link (YouTube / Google Drive / Reels):</span>
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://youtu.be/... or Google Drive video link"
-                        value={formData.videoUrl}
-                        onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    {/* Option 2: Upload Video File or Send Directly on WhatsApp */}
-                    <div className="pt-2 border-t border-slate-200/70">
-                      <div className="text-[11px] font-bold text-slate-700 mb-2 flex items-center gap-1">
-                        <FileVideo className="w-3 h-3 text-purple-600" />
-                        <span>Or Attach Video File Directly From Your Device:</span>
-                      </div>
-
-                      {videoFile ? (
-                        <div className="bg-white p-3 rounded-xl border border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
-                          <div className="flex items-center gap-2.5 overflow-hidden w-full">
-                            <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
-                              <Film className="w-5 h-5" />
-                            </div>
-                            <div className="overflow-hidden">
-                              <div className="text-xs font-bold text-slate-900 truncate">{videoFile.name}</div>
-                              <div className="text-[10px] text-slate-500 font-medium">{videoFile.size} • Video clip attached successfully</div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleRemoveVideo}
-                            className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors shrink-0 cursor-pointer"
-                          >
-                            Remove Video
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <label className="flex items-center justify-center gap-2 border border-slate-300 hover:border-purple-500 rounded-xl p-3 bg-white hover:bg-purple-50/30 transition-all cursor-pointer">
-                            <Upload className="w-4 h-4 text-purple-600 shrink-0" />
-                            <span className="text-xs font-bold text-slate-700">Upload Video Clip (Max 25MB)</span>
-                            <input
-                              type="file"
-                              accept="video/*"
-                              onChange={handleVideoUpload}
-                              className="hidden"
-                            />
-                          </label>
-
-                          <a
-                            href={`https://wa.me/${cleanAdminPhone}?text=${encodeURIComponent(`Hello! I want to share my property video walkthrough directly on WhatsApp for listing on GurdaspurProperty.in.`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 border border-emerald-200 hover:border-emerald-500 rounded-xl p-3 bg-emerald-50/50 hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-all text-center"
-                          >
-                            <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span>Send 4K Video on WhatsApp</span>
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Next Step Button */}
-                  <div className="pt-2">
+                {/* Purpose Toggle */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                    I Want To:
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
                     <button
-                      type="submit"
-                      className="w-full py-3.5 rounded-xl bg-[#005ca8] hover:bg-[#004885] text-white font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      type="button"
+                      onClick={() => setFormData({ ...formData, purpose: 'sell' })}
+                      className={`py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all border ${
+                        formData.purpose === 'sell'
+                          ? 'bg-[#005ca8] text-white border-[#005ca8] shadow-sm'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
                     >
-                      <span>Continue to Confidential Owner Details</span>
-                      <ArrowRight className="w-4 h-4" />
+                      🏡 Sell Property
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, purpose: 'rent' })}
+                      className={`py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all border ${
+                        formData.purpose === 'rent'
+                          ? 'bg-[#005ca8] text-white border-[#005ca8] shadow-sm'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      🔑 Rent Out
                     </button>
                   </div>
+                </div>
 
-                </form>
-              )}
+                {/* Property Category */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                    Property Category:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { id: 'plot', label: 'Plot / Land', icon: '📐' },
+                      { id: 'kothi', label: 'Villa / Kothi', icon: '🏰' },
+                      { id: 'commercial', label: 'Commercial SCO', icon: '🏬' },
+                      { id: 'land', label: 'Agricultural', icon: '🚜' }
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, category: cat.id })}
+                        className={`py-2.5 px-2 rounded-xl text-xs font-bold border transition-all text-center flex flex-col items-center gap-1 ${
+                          formData.category === cat.id
+                            ? 'bg-blue-50 text-[#005ca8] border-blue-400 shadow-2xs font-extrabold'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className="text-base">{cat.icon}</span>
+                        <span>{cat.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* STEP 2: Strictly Confidential Owner Details (Admin Eyes Only) */}
-              {step === 2 && (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  
-                  {/* Red/Amber Confidential Alert Card */}
-                  <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs text-rose-950">
-                    <div className="flex items-center gap-2 font-black uppercase text-[11px] text-rose-700 mb-1">
-                      <Lock className="w-4 h-4 text-rose-600" />
-                      <span>Strictly Confidential • Admin Eyes Only</span>
-                    </div>
-                    <p className="text-[11px] leading-relaxed text-rose-900">
-                      The confidential details below (your phone number and exact house/khasra number) will <strong>never be published on the public website</strong>. Only our official verified consultant team will contact you directly to confirm genuine buyer proposals.
-                    </p>
+                {/* Locality & Landmark */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                      Locality / Area *
+                    </label>
+                    <select
+                      value={formData.locality}
+                      onChange={(e) => setFormData({ ...formData, locality: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                    >
+                      {GURDASPUR_LOCALITIES.filter(l => l !== 'All Localities').map((loc) => (
+                        <option key={loc} value={loc}>
+                          {loc}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* Exact Address / Khasra No (Confidential) */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
-                      <EyeOff className="w-3.5 h-3.5 text-rose-600" />
-                      Exact Address / Street / Khasra No. (Private to Admin) *
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Colony / Landmark Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Near St. Soldier School / Civil Lines"
+                      value={formData.subArea}
+                      onChange={(e) => setFormData({ ...formData, subArea: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: Specifications & Pricing */}
+              <div className="space-y-4">
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
+                    <Maximize2 className="w-4 h-4 text-[#005ca8]" />
+                    <span>Specifications & Pricing</span>
+                  </h3>
+                </div>
+
+                {/* Size & Dimensions */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Property Size *
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        required
+                        placeholder="e.g. 10 or 1500"
+                        value={formData.size}
+                        onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                      />
+                      <select
+                        value={formData.unit}
+                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                        className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                      >
+                        <option value="Marla">Marla</option>
+                        <option value="Kanal">Kanal</option>
+                        <option value="Sq.Yd">Sq. Yards (Gaj)</option>
+                        <option value="Sq.Ft">Sq. Feet</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Dimensions (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 30 x 75 ft"
+                      value={formData.dimensions}
+                      onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Expected Total Demand / Price (₹) *</span>
+                    <span className="text-slate-400 font-normal text-[11px]">e.g. 4500000 for 45 Lakh</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold text-xs">₹</span>
+                    <input
+                      type="number"
+                      required
+                      placeholder="e.g. 3500000"
+                      value={formData.expectedPrice}
+                      onChange={(e) => setFormData({ ...formData, expectedPrice: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2.5 text-xs font-black text-slate-900 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id="isNegotiable"
+                      checked={formData.isNegotiable}
+                      onChange={(e) => setFormData({ ...formData, isNegotiable: e.target.checked })}
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                    <label htmlFor="isNegotiable" className="text-xs text-slate-600 font-semibold cursor-pointer">
+                      Price is negotiable for serious buyers
+                    </label>
+                  </div>
+                </div>
+
+                {/* Road Width, Facing & Registry Status */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Road Width in Front
+                    </label>
+                    <select
+                      value={formData.roadWidth}
+                      onChange={(e) => setFormData({ ...formData, roadWidth: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
+                    >
+                      <option value="30 Feet Wide Road">30 Feet Road</option>
+                      <option value="35 Feet Wide Road">35 Feet Road</option>
+                      <option value="40 Feet Wide Road">40 Feet Road</option>
+                      <option value="60+ Feet Main Highway">60+ Feet Highway Road</option>
+                      <option value="20-25 Feet Colony Road">20-25 Feet Colony Road</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                      <Compass className="w-3.5 h-3.5 text-blue-600" />
+                      Facing Direction
+                    </label>
+                    <select
+                      value={formData.facing}
+                      onChange={(e) => setFormData({ ...formData, facing: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
+                    >
+                      <option value="East">East (Sunlight)</option>
+                      <option value="North">North (Vastu)</option>
+                      <option value="North-East">North-East</option>
+                      <option value="West">West</option>
+                      <option value="South">South</option>
+                      <option value="North-West">North-West</option>
+                      <option value="South-East">South-East</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                      <FileCheck2 className="w-3.5 h-3.5 text-blue-600" />
+                      Registry Status
+                    </label>
+                    <select
+                      value={formData.registryStatus}
+                      onChange={(e) => setFormData({ ...formData, registryStatus: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
+                    >
+                      <option value="100% Clean Registry & Mutation">Clear Registry & Mutation</option>
+                      <option value="Colony Demarcation (Plot Pillars Done)">Colony Demarcation & Pillars</option>
+                      <option value="Direct Registry from Landlord">Direct Landlord Registry</option>
+                      <option value="Power of Attorney (POA)">Power of Attorney (POA)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Additional Remarks */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Property Description & Remarks (Optional)
+                  </label>
+                  <textarea
+                    rows="2"
+                    placeholder="e.g. Corner plot, 2 sides open, borewell connection, modular kitchen, immediate possession..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                  ></textarea>
+                </div>
+              </div>
+
+              {/* SECTION 3: Photos & Video Walkthrough */}
+              <div className="space-y-4">
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
+                    <Camera className="w-4 h-4 text-[#005ca8]" />
+                    <span>Property Photos & Video</span>
+                  </h3>
+                </div>
+
+                {/* Photo Upload Area */}
+                <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-1.5">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-[#005ca8]" />
+                      <span>Upload Property Photos</span>
+                    </label>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      {uploadedImages.length} / {MAX_PHOTOS} Photos Added
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500">
+                    Add clear photos of the front elevation, road view, interiors, or boundary pillars. Listings with photos receive up to 5x higher buyer interest.
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <label className={`flex-1 flex items-center justify-center gap-2 border-2 border-dashed rounded-xl p-3 transition-all cursor-pointer ${
+                      uploadedImages.length >= MAX_PHOTOS 
+                        ? 'border-slate-200 bg-slate-100 cursor-not-allowed opacity-60' 
+                        : 'border-blue-300 hover:border-blue-500 bg-blue-50/50 hover:bg-blue-50'
+                    }`}>
+                      {isCompressing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                          <span className="text-xs font-bold text-blue-700">Processing Photos...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 text-blue-600" />
+                          <span className="text-xs font-bold text-blue-700">
+                            {uploadedImages.length >= MAX_PHOTOS ? "15 Photo Limit Reached" : "Select Photos From Device"}
+                          </span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        disabled={uploadedImages.length >= MAX_PHOTOS || isCompressing}
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Thumbnail Gallery Preview Grid */}
+                  {uploadedImages.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 pt-2">
+                      {uploadedImages.map((img, idx) => (
+                        <div key={idx} className="relative aspect-4/3 rounded-xl overflow-hidden border border-slate-300 shadow-2xs group">
+                          <img 
+                            src={img} 
+                            alt={`Upload ${idx + 1}`} 
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="absolute top-1 right-1 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center opacity-90 hover:opacity-100 hover:scale-110 transition-all text-xs shadow-sm cursor-pointer"
+                            title="Remove Photo"
+                          >
+                            ×
+                          </button>
+                          <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-md">
+                            #{idx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-100">
+                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Photos in your gallery? You can also forward them directly to our consultant on WhatsApp after submission.</span>
+                  </div>
+                </div>
+
+                {/* Video Walkthrough Module */}
+                <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-1.5">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Video className="w-4 h-4 text-rose-600" />
+                      <span>Property Video Walkthrough</span>
+                    </label>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full">
+                      High Buyer Response
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500">
+                    Add a walkthrough video clip or link. Properties with video receive 3x faster buyer inquiries.
+                  </p>
+
+                  {/* Option 1: Walkthrough Video Link */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                      <ExternalLink className="w-3 h-3 text-[#005ca8]" />
+                      <span>Walkthrough Video Link (YouTube / Google Drive / Reels):</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://youtu.be/... or Google Drive video link"
+                      value={formData.videoUrl}
+                      onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  {/* Option 2: Upload Video File or Send on WhatsApp */}
+                  <div className="pt-2 border-t border-slate-200/70">
+                    <div className="text-[11px] font-bold text-slate-700 mb-2 flex items-center gap-1">
+                      <FileVideo className="w-3 h-3 text-purple-600" />
+                      <span>Or Attach Video File Directly:</span>
+                    </div>
+
+                    {videoFile ? (
+                      <div className="bg-white p-3 rounded-xl border border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                        <div className="flex items-center gap-2.5 overflow-hidden w-full">
+                          <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                            <Film className="w-5 h-5" />
+                          </div>
+                          <div className="overflow-hidden">
+                            <div className="text-xs font-bold text-slate-900 truncate">{videoFile.name}</div>
+                            <div className="text-[10px] text-slate-500 font-medium">{videoFile.size} • Video clip attached successfully</div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveVideo}
+                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors shrink-0 cursor-pointer"
+                        >
+                          Remove Video
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <label className="flex items-center justify-center gap-2 border border-slate-300 hover:border-purple-500 rounded-xl p-3 bg-white hover:bg-purple-50/30 transition-all cursor-pointer">
+                          <Upload className="w-4 h-4 text-purple-600 shrink-0" />
+                          <span className="text-xs font-bold text-slate-700">Upload Video (Max 25MB)</span>
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={handleVideoUpload}
+                            className="hidden"
+                          />
+                        </label>
+
+                        <a
+                          href={`https://wa.me/${cleanAdminPhone}?text=${encodeURIComponent(`Hello! I want to share my property video walkthrough directly on WhatsApp for listing on GurdaspurProperty.in.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 border border-emerald-200 hover:border-emerald-500 rounded-xl p-3 bg-emerald-50/50 hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-all text-center"
+                        >
+                          <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Send Video on WhatsApp</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: Contact Information */}
+              <div className="space-y-4">
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
+                    <User className="w-4 h-4 text-[#005ca8]" />
+                    <span>Contact Information</span>
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 text-slate-500" />
+                      Your Full Name *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. House #42, Street #3, Opp Water Tank, Khasra #128/4"
-                      value={formData.exactLocation}
-                      onChange={(e) => setFormData({ ...formData, exactLocation: e.target.value })}
-                      className="w-full bg-slate-50 border-2 border-rose-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-rose-500"
+                      placeholder="e.g. Gurpreet Singh"
+                      value={formData.sellerName}
+                      onChange={(e) => setFormData({ ...formData, sellerName: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
                     />
-                    <span className="text-[10px] text-slate-400 mt-1 block">
-                      🔒 This exact address will not appear on the website; it is strictly saved in the Admin private portal.
-                    </span>
                   </div>
 
-                  {/* Owner Name & Role */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-slate-500" />
-                        Owner Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Gurpreet Singh"
-                        value={formData.sellerName}
-                        onChange={(e) => setFormData({ ...formData, sellerName: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-800 mb-1">
-                        Who Are You?
-                      </label>
-                      <select
-                        value={formData.ownerRole}
-                        onChange={(e) => setFormData({ ...formData, ownerRole: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="Property Owner">Property Owner</option>
-                        <option value="Family Member">Family Member</option>
-                        <option value="Power of Attorney Holder">Power of Attorney (POA) Holder</option>
-                        <option value="NRI Representative">NRI Family Representative</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Owner Mobile Number (Confidential) */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+                    <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
                       <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                      Owner Mobile / WhatsApp Number (Confidential) *
+                      Mobile / WhatsApp Number *
                     </label>
                     <input
                       type="tel"
@@ -783,87 +765,55 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                       placeholder="e.g. +91 98765 43210"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full bg-slate-50 border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-xs font-black text-slate-900 focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-black text-slate-900 focus:outline-none focus:border-emerald-600"
                     />
-                    <span className="text-[10px] text-emerald-700 mt-1 block font-medium">
-                      ✓ 100% Spam-free: Only our official verified consultant will contact you regarding genuine buyer proposals.
-                    </span>
                   </div>
+                </div>
 
-                  {/* Legal / Registry Status */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                        <FileCheck2 className="w-3.5 h-3.5 text-blue-600" />
-                        Registry Document Status
-                      </label>
-                      <select
-                        value={formData.registryStatus}
-                        onChange={(e) => setFormData({ ...formData, registryStatus: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
-                      >
-                        <option value="100% Clean Registry & Mutation">100% Clear Registry & Mutation (Inteqaal)</option>
-                        <option value="Colony Demarcation (Plot Pillars Done)">Colony Demarcation & Pillars</option>
-                        <option value="Direct Registry from Landlord">Direct Landlord Registry</option>
-                        <option value="Power of Attorney (POA)">Power of Attorney (POA)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Road Width in Front
-                      </label>
-                      <select
-                        value={formData.roadWidth}
-                        onChange={(e) => setFormData({ ...formData, roadWidth: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
-                      >
-                        <option value="30 Feet Wide Road">30 Feet Road</option>
-                        <option value="35 Feet Wide Road">35 Feet Road</option>
-                        <option value="40 Feet Wide Road">40 Feet Road</option>
-                        <option value="60+ Feet Main Highway">60+ Feet Highway Road</option>
-                        <option value="20-25 Feet Colony Road">20-25 Feet Colony Road</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Additional Remarks */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Additional Remarks / Demarcation Details (Optional)
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Exact Address / House No. / Khasra No.
                     </label>
-                    <textarea
-                      rows="2"
-                      placeholder="e.g. Corner plot, 2 sides open, borewell connection, immediate sale needed..."
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
-                    ></textarea>
+                    <input
+                      type="text"
+                      placeholder="e.g. House #42, Street #3, Opp Water Tank"
+                      value={formData.exactLocation}
+                      onChange={(e) => setFormData({ ...formData, exactLocation: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    />
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="py-3 px-5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-colors"
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Who Are You?
+                    </label>
+                    <select
+                      value={formData.ownerRole}
+                      onChange={(e) => setFormData({ ...formData, ownerRole: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
                     >
-                      ← Back
-                    </button>
-
-                    <button
-                      type="submit"
-                      className="flex-1 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <ShieldCheck className="w-4 h-4" />
-                      <span>Submit Securely to Admin (100% Confidential)</span>
-                    </button>
+                      <option value="Property Owner">Property Owner</option>
+                      <option value="Family Member">Family Member</option>
+                      <option value="Power of Attorney Holder">Power of Attorney (POA) Holder</option>
+                      <option value="NRI Representative">NRI Family Representative</option>
+                    </select>
                   </div>
+                </div>
+              </div>
 
-                </form>
-              )}
+              {/* Submit Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Post Property Listing (FREE)</span>
+                </button>
+              </div>
 
-            </div>
+            </form>
           )}
         </div>
 
