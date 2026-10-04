@@ -34,48 +34,45 @@ export default function Navbar({
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#06152b]/95 backdrop-blur-xl text-white border-b border-slate-800/80 shadow-2xl shadow-black/30">
+    <header className="sticky top-0 z-50 bg-[#071c35] text-white border-b border-slate-800 shadow-xl">
       
-      {/* Top Luxury Gradient Hairline */}
+      {/* Top Subtle Luxury Line */}
       <div className="h-[2px] bg-gradient-to-r from-emerald-500/20 via-emerald-400 to-teal-400/20 w-full"></div>
 
-      {/* Main Luxury Header Bar */}
+      {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="flex items-center justify-between h-16 sm:h-18 gap-2">
           
-          {/* Left: Brand Logo & Locality Dropdown */}
-          <div className="flex items-center gap-3 sm:gap-5">
+          {/* Left: Brand Logo & City Selector Dropdown */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             
             {/* Logo */}
             <a href="#" className="flex items-center gap-2 group shrink-0">
-              <div className="relative">
-                <img 
-                  src="/logo.svg" 
-                  alt="Gurdaspur Property" 
-                  className="h-10 sm:h-11 w-auto object-contain brightness-110 group-hover:scale-105 transition-all drop-shadow-[0_2px_12px_rgba(16,185,129,0.25)]" 
-                />
-              </div>
+              <img 
+                src="/logo.svg" 
+                alt="Gurdaspur Property" 
+                className="h-10 sm:h-11 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform" 
+              />
             </a>
 
-            {/* City / Locality Selector Dropdown */}
-            <div className="relative hidden md:block">
+            {/* City Dropdown (Exact 99acres style: "Gurdaspur ▾") */}
+            <div className="relative hidden md:block shrink-0">
               <button
                 onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-200 hover:text-white bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 hover:border-emerald-500/50 shadow-sm transition-all cursor-pointer group"
-                title="Filter properties by locality in Gurdaspur"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/50 shadow-sm transition-all cursor-pointer whitespace-nowrap"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-                <span className="truncate max-w-[130px] font-semibold">{selectedLocality || "Gurdaspur"}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-400 transition-transform ${cityDropdownOpen ? 'rotate-180' : ''}`} />
+                <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>{selectedLocality && selectedLocality !== "All Localities" ? selectedLocality : "Gurdaspur"}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${cityDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {cityDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2.5 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 text-slate-900 text-left animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 text-slate-900 text-left animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-3.5 py-1.5 text-[10px] font-black uppercase text-slate-400 border-b border-slate-100 flex items-center justify-between">
                     <span>Localities in Gurdaspur</span>
-                    <span className="text-emerald-600 font-bold">{GURDASPUR_LOCALITIES.length} Areas</span>
+                    <span className="text-emerald-700 font-bold">{GURDASPUR_LOCALITIES.length}</span>
                   </div>
-                  <div className="max-h-64 overflow-y-auto py-1">
+                  <div className="max-h-60 overflow-y-auto py-1">
                     {GURDASPUR_LOCALITIES.map((loc) => {
                       const isCurrent = selectedLocality === loc;
                       return (
@@ -88,8 +85,8 @@ export default function Navbar({
                             if (el) el.scrollIntoView({ behavior: 'smooth' });
                           }}
                           className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
-                            isCurrent 
-                              ? 'bg-emerald-50 text-emerald-800 font-bold' 
+                            isCurrent
+                              ? 'bg-emerald-50 text-emerald-800 font-bold'
                               : 'hover:bg-slate-50 hover:text-emerald-700 text-slate-700'
                           }`}
                         >
@@ -105,8 +102,8 @@ export default function Navbar({
 
           </div>
 
-          {/* Center Links (Fintech / Luxury Style with soft micro-pills) */}
-          <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2 text-xs font-semibold text-slate-300">
+          {/* Center Links (99acres-Style: For Buyers | For Tenants | For Owners | NRI Desk | Insights) */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-medium text-slate-300 shrink min-w-0">
             
             <button
               onClick={() => {
@@ -114,9 +111,9 @@ export default function Navbar({
                 const el = document.getElementById('listings');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
                 activeFilter === 'all'
-                  ? 'text-white bg-white/10 font-bold shadow-xs'
+                  ? 'text-white bg-white/10 font-bold'
                   : 'text-slate-300 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -129,9 +126,9 @@ export default function Navbar({
                 const el = document.getElementById('listings');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
                 activeFilter === 'rent'
-                  ? 'text-white bg-white/10 font-bold shadow-xs'
+                  ? 'text-white bg-white/10 font-bold'
                   : 'text-slate-300 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -140,24 +137,23 @@ export default function Navbar({
 
             <button
               onClick={onOpenPostProperty}
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer whitespace-nowrap"
             >
               For Owners
             </button>
 
-            {/* Land Converter */}
+            {/* Land Converter (visible on xl screens to maintain clean spacing) */}
             <button
               onClick={onOpenCalculator}
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="hidden xl:flex px-3 py-1.5 rounded-full text-slate-300 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <Calculator className="w-3.5 h-3.5 text-emerald-400" />
               <span>Land Converter</span>
             </button>
 
-            {/* NRI Desk */}
             <a
               href="#nri-desk"
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-teal-300 hover:bg-teal-500/10 transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-teal-300 hover:bg-teal-500/10 transition-all flex items-center gap-1.5 whitespace-nowrap"
             >
               <Globe2 className="w-3.5 h-3.5 text-teal-400" />
               <span>NRI Desk</span>
@@ -166,27 +162,27 @@ export default function Navbar({
             {/* Insights [NEW] Badge */}
             <button
               onClick={onOpenStampDuty}
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <span>Insights</span>
-              <span className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm shadow-rose-500/30">
+              <span className="bg-rose-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full shadow-sm">
                 NEW
               </span>
             </button>
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             
-            {/* Highlighted "Post Property FREE" Luxury Glowing Button */}
+            {/* Highlighted "Post Property FREE" Glowing Button */}
             <button
               onClick={onOpenPostProperty}
-              className="group relative inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 hover:from-emerald-300 hover:via-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 hover:shadow-emerald-400/50 border border-emerald-300/80 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 border-2 border-emerald-300 ring-2 ring-emerald-400/30 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               title="Post Your Property (100% Free)"
             >
-              <PlusCircle className="w-4 h-4 text-slate-950 shrink-0 group-hover:rotate-90 transition-transform duration-300" />
-              <span className="tracking-tight">Post Property</span>
-              <span className="bg-slate-950 text-emerald-300 text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-inner tracking-wider animate-pulse">
+              <PlusCircle className="w-4 h-4 text-slate-950 shrink-0" />
+              <span>Post Property</span>
+              <span className="bg-slate-950 text-emerald-300 text-[10px] font-black uppercase px-2 py-0.5 rounded-full animate-pulse tracking-wider">
                 FREE
               </span>
             </button>
@@ -195,28 +191,26 @@ export default function Navbar({
             <a
               href={`tel:${settings.primaryPhone}`}
               title={`Customer Helpline: ${settings.primaryPhone}`}
-              className="px-2.5 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-semibold"
+              className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
             >
-              <Headphones className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden xl:inline text-[11px] font-bold text-slate-300">Help</span>
+              <Headphones className="w-4 h-4" />
             </a>
 
-            {/* User / Admin Login Pill */}
+            {/* User / Admin Login Icon */}
             <button
               onClick={onOpenAdmin}
               title="Admin Portal Login"
-              className="px-2.5 sm:px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-slate-200 hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+              className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <User className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline text-xs font-bold">Admin</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <User className="w-4 h-4" />
+              <ChevronDown className="w-3 h-3 text-slate-400 hidden sm:block" />
             </button>
 
             {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-full text-slate-200 hover:bg-white/10 transition-colors"
-              aria-label="Open Mobile Menu"
+              className="lg:hidden p-2 rounded-xl text-slate-200 hover:bg-white/10 transition-colors"
+              aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -228,12 +222,12 @@ export default function Navbar({
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-800/80 bg-[#06152b] px-4 pt-4 pb-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="lg:hidden border-t border-slate-800 bg-[#071c35] px-4 pt-4 pb-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
           
           {/* Highlighted Mobile Post Property Button */}
           <button
             onClick={() => { onOpenPostProperty(); setMobileMenuOpen(false); }}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-between border border-emerald-300 cursor-pointer"
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-between border-2 border-emerald-300 cursor-pointer"
           >
             <span className="flex items-center gap-2">
               <PlusCircle className="w-5 h-5 text-slate-950" />
@@ -247,25 +241,25 @@ export default function Navbar({
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-800">
             <button
               onClick={() => { setActiveFilter("all"); setMobileMenuOpen(false); const el = document.getElementById('listings'); if(el) el.scrollIntoView({ behavior: 'smooth' }); }}
-              className="text-left px-3 py-2.5 rounded-xl bg-slate-900/90 font-bold text-xs text-white border border-slate-800"
+              className="text-left px-3 py-2.5 rounded-xl bg-slate-900 font-bold text-xs text-white border border-slate-800"
             >
               🏢 For Buyers
             </button>
             <button
               onClick={() => { setActiveFilter("rent"); setMobileMenuOpen(false); const el = document.getElementById('listings'); if(el) el.scrollIntoView({ behavior: 'smooth' }); }}
-              className="text-left px-3 py-2.5 rounded-xl bg-slate-900/90 font-bold text-xs text-white border border-slate-800"
+              className="text-left px-3 py-2.5 rounded-xl bg-slate-900 font-bold text-xs text-white border border-slate-800"
             >
               🔑 For Tenants
             </button>
             <button
               onClick={() => { onOpenPostProperty(); setMobileMenuOpen(false); }}
-              className="text-left px-3 py-2.5 rounded-xl bg-slate-900/90 font-bold text-xs text-white border border-slate-800"
+              className="text-left px-3 py-2.5 rounded-xl bg-slate-900 font-bold text-xs text-white border border-slate-800"
             >
               📝 For Owners
             </button>
             <button
               onClick={() => { setMobileMenuOpen(false); const el = document.getElementById('nri-desk'); if(el) el.scrollIntoView({ behavior: 'smooth' }); }}
-              className="text-left px-3 py-2.5 rounded-xl bg-slate-900/90 font-bold text-xs text-white border border-slate-800"
+              className="text-left px-3 py-2.5 rounded-xl bg-slate-900 font-bold text-xs text-white border border-slate-800"
             >
               ✈️ NRI Desk
             </button>
@@ -274,7 +268,7 @@ export default function Navbar({
           <div className="space-y-2 pt-1">
             <button
               onClick={() => { onOpenStampDuty(); setMobileMenuOpen(false); }}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-950/80 text-blue-200 font-bold text-xs border border-blue-800/80"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-950 text-blue-200 font-bold text-xs border border-blue-800"
             >
               <span>Punjab Registry & Stamp Duty (2026)</span>
               <span>→</span>
@@ -282,7 +276,7 @@ export default function Navbar({
 
             <button
               onClick={() => { onOpenCalculator(); setMobileMenuOpen(false); }}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-amber-950/80 text-amber-200 font-bold text-xs border border-amber-800/80"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-amber-950 text-amber-200 font-bold text-xs border border-amber-800"
             >
               <span>Marla / Kanal Land Converter</span>
               <span>→</span>
