@@ -159,16 +159,6 @@ export default function Navbar({
               <span>NRI Desk</span>
             </a>
 
-            {/* Insights [NEW] Badge */}
-            <button
-              onClick={onOpenStampDuty}
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <span>Insights</span>
-              <span className="bg-rose-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full shadow-sm">
-                NEW
-              </span>
-            </button>
           </nav>
 
           {/* Right Action Buttons */}
