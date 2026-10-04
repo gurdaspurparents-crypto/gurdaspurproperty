@@ -15,6 +15,8 @@ export default function Footer({
   settings, 
   onOpenAdmin, 
   onOpenCalculator, 
+  onOpenStampDuty,
+  onOpenValuation,
   onOpenPostProperty,
   setSelectedLocality
 }) {
@@ -88,12 +90,22 @@ export default function Footer({
             </h4>
             <ul className="space-y-2">
               <li>
-                <button onClick={onOpenCalculator} className="text-amber-400 hover:text-amber-300 font-semibold text-left">
+                <button onClick={onOpenValuation} className="text-amber-400 hover:text-amber-300 font-semibold text-left cursor-pointer">
+                  Gurdaspur PropWorth™ Valuation
+                </button>
+              </li>
+              <li>
+                <button onClick={onOpenCalculator} className="text-emerald-400 hover:text-emerald-300 font-semibold text-left cursor-pointer">
                   Punjab Land Unit Calculator
                 </button>
               </li>
               <li>
-                <button onClick={onOpenPostProperty} className="text-emerald-400 hover:text-emerald-300 font-semibold text-left">
+                <button onClick={onOpenStampDuty} className="text-blue-400 hover:text-blue-300 font-semibold text-left cursor-pointer">
+                  Tehsil Stamp Duty &amp; Registry Costs
+                </button>
+              </li>
+              <li>
+                <button onClick={onOpenPostProperty} className="text-slate-200 hover:text-white font-semibold text-left cursor-pointer">
                   Post Your Property (Free)
                 </button>
               </li>

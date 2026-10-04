@@ -14,7 +14,13 @@ import {
   FileCheck,
   Check,
   Play,
-  Video
+  Video,
+  Calculator,
+  Navigation,
+  Clock,
+  Sparkles,
+  FileText,
+  FileCheck2
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 
@@ -76,8 +82,84 @@ export default function PropertyDetailModal({
     "/images/properties/gurdaspur_real_kothi.jpg"
   ];
 
-  const whatsappMessage = encodeURIComponent(
-    `Hello! I want more details & site visit for:\n\n*${property.title}*\n• ID: ${property.id}\n• Location: ${property.location} (${property.cityArea})\n• Size: ${property.size} ${property.unit}\n• Price: ${property.pricePerUnit || formatPrice(property.price, property.purpose)}\n\nPlease share video, registry papers & seller meeting timing.`
+  const getNearbyLandmarks = (loc) => {
+    switch (loc) {
+      case 'Tibri Road':
+        return [
+          { name: 'Army Cantt Military Station', dist: '800 m', time: '2 mins' },
+          { name: 'St. Soldier International School', dist: '650 m', time: '2 mins' },
+          { name: 'Gurdaspur Railway Station', dist: '2.5 km', time: '6 mins' },
+          { name: 'Main Bus Stand Gurdaspur', dist: '2.8 km', time: '7 mins' },
+          { name: 'Civil Hospital & District Courts', dist: '3.1 km', time: '8 mins' },
+          { name: 'Amritsar-Pathankot NH-54', dist: '4.2 km', time: '10 mins' }
+        ];
+      case 'Jail Road':
+        return [
+          { name: 'DC Office & District Sessions Courts', dist: '900 m', time: '2 mins' },
+          { name: 'Civil Hospital Gurdaspur', dist: '1.1 km', time: '3 mins' },
+          { name: 'Officers Colony & VIP Club', dist: '400 m', time: '1 min' },
+          { name: 'Gurdaspur Railway Station', dist: '1.6 km', time: '4 mins' },
+          { name: 'Main City Bus Stand', dist: '1.9 km', time: '5 mins' },
+          { name: 'Cambridge International School', dist: '2.2 km', time: '6 mins' }
+        ];
+      case 'Hanuman Chowk':
+        return [
+          { name: 'Hanuman Chowk Main Market', dist: '200 m', time: '1 min' },
+          { name: 'Old & New Bus Stand', dist: '600 m', time: '2 mins' },
+          { name: 'Gurdaspur Railway Station', dist: '1.2 km', time: '3 mins' },
+          { name: 'Main Commercial & Banking Street', dist: '300 m', time: '1 min' },
+          { name: 'Civil Hospital', dist: '1.8 km', time: '5 mins' },
+          { name: 'Vishal Mega Mart Batala Rd', dist: '1.5 km', time: '4 mins' }
+        ];
+      case 'Dinanagar Bypass':
+        return [
+          { name: 'National Highway 54 (4-Lane)', dist: '150 m', time: '1 min' },
+          { name: 'Dinanagar Commercial Market', dist: '2.0 km', time: '4 mins' },
+          { name: 'Pathankot Corridor Access', dist: 'Direct On Road', time: '0 mins' },
+          { name: 'Gurdaspur City Center', dist: '4.5 km', time: '8 mins' },
+          { name: 'Transport Hub & Warehousing', dist: '1.2 km', time: '3 mins' },
+          { name: 'Railway Station', dist: '5.0 km', time: '10 mins' }
+        ];
+      case 'Trimmu Road':
+        return [
+          { name: 'Trimmu Historical Gurdwara', dist: '1.1 km', time: '3 mins' },
+          { name: 'Perennial Irrigation Canal', dist: '350 m', time: '1 min' },
+          { name: 'Trimmu Bypass Link Road', dist: '500 m', time: '2 mins' },
+          { name: 'Gurdaspur City & Sadar Bazar', dist: '3.8 km', time: '8 mins' },
+          { name: 'Civil Hospital', dist: '4.2 km', time: '9 mins' },
+          { name: 'Railway Station', dist: '4.0 km', time: '9 mins' }
+        ];
+      default:
+        return [
+          { name: 'Gurdaspur Railway Station', dist: '2.0 km', time: '5 mins' },
+          { name: 'Main Bus Stand', dist: '1.8 km', time: '4 mins' },
+          { name: 'Civil Hospital', dist: '2.2 km', time: '5 mins' },
+          { name: 'District Courts & Tehsil', dist: '2.4 km', time: '6 mins' },
+          { name: 'Top English Medium Schools', dist: '1.5 km', time: '4 mins' },
+          { name: 'Batala Road Commercial Hub', dist: '2.5 km', time: '6 mins' }
+        ];
+    }
+  };
+
+  const landmarks = getNearbyLandmarks(property.location);
+
+  const calculateLoanBreakdown = (price, purpose) => {
+    if (purpose === 'rent' || !price) return null;
+    const downPayment = Math.round(price * 0.20);
+    const loanAmount = Math.round(price * 0.80);
+    const monthlyRate = 0.085 / 12;
+    const tenureMonths = 240;
+    const emi = Math.round(
+      (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
+      (Math.pow(1 + monthlyRate, tenureMonths) - 1)
+    );
+    return { downPayment, loanAmount, emi };
+  };
+
+  const loanInfo = calculateLoanBreakdown(property.price, property.purpose);
+
+  const whatsappFardMessage = encodeURIComponent(
+    `Hello! I want the Jamabandi Fard & Video Walkthrough for:\n\n*${property.title}*\n• ID: ${property.id}\n• Location: ${property.location} (${property.cityArea})\n• Price: ${property.pricePerUnit || formatPrice(property.price, property.purpose)}\n\nPlease share the revenue mutation papers & video.`
   );
 
   return (
@@ -265,6 +347,93 @@ export default function PropertyDetailModal({
             </div>
           </div>
 
+          {/* MagicBricks & 99acres Signature: Nearby Landmarks & Driving Distances Widget */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 font-['Outfit'] flex items-center gap-1.5">
+                <Navigation className="w-4 h-4 text-emerald-600" />
+                <span>Nearby Landmarks &amp; Connectivity ({property.location})</span>
+              </h3>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Estimated Driving Times</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {landmarks.map((lm, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-300 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-bold text-slate-800 line-clamp-1">{lm.name}</span>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    <div className="text-xs font-black text-emerald-700">{lm.dist}</div>
+                    <div className="text-[10px] text-slate-400">{lm.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Housing.com Signature: Estimated EMI & Loan Affordability Widget */}
+          {loanInfo && (
+            <div className="mb-8 p-5 rounded-2xl bg-gradient-to-br from-blue-50/70 via-indigo-50/40 to-slate-50 border-2 border-blue-200/70">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-blue-200/60 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-blue-600 text-white rounded-xl">
+                    <Calculator className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-blue-950 font-['Outfit']">
+                      Estimated Monthly EMI &amp; Home Loan
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Pre-approved for up to 80% funding by SBI, HDFC &amp; PNB
+                    </p>
+                  </div>
+                </div>
+                <div className="text-left sm:text-right">
+                  <div className="text-xs text-slate-500 font-bold uppercase">Estimated Monthly EMI</div>
+                  <div className="text-2xl font-black text-[#005ca8] font-['Outfit']">
+                    ₹{loanInfo.emi.toLocaleString('en-IN')}<span className="text-xs font-bold text-slate-500">/mo</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-xs">
+                <div className="bg-white p-3 rounded-xl border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Total Price</div>
+                  <div className="text-sm font-black text-slate-900 mt-0.5">
+                    {formatPrice(property.price, property.purpose)}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">20% Down Payment</div>
+                  <div className="text-sm font-black text-slate-900 mt-0.5">
+                    ₹{loanInfo.downPayment.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">80% Loan Amount</div>
+                  <div className="text-sm font-black text-emerald-700 mt-0.5">
+                    ₹{loanInfo.loanAmount.toLocaleString('en-IN')}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-blue-100">
+                <span>Calculated @ 8.5% p.a. standard bank rate for 20 years tenure</span>
+                <button
+                  onClick={() => {
+                    onClose();
+                    if (onOpenCalculator) onOpenCalculator();
+                  }}
+                  className="font-bold text-blue-700 hover:text-blue-900 cursor-pointer"
+                >
+                  Open Full Calculator →
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Consultant Inquiry Form + WhatsApp Box */}
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -288,6 +457,17 @@ export default function PropertyDetailModal({
                   >
                     <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
                     <span>WhatsApp Inquiry for {property.id}</span>
+                  </a>
+
+                  {/* WhatsApp Video & Fard Request Button */}
+                  <a
+                    href={`https://wa.me/${cleanPhone}?text=${whatsappFardMessage}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    <FileCheck2 className="w-4 h-4 text-emerald-400" />
+                    <span>Request Jamabandi Fard &amp; Video Walkthrough</span>
                   </a>
 
                   <a

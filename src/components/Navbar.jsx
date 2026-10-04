@@ -25,6 +25,7 @@ export default function Navbar({
   onOpenPostProperty, 
   onOpenCalculator, 
   onOpenStampDuty, 
+  onOpenValuation,
   onOpenAdmin, 
   activeFilter, 
   setActiveFilter,
@@ -124,6 +125,24 @@ export default function Navbar({
               For Owners
             </button>
 
+            {/* PropWorth Valuation Tool */}
+            <button
+              onClick={onOpenValuation}
+              className="hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer font-bold text-amber-300"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>PropWorth™</span>
+            </button>
+
+            {/* Land Converter */}
+            <button
+              onClick={onOpenCalculator}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Land Converter</span>
+            </button>
+
             <a
               href="#nri-desk"
               className="hover:text-emerald-400 transition-colors flex items-center gap-1"
@@ -221,6 +240,17 @@ export default function Navbar({
           </div>
 
           <div className="space-y-2 pt-1">
+            <button
+              onClick={() => { onOpenValuation(); setMobileMenuOpen(false); }}
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-amber-950/70 text-amber-200 font-bold text-xs border border-amber-800"
+            >
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>PropWorth™ Valuation Tool</span>
+              </span>
+              <span>→</span>
+            </button>
+
             <button
               onClick={() => { onOpenStampDuty(); setMobileMenuOpen(false); }}
               className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-950 text-blue-200 font-bold text-xs border border-blue-800"

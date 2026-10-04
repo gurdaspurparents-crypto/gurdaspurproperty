@@ -11,7 +11,9 @@ import {
   BadgeCheck,
   Compass,
   FileCheck2,
-  Play
+  Play,
+  Calculator,
+  FileText
 } from 'lucide-react';
 
 export default function PropertyCard({ 
@@ -68,8 +70,29 @@ export default function PropertyCard({
     setActiveImgIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
+  const calculateEstimatedEmi = (price, purpose) => {
+    if (purpose === 'rent' || !price) return null;
+    const loanAmount = price * 0.8;
+    const monthlyRate = 0.085 / 12;
+    const tenureMonths = 240;
+    const emi = Math.round(
+      (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
+      (Math.pow(1 + monthlyRate, tenureMonths) - 1)
+    );
+    if (emi >= 100000) {
+      return `₹${(emi / 100000).toFixed(2)}L/mo`;
+    }
+    return `₹${emi.toLocaleString('en-IN')}/mo`;
+  };
+
+  const estimatedEmi = calculateEstimatedEmi(property.price, property.purpose);
+
   const whatsappMessage = encodeURIComponent(
     `Hello Gurdaspur Property! I am interested in:\n\n*${property.title}*\n• Property ID: ${property.id}\n• Location: ${property.location} (${property.cityArea})\n• Size: ${property.size} ${property.unit}\n• Price: ${property.pricePerUnit || formatPrice(property.price, property.purpose)}\n\nPlease share the exact Google Maps location, registry verification papers & site visit timing.`
+  );
+
+  const whatsappFardMessage = encodeURIComponent(
+    `Hello Gurdaspur Property! I want the Jamabandi Fard & Video Walkthrough for:\n\n*${property.title}*\n• Property ID: ${property.id}\n• Location: ${property.location}\n• Price: ${property.pricePerUnit || formatPrice(property.price, property.purpose)}\n\nPlease share the Tehsil mutation papers & video.`
   );
 
   return (
@@ -236,6 +259,31 @@ export default function PropertyCard({
               </span>
             )}
           </div>
+
+          {/* Housing.com Signature: Estimated EMI Pill */}
+          {estimatedEmi && (
+            <div className="flex items-center justify-between bg-blue-50/80 border border-blue-200/70 rounded-xl px-3 py-1.5 mb-2.5 text-xs">
+              <div className="flex items-center gap-1.5 text-blue-950 font-bold">
+                <Calculator className="w-3.5 h-3.5 text-[#005ca8]" />
+                <span className="text-slate-600 font-semibold">Est. EMI:</span>
+                <span className="font-extrabold text-[#005ca8]">{estimatedEmi}</span>
+              </div>
+              <span className="text-[10px] text-blue-700 font-semibold bg-blue-100/60 px-2 py-0.5 rounded-md">
+                8.5% • 20 Yrs
+              </span>
+            </div>
+          )}
+
+          {/* 1-Click WhatsApp Video & Fard Request Button */}
+          <a
+            href={`https://wa.me/${cleanPhone}?text=${whatsappFardMessage}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full mb-3 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200/80 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <FileCheck2 className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Request Jamabandi Fard & Video</span>
+          </a>
         </div>
 
         {/* Action Controls */}

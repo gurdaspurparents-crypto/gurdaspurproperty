@@ -120,7 +120,7 @@ export default function PunjabLandCalculator({ isOpen, onClose }) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                Enter Value (Maap Daalo)
+                Enter Land Quantity
               </label>
               <input
                 type="number"
@@ -142,11 +142,11 @@ export default function PunjabLandCalculator({ isOpen, onClose }) {
                 onChange={(e) => setInputUnit(e.target.value)}
                 className="w-full h-[58px] bg-slate-50 border-2 border-slate-200 rounded-xl px-3 text-base font-bold text-slate-800 focus:outline-none focus:border-amber-500 cursor-pointer"
               >
-                <option value="marla">Marla (ਮਰਲਾ)</option>
-                <option value="kanal">Kanal (ਕਨਾਲ)</option>
-                <option value="gaj">Gaj / Sq.Yards (ਗਜ਼)</option>
-                <option value="sqft">Sq. Feet (ਸਕੇਅਰ ਫੁੱਟ)</option>
-                <option value="acre">Acre / Killa (ਕਿੱਲਾ)</option>
+                <option value="marla">Marla</option>
+                <option value="kanal">Kanal (20 Marla)</option>
+                <option value="gaj">Gaj / Sq.Yards</option>
+                <option value="sqft">Sq. Feet (ft²)</option>
+                <option value="acre">Acre / Killa (8 Kanal)</option>
               </select>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function PunjabLandCalculator({ isOpen, onClose }) {
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs text-slate-600">
             <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5">
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Punjab Revenue Land Table (ਪੰਜਾਬ ਜ਼ਮੀਨੀ ਮਾਪ):
+              Punjab Revenue Land Measurement Reference:
             </h4>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono text-[11px]">
               <div>• 1 Karam = 5.5 Feet (66 inches)</div>

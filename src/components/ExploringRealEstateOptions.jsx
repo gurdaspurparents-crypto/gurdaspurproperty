@@ -16,7 +16,8 @@ export default function ExploringRealEstateOptions({
   onSelectPurpose, 
   onOpenPostProperty, 
   onOpenStampDuty,
-  onOpenCalculator
+  onOpenCalculator,
+  onOpenValuation
 }) {
   const options = [
     {
@@ -74,11 +75,20 @@ export default function ExploringRealEstateOptions({
       }
     },
     {
+      id: "propworth",
+      title: "PropWorth™ Valuation",
+      subtitle: "Instant Price Estimate",
+      badge: "HOT",
+      badgeColor: "bg-amber-500",
+      image: "/images/properties/gurdaspur_consultant_office.jpg",
+      action: onOpenValuation
+    },
+    {
       id: "insights",
       title: "Explore Insights",
       subtitle: "Stamp Duty & Collector Rates",
       badge: "NEW",
-      badgeColor: "bg-amber-500",
+      badgeColor: "bg-blue-600",
       image: "/images/properties/punjab_stamp_duty_deed.jpg",
       action: onOpenStampDuty
     },
