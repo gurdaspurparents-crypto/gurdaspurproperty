@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   Building2, 
   Phone, 
-  MessageCircle, 
   PlusCircle, 
   ShieldCheck, 
   Calculator, 
@@ -34,8 +33,6 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
   const [buyersDropdownOpen, setBuyersDropdownOpen] = useState(false);
-
-  const cleanPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
 
   return (
     <header className="sticky top-0 z-50 bg-[#071c35] text-white border-b border-slate-800 shadow-lg">
@@ -169,18 +166,6 @@ export default function Navbar({
               </span>
             </button>
 
-            {/* Direct "Chat on WhatsApp" Button */}
-            <a
-              href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property,%20I%20would%20like%20to%20chat%20regarding%20properties.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs shadow-md shadow-emerald-600/30 transition-all hover:scale-105 cursor-pointer border border-emerald-300/40"
-              title="Chat with consultant on WhatsApp"
-            >
-              <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
-              <span>Chat on WhatsApp</span>
-            </a>
-
             {/* Support / Customer Helpline (Headphone icon) */}
             <a
               href={`tel:${settings.primaryPhone}`}
@@ -230,20 +215,6 @@ export default function Navbar({
               FREE
             </span>
           </button>
-
-          {/* Mobile Direct WhatsApp Chat Button */}
-          <a
-            href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property,%20I%20would%20like%20to%20chat%20regarding%20properties.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-2.5 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-xs shadow-md flex items-center justify-between cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 fill-white" />
-              <span>Chat on WhatsApp Directly</span>
-            </span>
-            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">🟢 Online</span>
-          </a>
 
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-800">
             <button
