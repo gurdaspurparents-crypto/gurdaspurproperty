@@ -103,14 +103,14 @@ export default function Hero({
               ))}
             </div>
 
-            {/* Post Property FREE badge on the right of the tab bar */}
-            <div className="hidden sm:block shrink-0">
+            {/* Highlighted Post Property FREE badge on the right of the tab bar */}
+            <div className="shrink-0">
               <button
                 onClick={onOpenPostProperty}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#005ca8] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-300 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
               >
-                <span>Post Property</span>
-                <span className="bg-emerald-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-2xs">
+                <span className="text-emerald-900 font-extrabold">Post Property</span>
+                <span className="bg-emerald-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-2xs animate-pulse">
                   FREE
                 </span>
               </button>

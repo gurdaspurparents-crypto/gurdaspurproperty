@@ -320,21 +320,26 @@ export default function App() {
         }}
       />
 
-      {/* Floating Action Button: WhatsApp Contact */}
-      <aside aria-label="Quick WhatsApp assistance" className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+      {/* Floating Action Button: WhatsApp Chat */}
+      <aside aria-label="Quick WhatsApp assistance" className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-1.5">
+        {/* Floating Live Badge */}
+        <div className="hidden sm:flex items-center gap-1.5 bg-slate-950/90 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-xl border border-slate-700/80 backdrop-blur-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Online • Chat with Consultant</span>
+        </div>
+
         <a
           href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property%20Consultants,%20I%20am%20looking%20for%20property%20in%20Gurdaspur.`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-2xl shadow-emerald-500/50 hover:scale-105 transition-all duration-300 group border-2 border-white/40"
-          title="Direct WhatsApp with Consultant"
+          className="flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs sm:text-sm shadow-2xl shadow-emerald-500/50 hover:scale-105 transition-all duration-300 group border-2 border-white/50"
+          title="Chat directly on WhatsApp"
         >
           <div className="relative">
-            <MessageCircle className="w-5 h-5 fill-slate-950 text-emerald-500" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-300 rounded-full animate-ping"></span>
+            <MessageCircle className="w-5 h-5 fill-white text-[#25D366]" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full animate-ping"></span>
           </div>
-          <span className="hidden sm:inline">WhatsApp Consultant</span>
-          <span className="sm:hidden">WhatsApp</span>
+          <span>Chat on WhatsApp</span>
         </a>
       </aside>
 

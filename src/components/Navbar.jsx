@@ -154,18 +154,32 @@ export default function Navbar({
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             
-            {/* 99acres-Style "Post property FREE" White Pill Button */}
+            {/* Highlighted "Post Property FREE" Glowing Button */}
             <button
               onClick={onOpenPostProperty}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-slate-900 font-extrabold text-xs shadow-md hover:bg-slate-100 transition-all cursor-pointer hover:scale-105"
+              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/35 border-2 border-emerald-300 ring-2 ring-emerald-400/40 hover:scale-105 transition-all cursor-pointer"
+              title="Post Your Property (100% Free)"
             >
-              <span>Post property</span>
-              <span className="bg-emerald-600 text-white text-[9px] font-black uppercase px-1.5 py-0.2 rounded">
+              <PlusCircle className="w-4 h-4 text-slate-950 shrink-0" />
+              <span>Post Property</span>
+              <span className="bg-slate-950 text-emerald-300 text-[10px] font-black uppercase px-2 py-0.5 rounded-full animate-pulse tracking-wider">
                 FREE
               </span>
             </button>
+
+            {/* Direct "Chat on WhatsApp" Button */}
+            <a
+              href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property,%20I%20would%20like%20to%20chat%20regarding%20properties.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs shadow-md shadow-emerald-600/30 transition-all hover:scale-105 cursor-pointer border border-emerald-300/40"
+              title="Chat with consultant on WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
+              <span>Chat on WhatsApp</span>
+            </a>
 
             {/* Support / Customer Helpline (Headphone icon) */}
             <a
@@ -202,6 +216,35 @@ export default function Navbar({
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-800 bg-[#071c35] px-4 pt-4 pb-6 space-y-3">
+          
+          {/* Highlighted Mobile Post Property Button */}
+          <button
+            onClick={() => { onOpenPostProperty(); setMobileMenuOpen(false); }}
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-between border-2 border-emerald-300 cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <PlusCircle className="w-5 h-5 text-slate-950" />
+              <span>Post Your Property (Free)</span>
+            </span>
+            <span className="bg-slate-950 text-emerald-300 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full animate-pulse">
+              FREE
+            </span>
+          </button>
+
+          {/* Mobile Direct WhatsApp Chat Button */}
+          <a
+            href={`https://wa.me/${cleanPhone}?text=Hi%20Gurdaspur%20Property,%20I%20would%20like%20to%20chat%20regarding%20properties.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-2.5 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-xs shadow-md flex items-center justify-between cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>Chat on WhatsApp Directly</span>
+            </span>
+            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">🟢 Online</span>
+          </a>
+
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-800">
             <button
               onClick={() => { setActiveFilter("all"); setMobileMenuOpen(false); const el = document.getElementById('listings'); if(el) el.scrollIntoView({ behavior: 'smooth' }); }}

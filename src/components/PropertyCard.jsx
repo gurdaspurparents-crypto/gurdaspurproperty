@@ -180,6 +180,11 @@ export default function PropertyCard({
                 {property.pricePerUnit}
               </div>
             )}
+            {estimatedEmi && (
+              <div className="mt-1 inline-flex items-center gap-1 bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shadow-md">
+                <span>⚡ EMI: {estimatedEmi}</span>
+              </div>
+            )}
           </div>
           <span className="text-[11px] uppercase tracking-wider bg-white/25 backdrop-blur-md px-2.5 py-1 rounded-lg text-white font-extrabold border border-white/25">
             {property.purpose === 'rent' ? 'For Rent' : 'For Sale'}
@@ -260,17 +265,35 @@ export default function PropertyCard({
             )}
           </div>
 
-          {/* Housing.com Signature: Estimated EMI Pill */}
+          {/* Highlighted Housing.com Signature: Estimated EMI Box */}
           {estimatedEmi && (
-            <div className="flex items-center justify-between bg-blue-50/80 border border-blue-200/70 rounded-xl px-3 py-1.5 mb-2.5 text-xs">
-              <div className="flex items-center gap-1.5 text-blue-950 font-bold">
-                <Calculator className="w-3.5 h-3.5 text-[#005ca8]" />
-                <span className="text-slate-600 font-semibold">Est. EMI:</span>
-                <span className="font-extrabold text-[#005ca8]">{estimatedEmi}</span>
+            <div 
+              onClick={() => onSelectProperty(property)}
+              className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white rounded-2xl p-3 mb-3 shadow-md shadow-indigo-600/25 border border-indigo-400/50 flex items-center justify-between cursor-pointer hover:brightness-105 transition-all group/emi"
+              title="Click to view detailed loan & down payment breakdown"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-amber-300 shrink-0">
+                  <Calculator className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-blue-200 leading-none">
+                    Estimated EMI:
+                  </div>
+                  <div className="text-base font-black text-amber-300 font-['Outfit'] mt-0.5 leading-tight">
+                    {estimatedEmi}
+                  </div>
+                </div>
               </div>
-              <span className="text-[10px] text-blue-700 font-semibold bg-blue-100/60 px-2 py-0.5 rounded-md">
-                8.5% • 20 Yrs
-              </span>
+
+              <div className="text-right shrink-0">
+                <span className="text-[10px] font-extrabold bg-white/20 backdrop-blur-xs text-white px-2.5 py-1 rounded-full border border-white/25 inline-block">
+                  8.5% • 20 Yrs
+                </span>
+                <div className="text-[9px] text-blue-200 mt-0.5 font-bold group-hover/emi:text-amber-200 transition-colors">
+                  View Loan Details →
+                </div>
+              </div>
             </div>
           )}
 
@@ -281,7 +304,7 @@ export default function PropertyCard({
             rel="noopener noreferrer"
             className="w-full mb-3 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200/80 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
           >
-            <FileCheck2 className="w-3.5 h-3.5 text-emerald-700" />
+            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
             <span>Request Jamabandi Fard & Video</span>
           </a>
         </div>
@@ -294,20 +317,20 @@ export default function PropertyCard({
             onClick={() => onSelectProperty(property)}
             className="flex-1 py-2.5 px-3 rounded-xl border-2 border-slate-200 text-xs font-bold text-slate-800 hover:bg-slate-100 transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            <span>View Full Details</span>
+            <span>View Details</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
 
-          {/* Direct WhatsApp CTA */}
+          {/* Highlighted Direct WhatsApp Chat CTA */}
           <a
             href={`https://wa.me/${cleanPhone}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all shadow-md shadow-emerald-600/30 flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.03]"
-            title="Inquire on WhatsApp"
+            className="py-2.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-black transition-all shadow-md shadow-emerald-600/30 flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.03]"
+            title="Chat with consultant on WhatsApp"
           >
-            <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
-            <span>WhatsApp</span>
+            <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
+            <span>Chat on WhatsApp</span>
           </a>
 
           {/* Quick Call */}
