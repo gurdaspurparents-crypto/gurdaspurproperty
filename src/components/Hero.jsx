@@ -8,8 +8,10 @@ import {
   ArrowRight, 
   Sparkles,
   X,
+  ShieldCheck,
   FileCheck2,
-  Calculator
+  CheckCircle2,
+  Building2
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
@@ -29,7 +31,7 @@ export default function Hero({
   onOpenPostProperty
 }) {
   const [propertyTypeDropdownOpen, setPropertyTypeDropdownOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('buy'); // 'buy', 'rent', 'new', 'commercial', 'plots', 'projects'
+  const [activeTab, setActiveTab] = useState('buy'); // 'buy', 'rent', 'new', 'commercial', 'plots'
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -48,9 +50,6 @@ export default function Hero({
     } else if (tab === 'plots') {
       setSelectedPurpose('buy');
       setSelectedCategory('plot');
-    } else if (tab === 'projects') {
-      setSelectedPurpose('buy');
-      setSelectedCategory('all');
     }
   };
 
@@ -72,87 +71,69 @@ export default function Hero({
   };
 
   return (
-    <div className="relative bg-[#071a33] text-white">
+    <div className="relative bg-gradient-to-b from-[#071c35] via-[#092548] to-[#0b2d55] text-white">
       
-      {/* 99acres Top Panoramic Architectural Banner */}
-      <div className="relative pt-5 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[220px] sm:min-h-[250px] flex flex-col justify-start">
+      {/* Subtle Ambient Radial Lighting & Pattern */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-500/15 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
         
-        {/* Background Architectural Luxury Skyline with Soft Vignette */}
-        <div className="absolute inset-0 z-0 flex items-center justify-between pointer-events-none">
-          <img 
-            src="/images/properties/gurdaspur_real_kothi.jpg" 
-            alt="Luxury Architecture" 
-            className="w-full h-full object-cover object-left opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071a33]/95 via-[#071a33]/70 to-[#071a33]/90"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#071a33]/40 via-transparent to-[#071a33]"></div>
+        {/* Subtle Architectural Dot Mesh Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)`,
+            backgroundSize: '28px 28px'
+          }}
+        ></div>
+      </div>
+
+      {/* Main Hero Header (Centered, Clean 99acres & Housing.com Style) */}
+      <div className="relative z-10 pt-10 sm:pt-14 pb-20 sm:pb-24 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto">
+        
+        {/* Sleek Trust Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-900/60 border border-blue-400/25 text-blue-200 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm backdrop-blur-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Gurdaspur's #1 Verified Property Platform</span>
         </div>
 
-        {/* Content Container (Matches 99acres Banner Layout) */}
-        <div className="max-w-6xl mx-auto relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 pt-1">
-          
-          {/* Left: Sleek Portal Badge & Title */}
-          <div className="text-left max-w-md">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-900/60 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Gurdaspur Real Estate Portal</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-['Outfit'] text-white tracking-tight">
-              Find Verified Properties in <span className="text-emerald-400">Gurdaspur</span>
-            </h1>
-            <p className="text-[11px] sm:text-xs text-slate-300 mt-1 max-w-sm">
-              Authentic plots, modern villas, commercial SCOs & farm land with verified Tehsil mutation records.
-            </p>
+        {/* Primary Headline */}
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black font-['Outfit'] text-white tracking-tight leading-tight sm:leading-none">
+          Find Your Dream Property in{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">
+            Gurdaspur
+          </span>
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-xs sm:text-sm text-slate-300 mt-3 max-w-2xl mx-auto leading-relaxed">
+          Search 100% Tehsil-verified residential plots, luxury kothis, commercial SCOs, and agricultural farmland with genuine mutation records.
+        </p>
+
+        {/* Quick Micro-Stats / Trust Row */}
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-5 text-[11px] sm:text-xs text-slate-300 font-medium">
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Tehsil Registry Ready</span>
           </div>
-
-          {/* Right: 99acres-Style Elegant Lounge & Tehsil Desk Card */}
-          <div className="bg-[#0b2447]/70 border border-blue-400/25 rounded-2xl p-3.5 sm:p-4 text-left max-w-md w-full shadow-xl backdrop-blur-md">
-            
-            {/* Developer / Desk Emblems */}
-            <div className="flex items-center justify-between text-[10px] font-extrabold text-blue-200 uppercase tracking-wider pb-1.5 border-b border-blue-800/40">
-              <span className="text-amber-400">★ TRAVELX ADVISORY</span>
-              <span className="text-slate-500">•</span>
-              <span>TEHSIL DESK</span>
-              <span className="text-slate-500">•</span>
-              <span className="text-emerald-400">DIRECT VERIFICATION</span>
-            </div>
-
-            <h3 className="text-xs sm:text-sm font-extrabold text-white font-['Outfit'] mt-2">
-              Gurdaspur Property Consultation Center
-            </h3>
-            
-            <p className="text-[10px] sm:text-[11px] text-slate-300 mt-0.5 leading-snug">
-              Travelx, Batala Road (Near Vishal Mega Mart), Gurdaspur, Punjab 143521.<br/>
-              Direct Tehsil registry legal guidance &amp; Punjab collector rate analysis.
-            </p>
-
-            <div className="mt-2.5 flex items-center justify-between pt-1.5 border-t border-blue-800/40 text-xs">
-              <button
-                onClick={onOpenStampDuty}
-                className="px-3 py-1 rounded-lg border border-blue-400/40 hover:bg-blue-600/20 text-blue-200 hover:text-white font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
-              >
-                <span>Check Registry Rates</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-              <a
-                href="tel:+918146526257"
-                className="font-bold text-emerald-400 hover:text-emerald-300 text-[11px]"
-              >
-                Call: +91 81465 26257
-              </a>
-            </div>
-
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Direct Land Mutation (Inteqaal)</span>
           </div>
-
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Zero Brokerage Fraud</span>
+          </div>
         </div>
 
       </div>
 
-      {/* 99ACRES ICONIC FLOATING SEARCH CARD (Overlaps 50% on dark banner, 50% on white section) */}
+      {/* 99ACRES ICONIC FLOATING SEARCH CARD (Centered & Overlapping cleanly) */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-30 -mb-14 sm:-mb-16">
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 text-slate-900 border border-slate-200">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 text-slate-900 border border-slate-200/90 backdrop-blur-sm">
           
-          {/* Top Tab Bar: Buy | Rent | New Launch | Commercial | Plots/Land | Projects | Post Property FREE */}
+          {/* Top Tab Bar: Buy | Rent | New Launch | Commercial | Plots/Land | Post Property FREE */}
           <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4 overflow-x-auto scrollbar-none">
             <div className="flex items-center gap-6 sm:gap-8">
               {[
@@ -160,8 +141,7 @@ export default function Hero({
                 { id: 'rent', label: 'Rent' },
                 { id: 'new', label: 'New Launch', dot: true },
                 { id: 'commercial', label: 'Commercial' },
-                { id: 'plots', label: 'Plots/Land' },
-                { id: 'projects', label: 'Projects' }
+                { id: 'plots', label: 'Plots / Land' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -192,7 +172,7 @@ export default function Hero({
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#005ca8] transition-colors cursor-pointer"
               >
                 <span>Post Property</span>
-                <span className="bg-emerald-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded">
+                <span className="bg-emerald-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-2xs">
                   FREE
                 </span>
               </button>
@@ -279,7 +259,7 @@ export default function Hero({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="text-slate-400 hover:text-slate-600 p-1"
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -294,7 +274,7 @@ export default function Hero({
                 setSearchQuery('Tibri Road');
               }}
               title="Locate Prime Gurdaspur Area"
-              className="hidden sm:flex p-2.5 rounded-xl text-slate-400 hover:text-[#005ca8] hover:bg-blue-50 transition-colors"
+              className="hidden sm:flex p-2.5 rounded-xl text-slate-400 hover:text-[#005ca8] hover:bg-blue-50 transition-colors cursor-pointer"
             >
               <Crosshair className="w-4 h-4" />
             </button>
@@ -307,8 +287,8 @@ export default function Hero({
                 const random = terms[Math.floor(Math.random() * terms.length)];
                 setSearchQuery(random);
               }}
-              title="Voice Search Simulation"
-              className="hidden sm:flex p-2.5 rounded-xl text-slate-400 hover:text-[#005ca8] hover:bg-blue-50 transition-colors mr-2"
+              title="Quick Search Suggestion"
+              className="hidden sm:flex p-2.5 rounded-xl text-slate-400 hover:text-[#005ca8] hover:bg-blue-50 transition-colors mr-2 cursor-pointer"
             >
               <Mic className="w-4 h-4" />
             </button>
