@@ -88,7 +88,12 @@ export default function AdminModal({
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (pinInput === settings.adminPin || pinInput === '1234') {
+    const cleanInput = pinInput.trim();
+    if (
+      cleanInput === settings.adminPin || 
+      cleanInput === '4051#' || 
+      cleanInput === '4051'
+    ) {
       setIsAuthenticated(true);
       setPinError(false);
     } else {
@@ -429,23 +434,23 @@ export default function AdminModal({
                 Admin Authentication
               </h3>
               <p className="text-xs text-slate-500 mb-6">
-                Enter your 4-digit security PIN (Default: <strong>1234</strong>)
+                Enter your security PIN (PIN: <strong>4051#</strong>)
               </p>
 
               <form onSubmit={handleLogin} className="space-y-3">
                 <input
                   type="password"
-                  maxLength="6"
+                  maxLength="8"
                   autoFocus
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
-                  placeholder="PIN code"
+                  placeholder="PIN code (4051#)"
                   className="w-full text-center text-2xl tracking-widest font-mono font-bold bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 text-slate-800 focus:outline-none focus:border-emerald-600"
                 />
 
                 {pinError && (
                   <p className="text-xs text-red-500 font-medium">
-                    Incorrect PIN. Try default: 1234
+                    Incorrect PIN. Try: 4051# or 4051
                   </p>
                 )}
 

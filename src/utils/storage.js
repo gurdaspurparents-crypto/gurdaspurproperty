@@ -12,7 +12,7 @@ export const defaultSettings = {
   officeAddress: "Travelx, Batala Road, Gurdaspur (Near Vishal Mega Mart), Punjab 143521",
   email: "contact@gurdaspurproperty.in",
   workingHours: "9:00 AM - 8:00 PM (Monday - Sunday)",
-  adminPin: "1234"
+  adminPin: "4051#"
 };
 
 export const getProperties = () => {
@@ -64,11 +64,15 @@ export const getSettings = () => {
     if (
       parsed.primaryPhone?.includes("98888") || 
       parsed.whatsappNumber?.includes("98888") ||
-      !parsed.officeAddress?.includes("Travelx")
+      !parsed.officeAddress?.includes("Travelx") ||
+      parsed.adminPin === "1234"
     ) {
       parsed.primaryPhone = defaultSettings.primaryPhone;
       parsed.whatsappNumber = defaultSettings.whatsappNumber;
       parsed.officeAddress = defaultSettings.officeAddress;
+      if (parsed.adminPin === "1234") {
+        parsed.adminPin = "4051#";
+      }
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
     }
     return { ...defaultSettings, ...parsed };
