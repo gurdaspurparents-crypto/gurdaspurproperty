@@ -8,21 +8,21 @@ export default function Testimonials() {
       location: "Bought 10 Marla Plot • Tibri Road",
       review: "Cleanest property transaction of my life. Being an army background person, clear revenue registry and mutation were my highest priorities. Gurdaspur Property Consultants verified all tehsil documents in advance. No hidden broker surprises.",
       rating: 5,
-      avatar: "https://images.unsplash.com/photo-1693675374628-f3b2357a7a62?auto=format&fit=crop&w=400&q=80"
+      avatar: "/images/avatars/major_harpreet_singh.jpg"
     },
     {
       name: "Dr. R.K. Sharma",
       location: "Purchased 12 Marla Kothi • Jail Road",
       review: "Found a dream 4 BHK house near the Civil Hospital. They helped me negotiate directly with the owner and facilitated an SBI home loan sanction within 10 days. Outstanding professional work in Gurdaspur.",
       rating: 5,
-      avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80"
+      avatar: "/images/avatars/dr_rk_sharma.jpg"
     },
     {
       name: "Balwinder Singh Dhillon",
       location: "NRI Investor • Surrey, BC (Canada)",
       review: "Sitting in Vancouver, I was worried about illegal encroachment on our 8 Kanal land on Trimmu Road. This team visited the site, gave me drone video proof, and got the boundary wall done. 100% trustworthy for overseas Punjabis.",
       rating: 5,
-      avatar: "https://images.unsplash.com/photo-1639116123812-515f32a01175?auto=format&fit=crop&w=400&q=80"
+      avatar: "/images/avatars/balwinder_singh_nri.jpg"
     }
   ];
 

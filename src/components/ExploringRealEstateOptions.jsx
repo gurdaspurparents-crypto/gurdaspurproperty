@@ -88,7 +88,7 @@ export default function ExploringRealEstateOptions({
       subtitle: "Drone & Jamabandi Care",
       badge: "NRI",
       badgeColor: "bg-emerald-600",
-      image: "https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/nri_drone_reconnaissance.jpg",
       action: () => {
         const el = document.getElementById('nri-desk');
         if (el) el.scrollIntoView({ behavior: 'smooth' });

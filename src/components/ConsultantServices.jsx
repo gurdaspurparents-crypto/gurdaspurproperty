@@ -96,7 +96,7 @@ export default function ConsultantServices({ settings }) {
             {/* Left: Office Photo & Ambience */}
             <div className="lg:col-span-5 relative min-h-[260px] sm:min-h-[300px] overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1000&q=85" 
+                src="/images/properties/gurdaspur_consultant_office.jpg" 
                 alt="Travelx Gurdaspur Property Office" 
                 className="w-full h-full object-cover object-center filter brightness-90 hover:scale-105 transition-transform duration-700"
               />

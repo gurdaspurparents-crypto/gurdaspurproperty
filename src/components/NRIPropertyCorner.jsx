@@ -91,7 +91,7 @@ export default function NRIPropertyCorner({ settings }) {
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
             <div className="lg:col-span-6 relative h-64 sm:h-80 overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1200&q=85" 
+                src="/images/properties/nri_drone_reconnaissance.jpg" 
                 alt="NRI Drone Inspection in Gurdaspur"
                 className="w-full h-full object-cover brightness-90 hover:scale-105 transition-transform duration-700" 
               />
