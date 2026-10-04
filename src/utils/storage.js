@@ -65,12 +65,13 @@ export const getSettings = () => {
       parsed.primaryPhone?.includes("98888") || 
       parsed.whatsappNumber?.includes("98888") ||
       !parsed.officeAddress?.includes("Travelx") ||
-      parsed.adminPin === "1234"
+      parsed.adminPin === "1234" ||
+      parsed.adminPin === "4051"
     ) {
       parsed.primaryPhone = defaultSettings.primaryPhone;
       parsed.whatsappNumber = defaultSettings.whatsappNumber;
       parsed.officeAddress = defaultSettings.officeAddress;
-      if (parsed.adminPin === "1234") {
+      if (parsed.adminPin === "1234" || parsed.adminPin === "4051") {
         parsed.adminPin = "4051#";
       }
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));

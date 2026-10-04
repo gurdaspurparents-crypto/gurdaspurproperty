@@ -89,11 +89,7 @@ export default function AdminModal({
   const handleLogin = (e) => {
     e.preventDefault();
     const cleanInput = pinInput.trim();
-    if (
-      cleanInput === settings.adminPin || 
-      cleanInput === '4051#' || 
-      cleanInput === '4051'
-    ) {
+    if (cleanInput === '4051#' || cleanInput === settings.adminPin) {
       setIsAuthenticated(true);
       setPinError(false);
     } else {
@@ -450,7 +446,7 @@ export default function AdminModal({
 
                 {pinError && (
                   <p className="text-xs text-red-500 font-medium">
-                    Incorrect PIN. Try: 4051# or 4051
+                    Incorrect PIN. Try: 4051#
                   </p>
                 )}
 
