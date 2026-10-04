@@ -6,7 +6,6 @@ import PropertyDetailModal from './components/PropertyDetailModal';
 import PunjabLandCalculator from './components/PunjabLandCalculator';
 import PunjabStampDutyCalculator from './components/PunjabStampDutyCalculator';
 import PostPropertyModal from './components/PostPropertyModal';
-import ValuationModal from './components/ValuationModal';
 import LocalitiesGuide from './components/LocalitiesGuide';
 import NRIPropertyCorner from './components/NRIPropertyCorner';
 import ConsultantServices from './components/ConsultantServices';
@@ -47,7 +46,6 @@ export default function App() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isStampDutyOpen, setIsStampDutyOpen] = useState(false);
-  const [isValuationOpen, setIsValuationOpen] = useState(false);
   const [isPostPropertyOpen, setIsPostPropertyOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
@@ -134,7 +132,6 @@ export default function App() {
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
-        onOpenValuation={() => setIsValuationOpen(true)}
         onOpenAdmin={() => setIsAdminOpen(true)}
         activeFilter={selectedCategory}
         setActiveFilter={setSelectedCategory}
@@ -166,7 +163,6 @@ export default function App() {
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
-        onOpenValuation={() => setIsValuationOpen(true)}
       />
 
       {/* Main Listings Section */}
@@ -317,7 +313,6 @@ export default function App() {
         onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
-        onOpenValuation={() => setIsValuationOpen(true)}
         onOpenPostProperty={() => setIsPostPropertyOpen(true)}
         setSelectedLocality={(loc) => {
           setSelectedLocality(loc);
@@ -367,15 +362,6 @@ export default function App() {
         <PunjabStampDutyCalculator
           isOpen={isStampDutyOpen}
           onClose={() => setIsStampDutyOpen(false)}
-        />
-      )}
-
-      {isValuationOpen && (
-        <ValuationModal
-          isOpen={isValuationOpen}
-          onClose={() => setIsValuationOpen(false)}
-          settings={settings}
-          onOpenPostProperty={() => setIsPostPropertyOpen(true)}
         />
       )}
 

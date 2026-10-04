@@ -16,7 +16,6 @@ export default function Footer({
   onOpenAdmin, 
   onOpenCalculator, 
   onOpenStampDuty,
-  onOpenValuation,
   onOpenPostProperty,
   setSelectedLocality
 }) {
@@ -89,11 +88,6 @@ export default function Footer({
               Services & Tools
             </h4>
             <ul className="space-y-2">
-              <li>
-                <button onClick={onOpenValuation} className="text-amber-400 hover:text-amber-300 font-semibold text-left cursor-pointer">
-                  Gurdaspur PropWorth™ Valuation
-                </button>
-              </li>
               <li>
                 <button onClick={onOpenCalculator} className="text-emerald-400 hover:text-emerald-300 font-semibold text-left cursor-pointer">
                   Punjab Land Unit Calculator

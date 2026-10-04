@@ -16,8 +16,7 @@ export default function ExploringRealEstateOptions({
   onSelectPurpose, 
   onOpenPostProperty, 
   onOpenStampDuty,
-  onOpenCalculator,
-  onOpenValuation
+  onOpenCalculator
 }) {
   const options = [
     {
@@ -73,15 +72,6 @@ export default function ExploringRealEstateOptions({
         const el = document.getElementById('listings');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }
-    },
-    {
-      id: "propworth",
-      title: "PropWorth™ Valuation",
-      subtitle: "Instant Price Estimate",
-      badge: "HOT",
-      badgeColor: "bg-amber-500",
-      image: "/images/properties/gurdaspur_consultant_office.jpg",
-      action: onOpenValuation
     },
     {
       id: "insights",
