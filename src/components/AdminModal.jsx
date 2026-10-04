@@ -19,11 +19,14 @@ import {
   Video,
   Play,
   Film,
-  ExternalLink
+  ExternalLink,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { 
   getLeads, 
   deleteLead, 
+  updateLead,
   saveProperties, 
   saveSettings, 
   resetToDefault 
@@ -43,6 +46,8 @@ export default function AdminModal({
   const [pinError, setPinError] = useState(false);
   const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'leads' | 'settings'
   const [leads, setLeads] = useState([]);
+  const [editingLeadId, setEditingLeadId] = useState(null);
+  const [editLeadForm, setEditLeadForm] = useState(null);
 
   // Property Form State
   const [showPropertyForm, setShowPropertyForm] = useState(false);
@@ -230,9 +235,143 @@ export default function AdminModal({
     setEditingPropertyId(null);
   };
 
-  const handleDeleteLead = (id) => {
-    deleteLead(id);
+  const compressImageFile = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          resolve(dataUrl);
+        };
+        img.onerror = () => resolve(event.target.result);
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleDeleteLeadPhoto = (leadId, photoIndex, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to delete Photo #${photoIndex + 1}?`)) {
+      const currentLead = leads.find(l => l.id === leadId);
+      if (!currentLead) return;
+      const updatedImages = (currentLead.images || []).filter((_, idx) => idx !== photoIndex);
+      updateLead(leadId, { images: updatedImages });
+      setLeads(getLeads());
+    }
+  };
+
+  const handleAddPhotosToLead = async (leadId, e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const currentLead = leads.find(l => l.id === leadId);
+    const existingImages = currentLead?.images || [];
+    const remainingSlots = 15 - existingImages.length;
+    if (remainingSlots <= 0) {
+      alert("Maximum 15 photos allowed per listing.");
+      return;
+    }
+
+    const selectedFiles = files.slice(0, remainingSlots);
+    const compressedList = await Promise.all(selectedFiles.map(compressImageFile));
+    const validCompressed = compressedList.filter(Boolean);
+
+    const updatedImages = [...existingImages, ...validCompressed];
+    updateLead(leadId, { images: updatedImages });
     setLeads(getLeads());
+    e.target.value = '';
+  };
+
+  const handleDeleteLead = (id) => {
+    if (window.confirm("Are you sure you want to permanently delete this lead?")) {
+      deleteLead(id);
+      setLeads(getLeads());
+    }
+  };
+
+  const handleStartEditLead = (lead) => {
+    setEditingLeadId(lead.id);
+    setEditLeadForm({
+      name: lead.name || '',
+      phone: lead.phone || '',
+      ownerRole: lead.ownerRole || 'Property Owner',
+      purpose: lead.purpose || 'sell',
+      category: lead.category || 'plot',
+      locality: lead.locality || 'Tibri Road',
+      subArea: lead.subArea || '',
+      size: lead.size || '',
+      dimensions: lead.dimensions || '',
+      price: lead.price || '',
+      isNegotiable: lead.isNegotiable !== false,
+      exactLocation: lead.exactLocation || '',
+      registryStatus: lead.registryStatus || '',
+      notes: lead.notes || ''
+    });
+  };
+
+  const handleSaveEditLead = (leadId, e) => {
+    e.preventDefault();
+    updateLead(leadId, editLeadForm);
+    setLeads(getLeads());
+    setEditingLeadId(null);
+    setEditLeadForm(null);
+  };
+
+  const handleAddPhotosToPropForm = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    const currentImages = propForm.images && propForm.images.length > 0
+      ? propForm.images
+      : (propForm.imageUrl ? [propForm.imageUrl] : []);
+    const compressedList = await Promise.all(files.map(compressImageFile));
+    const valid = compressedList.filter(Boolean);
+    const updated = [...currentImages, ...valid];
+    setPropForm({
+      ...propForm,
+      imageUrl: updated[0] || propForm.imageUrl,
+      images: updated
+    });
+    e.target.value = '';
+  };
+
+  const handleDeletePropFormPhoto = (index, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const currentImages = propForm.images && propForm.images.length > 0
+      ? propForm.images
+      : (propForm.imageUrl ? [propForm.imageUrl] : []);
+    const updated = currentImages.filter((_, idx) => idx !== index);
+    setPropForm({
+      ...propForm,
+      imageUrl: updated[0] || '',
+      images: updated
+    });
   };
 
   const handleSaveSettings = (e) => {
@@ -551,6 +690,50 @@ export default function AdminModal({
                           </div>
                         </div>
 
+                        {/* Listing Gallery Photos Upload & Delete */}
+                        <div className="space-y-2 p-3 bg-white rounded-xl border border-slate-200">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-[11px] font-bold uppercase text-slate-600 flex items-center gap-1.5">
+                              <Camera className="w-3.5 h-3.5 text-blue-600" />
+                              <span>Listing Gallery Photos ({(propForm.images || []).length} Photos)</span>
+                            </span>
+                            <label className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-xs">
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>+ Add Photos from Device</span>
+                              <input 
+                                type="file" 
+                                multiple 
+                                accept="image/*" 
+                                onChange={handleAddPhotosToPropForm} 
+                                className="hidden" 
+                              />
+                            </label>
+                          </div>
+
+                          {(propForm.images && propForm.images.length > 0) ? (
+                            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 pt-1">
+                              {propForm.images.map((img, idx) => (
+                                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-300 bg-slate-900 group shadow-xs">
+                                  <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                                  <span className="absolute bottom-0.5 left-0.5 bg-black/75 text-[8px] text-white px-1 rounded font-mono">
+                                    {idx === 0 ? 'Cover' : `#${idx + 1}`}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleDeletePropFormPhoto(idx, e)}
+                                    className="absolute top-0.5 right-0.5 p-1 bg-red-600 hover:bg-red-700 text-white rounded-md cursor-pointer transition-transform hover:scale-110"
+                                    title="Delete photo"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-slate-400 italic">No gallery photos uploaded yet. Click "+ Add Photos from Device" above or enter a cover URL.</p>
+                          )}
+                        </div>
+
                         <div>
                           <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Description</label>
                           <textarea
@@ -720,34 +903,91 @@ export default function AdminModal({
                             )}
 
                             {/* Customer Uploaded Photos Preview (up to 15 photos) */}
-                            {lead.images && lead.images.length > 0 && (
-                              <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                <div className="text-[10px] uppercase font-bold text-slate-600 flex items-center justify-between">
-                                  <div className="flex items-center gap-1.5">
-                                    <Camera className="w-3.5 h-3.5 text-blue-600" />
-                                    <span>Customer Uploaded Photos ({lead.images.length} / 15 Photos):</span>
-                                  </div>
-                                  <span className="text-[10px] text-slate-400">Click photo to view full resolution</span>
+                            <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                              <div className="text-[10px] uppercase font-bold text-slate-600 flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5">
+                                  <Camera className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>Customer Uploaded Photos ({(lead.images || []).length} / 15 Photos):</span>
                                 </div>
-                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 pt-1">
-                                  {lead.images.map((img, i) => (
-                                    <a 
-                                      key={i} 
-                                      href={img} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer" 
-                                      className="relative aspect-square rounded-lg overflow-hidden border border-slate-300 block shadow-2xs hover:scale-105 transition-transform bg-slate-900 group"
-                                      title={`View Photo #${i + 1}`}
-                                    >
-                                      <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
-                                      <span className="absolute bottom-0.5 right-0.5 bg-black/75 text-[8px] text-white px-1 rounded font-mono">
-                                        #{i + 1}
-                                      </span>
-                                    </a>
-                                  ))}
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-slate-400 hidden sm:inline">Click thumbnail to view full resolution</span>
+                                  <label 
+                                    htmlFor={`add-photos-${lead.id}`}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer shadow-xs transition-colors"
+                                    title="Add more photos from device"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>+ Add Photos</span>
+                                  </label>
+                                  <input
+                                    type="file"
+                                    id={`add-photos-${lead.id}`}
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => handleAddPhotosToLead(lead.id, e)}
+                                    className="hidden"
+                                  />
                                 </div>
                               </div>
-                            )}
+
+                              {lead.images && lead.images.length > 0 ? (
+                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 pt-1">
+                                  {lead.images.map((img, i) => (
+                                    <div 
+                                      key={i} 
+                                      className="relative aspect-square rounded-lg overflow-hidden border border-slate-300 shadow-2xs group bg-slate-900"
+                                    >
+                                      <a 
+                                        href={img} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="block w-full h-full"
+                                        title={`View Photo #${i + 1} in full resolution`}
+                                      >
+                                        <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                      </a>
+                                      
+                                      <span className="absolute bottom-0.5 left-0.5 bg-black/75 text-[8px] text-white px-1 rounded font-mono">
+                                        #{i + 1}
+                                      </span>
+
+                                      {/* Delete Photo Button (Top Right) */}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => handleDeleteLeadPhoto(lead.id, i, e)}
+                                        className="absolute top-0.5 right-0.5 p-1 bg-red-600/90 hover:bg-red-700 text-white rounded-md shadow-md cursor-pointer transition-all hover:scale-110"
+                                        title={`Delete Photo #${i + 1}`}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+
+                                  {/* Add photo card inside grid if under limit */}
+                                  {(lead.images || []).length < 15 && (
+                                    <label
+                                      htmlFor={`add-photos-${lead.id}`}
+                                      className="aspect-square rounded-lg border-2 border-dashed border-emerald-400 bg-emerald-50/60 hover:bg-emerald-100 flex flex-col items-center justify-center text-emerald-800 cursor-pointer transition-all gap-0.5 text-center p-1"
+                                      title="Add photo"
+                                    >
+                                      <Plus className="w-4 h-4 text-emerald-600" />
+                                      <span className="text-[9px] font-black uppercase leading-none">Add</span>
+                                    </label>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="py-4 text-center border-2 border-dashed border-slate-200 rounded-xl bg-white">
+                                  <p className="text-[11px] text-slate-500 mb-1.5">No photos attached yet.</p>
+                                  <label
+                                    htmlFor={`add-photos-${lead.id}`}
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>+ Upload Property Photos</span>
+                                  </label>
+                                </div>
+                              )}
+                            </div>
 
                             {/* Customer Video Walkthrough Section */}
                             {(lead.videoUrl || lead.videoFile) ? (
@@ -813,6 +1053,101 @@ export default function AdminModal({
                               </div>
                             )}
 
+                            {/* Inline Edit Form (when active) */}
+                            {editingLeadId === lead.id && editLeadForm && (
+                              <form onSubmit={(e) => handleSaveEditLead(lead.id, e)} className="p-4 bg-amber-50/70 rounded-xl border border-amber-200 space-y-3">
+                                <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+                                  <h4 className="text-xs font-bold text-amber-900 uppercase">Edit Lead Details ({lead.id})</h4>
+                                  <button type="button" onClick={() => setEditingLeadId(null)} className="text-xs text-slate-500 hover:text-slate-800 cursor-pointer">Cancel</button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                  <div>
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Owner Name</label>
+                                    <input 
+                                      type="text" 
+                                      value={editLeadForm.name} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, name: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                      required 
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Phone Number</label>
+                                    <input 
+                                      type="text" 
+                                      value={editLeadForm.phone} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, phone: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                      required 
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Expected Price (₹)</label>
+                                    <input 
+                                      type="text" 
+                                      value={editLeadForm.price} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, price: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                      required 
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Size & Unit</label>
+                                    <input 
+                                      type="text" 
+                                      value={editLeadForm.size} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, size: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                      required 
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Locality</label>
+                                    <select 
+                                      value={editLeadForm.locality} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, locality: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium"
+                                    >
+                                      {GURDASPUR_LOCALITIES.filter(l => l !== 'All Localities').map(l => (
+                                        <option key={l} value={l}>{l}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Colony / Landmark</label>
+                                    <input 
+                                      type="text" 
+                                      value={editLeadForm.subArea} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, subArea: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                    />
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Private Location (House #, Khasra #)</label>
+                                    <input 
+                                      type="text" 
+                                      value={editLeadForm.exactLocation} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, exactLocation: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                    />
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Description / Notes</label>
+                                    <textarea 
+                                      rows="2" 
+                                      value={editLeadForm.notes} 
+                                      onChange={(e) => setEditLeadForm({ ...editLeadForm, notes: e.target.value })} 
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium" 
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex justify-end gap-2 pt-1">
+                                  <button type="button" onClick={() => setEditingLeadId(null)} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 cursor-pointer">Cancel</button>
+                                  <button type="submit" className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">Save Changes</button>
+                                </div>
+                              </form>
+                            )}
+
                             {/* Action Row */}
                             <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                               <div className="flex items-center gap-2">
@@ -835,22 +1170,35 @@ export default function AdminModal({
                                 </a>
                               </div>
 
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <button
+                                  type="button"
+                                  onClick={() => handleStartEditLead(lead)}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 font-bold text-xs transition-colors cursor-pointer"
+                                  title="Edit lead details"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </button>
+
+                                <button
+                                  type="button"
                                   onClick={() => handleConvertLeadToProperty(lead)}
                                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-[#005ca8] hover:bg-blue-100 border border-blue-200 font-bold text-xs transition-colors cursor-pointer"
                                   title="Add to website without customer phone or private house number"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
-                                  <span>Publish Sanitized to Website</span>
+                                  <span>+ Publish to Website</span>
                                 </button>
 
                                 <button
+                                  type="button"
                                   onClick={() => handleDeleteLead(lead.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                  title="Delete Lead"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-bold text-xs transition-colors cursor-pointer"
+                                  title="Permanently delete this lead"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Delete Lead</span>
                                 </button>
                               </div>
                             </div>

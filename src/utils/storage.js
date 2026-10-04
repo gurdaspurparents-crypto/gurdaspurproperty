@@ -111,6 +111,30 @@ export const addLead = (lead) => {
   }
 };
 
+export const saveLeads = (leads) => {
+  try {
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
+  } catch (e) {
+    console.error("Error saving leads", e);
+  }
+};
+
+export const updateLead = (leadId, updatedFields) => {
+  try {
+    const leads = getLeads().map((l) => {
+      if (l.id === leadId) {
+        return { ...l, ...updatedFields };
+      }
+      return l;
+    });
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
+    return leads;
+  } catch (e) {
+    console.error("Error updating lead", e);
+    return getLeads();
+  }
+};
+
 export const deleteLead = (leadId) => {
   try {
     const leads = getLeads().filter((l) => l.id !== leadId);
