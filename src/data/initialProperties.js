@@ -23,9 +23,9 @@ export const initialProperties = [
       "Close to Military Cantt & Market"
     ],
     images: [
-      "/images/properties/punjab_residential_plots.jpg",
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=85",
-      "https://images.unsplash.com/photo-1524813686514-a57563d77d61?auto=format&fit=crop&w=1200&q=85"
+      "https://images.unsplash.com/photo-1524813686514-a57563d77d61?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=85"
     ],
     badge: "Hot Deal",
     verified: true,
@@ -61,10 +61,10 @@ export const initialProperties = [
       "Teakwood Doors & UPVC Windows"
     ],
     images: [
-      "/images/properties/luxury_kothi_main.jpg",
-      "/images/properties/luxury_living_room.jpg",
-      "/images/properties/indian_modular_kitchen.jpg",
-      "/images/properties/indian_master_bedroom.jpg"
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85"
     ],
     badge: "Luxury Villa",
     verified: true,
@@ -97,8 +97,8 @@ export const initialProperties = [
       "Immediate High Rental Yield Potential"
     ],
     images: [
-      "/images/properties/punjab_commercial_sco.jpg",
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=85"
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85"
     ],
     badge: "High ROI Commercial",
     verified: true,
@@ -166,9 +166,8 @@ export const initialProperties = [
       "Wide Balcony with Scenic Views"
     ],
     images: [
-      "/images/properties/budget_kothi_punjab.jpg",
-      "/images/properties/luxury_living_room.jpg",
-      "/images/properties/indian_master_bedroom.jpg"
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85"
     ],
     badge: "Ready to Move",
     verified: true,
@@ -200,8 +199,8 @@ export const initialProperties = [
       "Clean Revenue Registry Title"
     ],
     images: [
-      "/images/properties/punjab_commercial_sco.jpg",
-      "/images/properties/punjab_residential_plots.jpg"
+      "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=85"
     ],
     badge: "Highway Commercial",
     verified: true,
@@ -233,9 +232,8 @@ export const initialProperties = [
       "24-Hour Municipal Water Supply"
     ],
     images: [
-      "/images/properties/luxury_living_room.jpg",
-      "/images/properties/indian_master_bedroom.jpg",
-      "/images/properties/budget_kothi_punjab.jpg"
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=85"
     ],
     badge: "VIP Rental",
     verified: true,
@@ -297,7 +295,7 @@ export const LOCALITY_TRENDS = [
     highlights: "Near Army Cantt, wide 35-40ft roads, clean gated societies, top English schools.",
     color: "from-emerald-500/20 to-teal-500/5",
     accent: "text-emerald-700 bg-emerald-100",
-    image: "/images/properties/punjab_residential_plots.jpg"
+    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"
   },
   {
     name: "Jail Road (VIP Belt)",
@@ -307,7 +305,7 @@ export const LOCALITY_TRENDS = [
     highlights: "Close to DC Office, District Courts, Civil Hospital, and high-end residential bungalows.",
     color: "from-blue-500/20 to-indigo-500/5",
     accent: "text-blue-700 bg-blue-100",
-    image: "/images/properties/luxury_kothi_main.jpg"
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"
   },
   {
     name: "Dinanagar Bypass (NH-54)",
@@ -317,7 +315,7 @@ export const LOCALITY_TRENDS = [
     highlights: "Four-lane highway connectivity to Amritsar-Pathankot, ideal for resorts, godowns & showrooms.",
     color: "from-amber-500/20 to-orange-500/5",
     accent: "text-amber-700 bg-amber-100",
-    image: "/images/properties/punjab_commercial_sco.jpg"
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80"
   },
   {
     name: "Trimmu Road & Outskirts",
