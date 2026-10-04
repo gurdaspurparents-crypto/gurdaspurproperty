@@ -5,13 +5,7 @@ import {
   Crosshair, 
   Mic, 
   ChevronDown, 
-  ArrowRight, 
-  Sparkles,
-  X,
-  ShieldCheck,
-  FileCheck2,
-  CheckCircle2,
-  Building2
+  X 
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
@@ -71,69 +65,13 @@ export default function Hero({
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-[#071c35] via-[#092548] to-[#0b2d55] text-white">
-      
-      {/* Subtle Ambient Radial Lighting & Pattern */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-500/15 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
+    <div className="bg-[#071c35] text-white py-6 sm:py-8 border-b border-slate-800">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
-        {/* Subtle Architectural Dot Mesh Grid */}
-        <div 
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)`,
-            backgroundSize: '28px 28px'
-          }}
-        ></div>
-      </div>
-
-      {/* Main Hero Header (Centered, Clean 99acres & Housing.com Style) */}
-      <div className="relative z-10 pt-10 sm:pt-14 pb-20 sm:pb-24 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto">
-        
-        {/* Sleek Trust Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-900/60 border border-blue-400/25 text-blue-200 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm backdrop-blur-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Gurdaspur's #1 Verified Property Platform</span>
-        </div>
-
-        {/* Primary Headline */}
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black font-['Outfit'] text-white tracking-tight leading-tight sm:leading-none">
-          Find Your Dream Property in{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">
-            Gurdaspur
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-xs sm:text-sm text-slate-300 mt-3 max-w-2xl mx-auto leading-relaxed">
-          Search 100% Tehsil-verified residential plots, luxury kothis, commercial SCOs, and agricultural farmland with genuine mutation records.
-        </p>
-
-        {/* Quick Micro-Stats / Trust Row */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-5 text-[11px] sm:text-xs text-slate-300 font-medium">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span>Tehsil Registry Ready</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span>Direct Land Mutation (Inteqaal)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span>Zero Brokerage Fraud</span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* 99ACRES ICONIC FLOATING SEARCH CARD (Centered & Overlapping cleanly) */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-30 -mb-14 sm:-mb-16">
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 text-slate-900 border border-slate-200/90 backdrop-blur-sm">
+        {/* 99ACRES ICONIC SEARCH CARD */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-5 text-slate-900 border border-slate-200">
           
-          {/* Top Tab Bar: Buy | Rent | New Launch | Commercial | Plots/Land | Post Property FREE */}
+          {/* Top Tab Bar: Buy | Rent | New Launch | Commercial | Plots / Land | Post Property FREE */}
           <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4 overflow-x-auto scrollbar-none">
             <div className="flex items-center gap-6 sm:gap-8">
               {[
@@ -305,7 +243,6 @@ export default function Hero({
 
         </div>
       </div>
-
     </div>
   );
 }
