@@ -430,7 +430,7 @@ export default function AdminModal({
                 Admin Authentication
               </h3>
               <p className="text-xs text-slate-500 mb-6">
-                Enter your security PIN (PIN: <strong>4051#</strong>)
+                Enter your authorized security PIN
               </p>
 
               <form onSubmit={handleLogin} className="space-y-3">
@@ -440,13 +440,13 @@ export default function AdminModal({
                   autoFocus
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
-                  placeholder="PIN code (4051#)"
+                  placeholder="••••••••"
                   className="w-full text-center text-2xl tracking-widest font-mono font-bold bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 text-slate-800 focus:outline-none focus:border-emerald-600"
                 />
 
                 {pinError && (
                   <p className="text-xs text-red-500 font-medium">
-                    Incorrect PIN. Try: 4051#
+                    Incorrect security PIN. Please try again.
                   </p>
                 )}
 
