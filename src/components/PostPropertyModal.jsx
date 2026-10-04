@@ -20,14 +20,17 @@ import {
   Film, 
   ExternalLink, 
   FileVideo, 
-  Loader2 
+  Loader2,
+  Mail 
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
+import { sendPropertyPostNotification } from '../utils/notificationService';
 
 export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoFile, setVideoFile] = useState(null); // { name, size, dataUrl }
   const [formData, setFormData] = useState({
     // Basic Property Details
@@ -151,7 +154,7 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
     setVideoFile(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.sellerName || !formData.phone) {
       alert("Please enter your full name and phone number.");
@@ -162,8 +165,9 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       return;
     }
 
-    // Save lead into Admin local database
-    const saved = addLead({
+    setIsSubmitting(true);
+
+    const leadPayload = {
       name: formData.sellerName,
       phone: formData.phone,
       type: 'seller_listing',
@@ -185,8 +189,18 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       videoUrl: formData.videoUrl,
       videoFile: videoFile ? { name: videoFile.name, size: videoFile.size, dataUrl: videoFile.dataUrl } : null,
       isConfidential: true
-    });
+    };
 
+    // Save lead into Admin local database
+    const saved = addLead(leadPayload);
+
+    // Dispatch email alert to navkiransharma@gmail.com
+    await sendPropertyPostNotification(
+      leadPayload, 
+      settings?.email || 'navkiransharma@gmail.com'
+    );
+
+    setIsSubmitting(false);
     setLastSubmittedLead(saved);
     setSubmitted(true);
   };
@@ -274,9 +288,21 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
               <h3 className="text-2xl font-black text-slate-900 font-['Outfit'] mt-3">
                 Property Successfully Submitted!
               </h3>
+
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 my-4 max-w-md mx-auto text-xs text-emerald-950 text-left flex items-start gap-3">
+                <Mail className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-extrabold text-emerald-900">
+                    Instant Email Alert Sent to Admin
+                  </div>
+                  <div className="text-[11px] text-emerald-800 mt-0.5">
+                    Your complete listing specifications have been forwarded to <strong>navkiransharma@gmail.com</strong> and saved in the priority verification queue.
+                  </div>
+                </div>
+              </div>
               
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto mt-2 mb-6 leading-relaxed">
-                Thank you, <strong>{formData.sellerName}</strong>! Your property details have been received. Our verified consultant team will review the details and connect with you shortly.
+                Thank you, <strong>{formData.sellerName}</strong>! Our advisory desk will review your property and connect with you shortly.
               </p>
 
               <div className="space-y-3 max-w-md mx-auto">
@@ -806,10 +832,20 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+                  disabled={isSubmitting}
+                  className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] disabled:opacity-75"
                 >
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span>Post Property Listing (FREE)</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Submitting & Sending Email Alert...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>Post Property Listing (FREE)</span>
+                    </>
+                  )}
                 </button>
               </div>
 
