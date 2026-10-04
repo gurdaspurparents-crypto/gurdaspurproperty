@@ -41,7 +41,7 @@ export default function Navbar({
 
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18 gap-2">
+        <div className="flex items-center justify-between h-18 sm:h-20 gap-3">
           
           {/* Left: Brand Logo & City Selector Dropdown */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
@@ -51,7 +51,7 @@ export default function Navbar({
               <img 
                 src="/logo.svg" 
                 alt="Gurdaspur Property" 
-                className="h-10 sm:h-11 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform" 
+                className="h-12 sm:h-14 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform drop-shadow-[0_2px_8px_rgba(16,185,129,0.2)]" 
               />
             </a>
 
