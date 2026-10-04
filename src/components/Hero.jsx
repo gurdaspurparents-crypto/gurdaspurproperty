@@ -80,7 +80,7 @@ export default function Hero({
         {/* Background Architectural Luxury Skyline with Soft Vignette */}
         <div className="absolute inset-0 z-0 flex items-center justify-between pointer-events-none">
           <img 
-            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=85" 
+            src="/images/properties/gurdaspur_real_kothi.jpg" 
             alt="Luxury Architecture" 
             className="w-full h-full object-cover object-left opacity-30"
           />

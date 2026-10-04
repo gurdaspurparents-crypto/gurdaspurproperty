@@ -1,6 +1,6 @@
 import { initialProperties } from "../data/initialProperties";
 
-const PROPERTIES_KEY = "gp_properties_v1";
+const PROPERTIES_KEY = "gp_properties_v2";
 const LEADS_KEY = "gp_seller_leads_v1";
 const INQUIRIES_KEY = "gp_inquiries_v1";
 const SETTINGS_KEY = "gp_settings_v1";
@@ -19,10 +19,29 @@ export const getProperties = () => {
   try {
     const data = localStorage.getItem(PROPERTIES_KEY);
     if (!data) {
-      localStorage.setItem(PROPERTIES_KEY, JSON.stringify(initialProperties));
-      return initialProperties;
+      const oldData = localStorage.getItem("gp_properties_v1");
+      let customProps = [];
+      if (oldData) {
+        try {
+          const parsedOld = JSON.parse(oldData);
+          customProps = parsedOld.filter(p => !initialProperties.some(ip => ip.id === p.id));
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      const merged = [...initialProperties, ...customProps];
+      localStorage.setItem(PROPERTIES_KEY, JSON.stringify(merged));
+      return merged;
     }
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    const updated = parsed.map(p => {
+      const initMatch = initialProperties.find(ip => ip.id === p.id);
+      if (initMatch) {
+        return { ...p, images: initMatch.images };
+      }
+      return p;
+    });
+    return updated;
   } catch (e) {
     console.error("Error reading properties from storage", e);
     return initialProperties;

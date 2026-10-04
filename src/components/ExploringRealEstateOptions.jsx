@@ -23,7 +23,7 @@ export default function ExploringRealEstateOptions({
       id: "buying",
       title: "Buying a home",
       subtitle: "Villas & Houses",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/gurdaspur_real_kothi.jpg",
       action: () => {
         onSelectPurpose("buy");
         onSelectCategory("kothi");
@@ -35,7 +35,7 @@ export default function ExploringRealEstateOptions({
       id: "renting",
       title: "Renting a home",
       subtitle: "Independent Floors",
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/gurdaspur_drawing_room.jpg",
       action: () => {
         onSelectPurpose("rent");
         const el = document.getElementById('listings');
@@ -48,7 +48,7 @@ export default function ExploringRealEstateOptions({
       subtitle: "Commercial SCO & Plots",
       badge: "NEW",
       badgeColor: "bg-rose-500",
-      image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/gurdaspur_commercial_sco.jpg",
       action: () => {
         onSelectCategory("commercial");
         const el = document.getElementById('listings');
@@ -59,14 +59,14 @@ export default function ExploringRealEstateOptions({
       id: "sell",
       title: "Sell/Rent your property",
       bannerText: "Sell faster at the right price!",
-      image: "https://images.unsplash.com/photo-1623510848605-3cf32d03059e?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/sell_property_handover.jpg",
       action: onOpenPostProperty
     },
     {
       id: "plots",
       title: "Plots/Land",
       subtitle: "Residential & Agri",
-      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/gurdaspur_plotted_colony.jpg",
       action: () => {
         onSelectCategory("plot");
         const el = document.getElementById('listings');
@@ -79,7 +79,7 @@ export default function ExploringRealEstateOptions({
       subtitle: "Stamp Duty & Collector Rates",
       badge: "NEW",
       badgeColor: "bg-amber-500",
-      image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=500&q=80",
+      image: "/images/properties/punjab_stamp_duty_deed.jpg",
       action: onOpenStampDuty
     },
     {

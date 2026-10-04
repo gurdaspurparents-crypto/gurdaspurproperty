@@ -73,7 +73,7 @@ export default function PropertyDetailModal({
   };
 
   const images = property.images && property.images.length > 0 ? property.images : [
-    "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80"
+    "/images/properties/gurdaspur_real_kothi.jpg"
   ];
 
   const whatsappMessage = encodeURIComponent(
