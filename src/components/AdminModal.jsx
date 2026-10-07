@@ -647,35 +647,6 @@ export default function AdminModal({
                   Unlock Dashboard
                 </button>
               </form>
-
-              {/* Two-Tier PIN Guidance Box */}
-              <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3 text-left">
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                  <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs mb-1">
-                    <Lock className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Master Admin</span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 mb-1">
-                    Full control, approvals, settings & website leads.
-                  </div>
-                  <code className="text-[11px] font-mono font-bold text-blue-700 bg-blue-100/60 px-1.5 py-0.5 rounded">
-                    4051#
-                  </code>
-                </div>
-
-                <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80">
-                  <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs mb-1">
-                    <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Field Surveyor</span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 mb-1">
-                    Mobile intake form with live GPS & camera upload.
-                  </div>
-                  <code className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">
-                    2026#
-                  </code>
-                </div>
-              </div>
             </div>
           ) : authRole === 'surveyor' ? (
             <FieldSurveyPortal 
