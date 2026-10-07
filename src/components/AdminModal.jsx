@@ -40,9 +40,12 @@ import {
   getLeads, 
   deleteLead, 
   updateLead,
+  addLead,
   saveProperties, 
   saveSettings, 
-  resetToDefault 
+  resetToDefault,
+  syncCloudData,
+  pushCloudData 
 } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 import FieldSurveyPortal from './FieldSurveyPortal';
@@ -93,11 +96,28 @@ export default function AdminModal({
   // Settings Form State
   const [settingsForm, setSettingsForm] = useState({ ...settings });
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState(null);
+
+  const performCloudSync = async () => {
+    setIsSyncingCloud(true);
+    try {
+      const { leads: syncedLeads, properties: syncedProps } = await syncCloudData();
+      if (syncedLeads) setLeads(syncedLeads);
+      if (syncedProps && syncedProps.length > 0) setProperties(syncedProps);
+      setLastSyncTime(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
+    } catch (err) {
+      console.warn("Cloud sync error in admin modal:", err);
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
       setLeads(getLeads());
       setSettingsForm({ ...settings });
+      performCloudSync();
     }
   }, [isOpen, settings]);
 
@@ -333,6 +353,50 @@ export default function AdminModal({
       facing: 'East'
     });
     setShowPropertyForm(true);
+  };
+
+  const handleCreateDemoSurvey = async () => {
+    setIsSyncingCloud(true);
+    const demoSurvey = {
+      name: 'Sardar Manjit Singh',
+      phone: '9888826257',
+      alternatePhone: '8146526257',
+      ownerRole: 'Direct Landlord',
+      type: 'field_survey',
+      isSurvey: true,
+      surveyStatus: 'pending_approval',
+      surveyorName: 'Field Executive 1',
+      surveyorPhone: '8146526257',
+      purpose: 'rent',
+      category: 'room',
+      locality: 'Jail Road',
+      subArea: 'Near Civil Hospital',
+      exactLocation: 'House No. 42, Gali No. 3, Jail Road',
+      size: '1 BHK Independent Floor',
+      dimensions: '18 x 25 Ft',
+      roadWidth: '30 Ft Wide Road',
+      facing: 'North-East',
+      price: '9500',
+      isNegotiable: true,
+      securityDeposit: '1 Month Rent (₹9,500)',
+      electricityMeter: 'Separate Sub-Meter',
+      waterSupply: '24x7 Submersible Water',
+      parking: 'Car & 2-Wheeler Covered Parking',
+      tenantPreference: 'Family or Working Professionals',
+      kitchenWashroom: 'Attached Modular Kitchen & Western Washroom',
+      availableFrom: 'Immediate',
+      notes: 'Independent unit with separate entrance gate. 2 minutes from Civil Hospital.',
+      images: [
+        '/images/properties/gurdaspur_real_kothi.jpg'
+      ],
+      videoUrl: '',
+      gpsCoordinates: { latitude: '32.041680', longitude: '75.405210', accuracy: 8 },
+      googleMapsUrl: 'https://www.google.com/maps?q=32.041680,75.405210',
+      createdAt: new Date().toISOString()
+    };
+    await addLead(demoSurvey);
+    await performCloudSync();
+    setActiveTab('surveys');
   };
 
   const handleSaveProperty = (e) => {
@@ -660,6 +724,35 @@ export default function AdminModal({
             />
           ) : (
             <div>
+              {/* Executive Field Surveys Alert Banner */}
+              {pendingSurveysCount > 0 && activeTab !== 'surveys' && (
+                <div className="mb-5 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-amber-500/15 border-2 border-amber-400 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-in fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shrink-0 shadow-sm animate-pulse">
+                      🔔
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-amber-950 uppercase tracking-wide flex items-center gap-2">
+                        <span>{pendingSurveysCount} Field Survey{pendingSurveysCount > 1 ? 's' : ''} Submitted by Executive</span>
+                        <span className="bg-amber-400 text-amber-950 text-[10px] px-2 py-0.5 rounded-full font-black">
+                          ACTION REQUIRED
+                        </span>
+                      </h4>
+                      <p className="text-[11px] text-amber-900 mt-0.5">
+                        Your marketing executive logged new door-to-door property details. Review landlord phone, walkthrough video & GPS pin, then click "Approve" to publish live to www.gurdaspurproperty.in.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('surveys')}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all shrink-0 cursor-pointer flex items-center gap-1.5 hover:scale-105"
+                  >
+                    <span>Open Door Surveys ({pendingSurveysCount})</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              )}
+
               {/* Navigation Tabs */}
               <div className="flex flex-wrap border-b border-slate-200 pb-3 mb-6 gap-2">
                 <button
@@ -1106,23 +1199,59 @@ export default function AdminModal({
                     </div>
                   </div>
 
+                  {/* Multi-Device Cloud Sync Status Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900 text-white p-3 rounded-2xl shadow-xs text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span className="font-bold">Multi-Device Cloud Sync:</span>
+                      <span className="text-slate-300">
+                        {lastSyncTime ? `Last updated: ${lastSyncTime}` : 'Connected to live cloud repository'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={performCloudSync}
+                        disabled={isSyncingCloud}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                      >
+                        <RefreshCcw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+                        <span>{isSyncingCloud ? 'Syncing...' : 'Sync Cloud Surveys'}</span>
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Surveys List */}
                   {surveys.length === 0 ? (
-                    <div className="text-center py-12 px-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl">
-                      <ClipboardCheck className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                      <h4 className="text-sm font-bold text-slate-700">No Field Surveys Yet</h4>
-                      <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
-                        When your field executive goes door-to-door in Gurdaspur and logs rooms or houses using PIN <strong className="text-slate-800">2026#</strong>, they will instantly appear here with physical GPS coordinates for your review.
-                      </p>
-                      <button
-                        onClick={() => {
-                          setAuthRole('surveyor');
-                        }}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
-                      >
-                        <span>Open Field Surveyor Portal View</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </button>
+                    <div className="text-center py-12 px-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl space-y-4">
+                      <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                        <ClipboardCheck className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800">No Field Surveys in Local/Cloud Queue</h4>
+                        <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
+                          When your field executive goes door-to-door in Gurdaspur and submits a survey on their smartphone, it syncs across the cloud and appears right here with GPS coordinates for your review before going live.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <button
+                          onClick={handleCreateDemoSurvey}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer hover:scale-105"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Generate 1-Click Test Field Survey</span>
+                        </button>
+
+                        <button
+                          onClick={performCloudSync}
+                          disabled={isSyncingCloud}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          <RefreshCcw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+                          <span>Check Cloud for New Submissions</span>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -1892,6 +2021,25 @@ export default function AdminModal({
                       />
                       <p className="text-[11px] text-slate-500 mt-1.5">
                         Give this PIN to your field executive. It unlocks only the mobile survey form with GPS proof and camera uploads, keeping your financial settings and live website listings protected.
+                      </p>
+                    </div>
+
+                    {/* Auto-Publish Executive Surveys Toggle */}
+                    <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5 cursor-pointer">
+                          <span>Auto-Publish Field Executive Surveys</span>
+                          <span className="text-[10px] bg-emerald-200 text-emerald-900 font-extrabold px-1.5 py-0.5 rounded">Instant Live</span>
+                        </label>
+                        <input
+                          type="checkbox"
+                          checked={!!settingsForm.autoPublishSurveys}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, autoPublishSurveys: e.target.checked })}
+                          className="w-5 h-5 accent-emerald-600 rounded cursor-pointer"
+                        />
+                      </div>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        When enabled, any property surveyed by your executive on mobile will publish directly to www.gurdaspurproperty.in immediately without waiting for manual approval.
                       </p>
                     </div>
 

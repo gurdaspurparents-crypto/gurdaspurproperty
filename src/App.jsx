@@ -18,7 +18,8 @@ import {
   getProperties, 
   getSettings, 
   saveProperties, 
-  saveSettings 
+  saveSettings,
+  syncCloudData 
 } from './utils/storage';
 import { PROPERTY_TYPES, GURDASPUR_LOCALITIES } from './data/initialProperties';
 import { 
@@ -60,6 +61,13 @@ export default function App() {
   useEffect(() => {
     setProperties(getProperties());
     setSettings(getSettings());
+
+    // Fetch latest verified listings and surveys from cloud
+    syncCloudData().then(({ properties: syncedProps }) => {
+      if (syncedProps && syncedProps.length > 0) {
+        setProperties(syncedProps);
+      }
+    });
 
     const checkHash = () => {
       if (

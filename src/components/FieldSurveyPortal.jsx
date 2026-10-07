@@ -259,8 +259,8 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
       createdAt: new Date().toISOString()
     };
 
-    // Save into storage leads
-    const saved = addLead(surveyData);
+    // Save into storage leads & sync to cloud
+    const saved = await addLead(surveyData);
     setLastSurveyId(saved?.id || 'SURVEY-' + Date.now().toString().slice(-4));
 
     // Send instant email notification to owner (navkiransharma@gmail.com)
