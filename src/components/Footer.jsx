@@ -139,10 +139,10 @@ export default function Footer({
 
             <button
               onClick={onOpenAdmin}
-              className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 mt-2"
+              className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-emerald-400 mt-2 transition-colors cursor-pointer"
             >
-              <Lock className="w-3 h-3" />
-              <span>Consultant Admin Login</span>
+              <Lock className="w-3 h-3 text-emerald-500" />
+              <span>Field Staff & Admin Portal</span>
             </button>
           </div>
 

@@ -60,6 +60,19 @@ export default function App() {
   useEffect(() => {
     setProperties(getProperties());
     setSettings(getSettings());
+
+    const checkHash = () => {
+      if (
+        window.location.hash === '#survey' || 
+        window.location.hash === '#staff' || 
+        window.location.hash === '#admin'
+      ) {
+        setIsAdminOpen(true);
+      }
+    };
+    checkHash();
+    window.addEventListener('hashchange', checkHash);
+    return () => window.removeEventListener('hashchange', checkHash);
   }, []);
 
   // Filter Logic

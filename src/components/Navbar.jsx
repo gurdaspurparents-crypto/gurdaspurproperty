@@ -279,10 +279,10 @@ export default function Navbar({
               </a>
               <button
                 onClick={() => { onOpenAdmin(); setMobileMenuOpen(false); }}
-                className="text-slate-400 hover:text-white flex items-center gap-1"
+                className="text-emerald-300 hover:text-white font-bold flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-slate-900 border border-emerald-600/50 shadow-xs cursor-pointer"
               >
-                <Lock className="w-3 h-3 text-emerald-400" />
-                Admin Login
+                <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Field Staff / Admin PIN</span>
               </button>
             </div>
           </div>
