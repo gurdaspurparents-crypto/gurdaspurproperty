@@ -21,7 +21,20 @@ import {
   Film,
   ExternalLink,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ClipboardCheck,
+  QrCode,
+  MapPin,
+  BadgeCheck,
+  AlertCircle,
+  Clock,
+  Sparkles,
+  LogOut,
+  Car,
+  Zap,
+  Droplets,
+  Printer,
+  UserCheck
 } from 'lucide-react';
 import { 
   getLeads, 
@@ -32,6 +45,8 @@ import {
   resetToDefault 
 } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
+import FieldSurveyPortal from './FieldSurveyPortal';
+import ExecutiveIdCardKit from './ExecutiveIdCardKit';
 
 export default function AdminModal({ 
   isOpen, 
@@ -42,9 +57,11 @@ export default function AdminModal({
   setSettings 
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authRole, setAuthRole] = useState(null); // 'admin' | 'surveyor'
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'leads' | 'settings'
+  const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'surveys' | 'leads' | 'id_cards' | 'settings'
+  const [surveyFilter, setSurveyFilter] = useState('all'); // 'all' | 'pending' | 'approved'
   const [leads, setLeads] = useState([]);
   const [editingLeadId, setEditingLeadId] = useState(null);
   const [editLeadForm, setEditLeadForm] = useState(null);
@@ -86,11 +103,20 @@ export default function AdminModal({
 
   if (!isOpen) return null;
 
+  const surveys = leads.filter(l => l.isSurvey || l.type === 'field_survey');
+  const webLeads = leads.filter(l => !l.isSurvey && l.type !== 'field_survey');
+  const pendingSurveysCount = surveys.filter(s => s.surveyStatus !== 'approved').length;
+
   const handleLogin = (e) => {
     e.preventDefault();
     const cleanInput = pinInput.trim();
     if (cleanInput === '4051#' || cleanInput === settings.adminPin) {
       setIsAuthenticated(true);
+      setAuthRole('admin');
+      setPinError(false);
+    } else if (cleanInput === '2026#' || cleanInput === (settings.surveyorPin || '2026#')) {
+      setIsAuthenticated(true);
+      setAuthRole('surveyor');
       setPinError(false);
     } else {
       setPinError(true);
@@ -177,6 +203,134 @@ export default function AdminModal({
       badge: 'Direct Listing',
       verified: true,
       facing: lead.facing || 'East'
+    });
+    setShowPropertyForm(true);
+  };
+
+  const handleApproveSurveyLead = (survey) => {
+    const priceNum = parseFloat(survey.price) || 0;
+    const isRent = survey.purpose === 'rent';
+    const sizeStr = survey.size || (survey.category === 'room' ? '1 Room Set' : '10 Marla');
+    const newId = `GP-${Math.floor(100 + Math.random() * 900)}`;
+
+    const defaultCover = survey.category === 'room'
+      ? '/images/properties/gurdaspur_real_kothi.jpg'
+      : survey.category === 'kothi'
+      ? '/images/properties/gurdaspur_real_kothi.jpg'
+      : survey.category === 'commercial'
+      ? '/images/properties/gurdaspur_commercial_sco.jpg'
+      : survey.category === 'land'
+      ? '/images/properties/punjab_tubewell_farm.jpg'
+      : '/images/properties/gurdaspur_plotted_colony.jpg';
+
+    const images = (survey.images && survey.images.length > 0) ? survey.images : [defaultCover];
+
+    let desc = `${sizeStr} available for ${isRent ? 'immediate rent' : 'direct sale'} in ${survey.locality}, Gurdaspur. `;
+    if (survey.subArea) desc += `Location / Landmark: ${survey.subArea}. `;
+    if (isRent) {
+      if (survey.electricityMeter) desc += `Electricity: ${survey.electricityMeter}. `;
+      if (survey.waterSupply) desc += `Water Supply: ${survey.waterSupply}. `;
+      if (survey.parking) desc += `Parking: ${survey.parking}. `;
+      if (survey.tenantPreference) desc += `Preferred Tenant: ${survey.tenantPreference}. `;
+      if (survey.securityDeposit) desc += `Security Deposit: ${survey.securityDeposit}. `;
+    }
+    if (survey.notes) desc += `${survey.notes}. `;
+    desc += `Verified on-site visit by Gurdaspur Property field team. Direct deal, zero hidden brokerage.`;
+
+    const amenities = [
+      survey.parking || 'Parking Available',
+      survey.waterSupply || 'Water Supply',
+      survey.electricityMeter || 'Electricity Connection',
+      'Verified Physical GPS Visit',
+      'Direct Landlord Deal'
+    ].filter(Boolean);
+
+    const newProp = {
+      id: newId,
+      title: `${sizeStr} for ${isRent ? 'Rent' : 'Sale'} in ${survey.locality}`,
+      category: survey.category || 'room',
+      purpose: isRent ? 'rent' : 'buy',
+      price: priceNum,
+      pricePerUnit: isRent
+        ? `₹${priceNum.toLocaleString('en-IN')}/month`
+        : (priceNum >= 10000000 ? `₹${(priceNum / 10000000).toFixed(2)} Cr` : `₹${(priceNum / 100000).toFixed(2)} Lakh`),
+      size: sizeStr,
+      unit: survey.category === 'room' ? 'Room Set' : 'Marla',
+      sqft: survey.category === 'room' ? 250 : 2250,
+      location: survey.locality || 'Tibri Road',
+      cityArea: survey.subArea ? `${survey.subArea}, ${survey.locality}, Gurdaspur` : `${survey.locality}, Gurdaspur`,
+      description: desc,
+      amenities: amenities,
+      imageUrl: images[0],
+      images: images,
+      videoUrl: survey.videoUrl || '',
+      badge: 'Field Verified',
+      verified: true,
+      facing: 'East',
+      status: 'available',
+      dateAdded: new Date().toISOString().split('T')[0]
+    };
+
+    const updatedProps = [newProp, ...properties];
+    setProperties(updatedProps);
+    saveProperties(updatedProps);
+
+    const updatedLeads = updateLead(survey.id, { surveyStatus: 'approved' });
+    setLeads(updatedLeads);
+
+    alert(`✅ Survey Approved & Published Successfully!\n\nListing ID: ${newId}\n"${newProp.title}" is now LIVE on www.gurdaspurproperty.in!`);
+  };
+
+  const handleConvertSurveyToForm = (survey) => {
+    setActiveTab('properties');
+    setEditingPropertyId(null);
+    const isRent = survey.purpose === 'rent';
+    const priceNum = parseFloat(survey.price) || 0;
+    const sizeStr = survey.size || (survey.category === 'room' ? '1 Room Set' : '10 Marla');
+
+    const defaultCover = survey.category === 'room'
+      ? '/images/properties/gurdaspur_real_kothi.jpg'
+      : survey.category === 'kothi'
+      ? '/images/properties/gurdaspur_real_kothi.jpg'
+      : survey.category === 'commercial'
+      ? '/images/properties/gurdaspur_commercial_sco.jpg'
+      : survey.category === 'land'
+      ? '/images/properties/punjab_tubewell_farm.jpg'
+      : '/images/properties/gurdaspur_plotted_colony.jpg';
+
+    const images = (survey.images && survey.images.length > 0) ? survey.images : [defaultCover];
+
+    let desc = `${sizeStr} available for ${isRent ? 'immediate rent' : 'sale'} in ${survey.locality}, Gurdaspur. `;
+    if (survey.subArea) desc += `Near ${survey.subArea}. `;
+    if (isRent) {
+      if (survey.electricityMeter) desc += `Electricity: ${survey.electricityMeter}. `;
+      if (survey.waterSupply) desc += `Water Supply: ${survey.waterSupply}. `;
+      if (survey.parking) desc += `Parking: ${survey.parking}. `;
+      if (survey.tenantPreference) desc += `Preferred Tenant: ${survey.tenantPreference}. `;
+    }
+    if (survey.notes) desc += `${survey.notes}. `;
+
+    setPropForm({
+      title: `${sizeStr} for ${isRent ? 'Rent' : 'Sale'} in ${survey.locality}`,
+      category: survey.category || 'room',
+      purpose: isRent ? 'rent' : 'buy',
+      price: priceNum,
+      pricePerUnit: isRent
+        ? `₹${priceNum.toLocaleString('en-IN')}/month`
+        : (priceNum >= 10000000 ? `₹${(priceNum / 10000000).toFixed(2)} Cr` : `₹${(priceNum / 100000).toFixed(2)} Lakh`),
+      size: sizeStr,
+      unit: survey.category === 'room' ? 'Room Set' : 'Marla',
+      sqft: survey.category === 'room' ? 250 : 2250,
+      location: survey.locality || 'Tibri Road',
+      cityArea: survey.subArea ? `${survey.subArea}, ${survey.locality}, Gurdaspur` : `${survey.locality}, Gurdaspur`,
+      description: desc,
+      amenities: `${survey.parking || 'Parking'}, ${survey.electricityMeter || 'Sub-Meter'}, Physical GPS Verified Visit, Direct Landlord Deal`,
+      imageUrl: images[0],
+      images: images,
+      videoUrl: '',
+      badge: 'Field Verified',
+      verified: true,
+      facing: 'East'
     });
     setShowPropertyForm(true);
   };
@@ -406,34 +560,70 @@ export default function AdminModal({
               className="h-10 w-auto object-contain brightness-110 shrink-0"
             />
             <div>
-              <h2 className="text-base font-bold font-['Outfit']">Gurdaspur Property Admin Panel</h2>
-              <p className="text-[11px] text-slate-400">Manage listings, WhatsApp leads & office settings</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold font-['Outfit']">
+                  {authRole === 'surveyor' 
+                    ? 'Field Surveyor Mobile Portal' 
+                    : 'Gurdaspur Property Admin Panel'}
+                </h2>
+                {isAuthenticated && (
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    authRole === 'surveyor' 
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                      : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                  }`}>
+                    {authRole === 'surveyor' ? 'Field Executive Mode' : 'Owner Master Control'}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400">
+                {authRole === 'surveyor' 
+                  ? 'Door-to-door property logging with live GPS verification' 
+                  : 'Manage listings, field surveys, leads & office settings'}
+              </p>
             </div>
           </div>
 
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  setIsAuthenticated(false);
+                  setAuthRole(null);
+                  setPinInput('');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Switch PIN / Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            )}
+
+            <button 
+              onClick={onClose}
+              className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content Area */}
         <div className="p-6">
           {!isAuthenticated ? (
-            <div className="max-w-xs mx-auto py-10 text-center">
+            <div className="max-w-md mx-auto py-8 text-center">
               <div className="flex justify-center mb-4">
                 <img src="/logo.svg" alt="Gurdaspur Property" className="h-14 w-auto object-contain" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 font-['Outfit'] mb-1">
-                Admin Authentication
+              <h3 className="text-xl font-extrabold text-slate-900 font-['Outfit'] mb-1">
+                Portal Authentication
               </h3>
               <p className="text-xs text-slate-500 mb-6">
-                Enter your authorized security PIN
+                Enter your authorized security PIN to continue
               </p>
 
-              <form onSubmit={handleLogin} className="space-y-3">
+              <form onSubmit={handleLogin} className="space-y-4">
                 <input
                   type="password"
                   maxLength="8"
@@ -441,27 +631,66 @@ export default function AdminModal({
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full text-center text-2xl tracking-widest font-mono font-bold bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 text-slate-800 focus:outline-none focus:border-emerald-600"
+                  className="w-full text-center text-3xl tracking-widest font-mono font-bold bg-slate-50 border-2 border-slate-200 rounded-2xl py-3 text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all shadow-inner"
                 />
 
                 {pinError && (
-                  <p className="text-xs text-red-500 font-medium">
+                  <p className="text-xs text-red-500 font-semibold bg-red-50 py-2 px-3 rounded-xl border border-red-200">
                     Incorrect security PIN. Please try again.
                   </p>
                 )}
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
                 >
-                  Unlock Admin Dashboard
+                  Unlock Dashboard
                 </button>
               </form>
+
+              {/* Two-Tier PIN Guidance Box */}
+              <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3 text-left">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                  <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs mb-1">
+                    <Lock className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Master Admin</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 mb-1">
+                    Full control, approvals, settings & website leads.
+                  </div>
+                  <code className="text-[11px] font-mono font-bold text-blue-700 bg-blue-100/60 px-1.5 py-0.5 rounded">
+                    4051#
+                  </code>
+                </div>
+
+                <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80">
+                  <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs mb-1">
+                    <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Field Surveyor</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 mb-1">
+                    Mobile intake form with live GPS & camera upload.
+                  </div>
+                  <code className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">
+                    2026#
+                  </code>
+                </div>
+              </div>
             </div>
+          ) : authRole === 'surveyor' ? (
+            <FieldSurveyPortal 
+              settings={settings} 
+              onSurveySubmitted={() => setLeads(getLeads())}
+              onLogout={() => {
+                setIsAuthenticated(false);
+                setAuthRole(null);
+                setPinInput('');
+              }}
+            />
           ) : (
             <div>
               {/* Navigation Tabs */}
-              <div className="flex border-b border-slate-200 pb-3 mb-6 gap-2">
+              <div className="flex flex-wrap border-b border-slate-200 pb-3 mb-6 gap-2">
                 <button
                   onClick={() => { setActiveTab('properties'); setShowPropertyForm(false); }}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -475,15 +704,44 @@ export default function AdminModal({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('leads')}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    activeTab === 'leads' 
+                  onClick={() => setActiveTab('surveys')}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative ${
+                    activeTab === 'surveys' 
                       ? 'bg-emerald-600 text-white shadow-xs' 
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
+                  <ClipboardCheck className="w-4 h-4" />
+                  Door Surveys ({surveys.length})
+                  {pendingSurveysCount > 0 && (
+                    <span className="bg-amber-400 text-amber-950 font-black text-[10px] px-1.5 py-0.2 rounded-full shadow-xs">
+                      {pendingSurveysCount} pending
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('leads')}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'leads' 
+                      ? 'bg-blue-600 text-white shadow-xs' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
                   <Users className="w-4 h-4" />
-                  Seller Leads ({leads.length})
+                  Website Leads ({webLeads.length})
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('id_cards')}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'id_cards' 
+                      ? 'bg-purple-600 text-white shadow-xs' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <QrCode className="w-4 h-4" />
+                  Staff ID & Cards
                 </button>
 
                 <button
@@ -831,23 +1089,314 @@ export default function AdminModal({
                 </div>
               )}
 
-              {/* TAB 2: SELLER LEADS */}
+              {/* TAB: FIELD SURVEYS (DOOR-TO-DOOR INTAKE) */}
+              {activeTab === 'surveys' && (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50/70 border border-emerald-200/80 p-4 rounded-2xl">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
+                          Door-to-Door Intake
+                        </span>
+                        <h3 className="font-extrabold text-sm text-slate-900 font-['Outfit']">
+                          Field Executive Survey Queue
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Verify GPS physical proof & photos, then 1-click publish to www.gurdaspurproperty.in
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-emerald-200 shadow-2xs shrink-0">
+                      <button
+                        onClick={() => setSurveyFilter('all')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          surveyFilter === 'all' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        All ({surveys.length})
+                      </button>
+                      <button
+                        onClick={() => setSurveyFilter('pending')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          surveyFilter === 'pending' ? 'bg-amber-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        Pending ({pendingSurveysCount})
+                      </button>
+                      <button
+                        onClick={() => setSurveyFilter('approved')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          surveyFilter === 'approved' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        Live ({surveys.length - pendingSurveysCount})
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Surveys List */}
+                  {surveys.length === 0 ? (
+                    <div className="text-center py-12 px-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl">
+                      <ClipboardCheck className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                      <h4 className="text-sm font-bold text-slate-700">No Field Surveys Yet</h4>
+                      <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
+                        When your field executive goes door-to-door in Gurdaspur and logs rooms or houses using PIN <strong className="text-slate-800">2026#</strong>, they will instantly appear here with physical GPS coordinates for your review.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setAuthRole('surveyor');
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+                      >
+                        <span>Open Field Surveyor Portal View</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {surveys
+                        .filter(s => {
+                          if (surveyFilter === 'pending') return s.surveyStatus !== 'approved';
+                          if (surveyFilter === 'approved') return s.surveyStatus === 'approved';
+                          return true;
+                        })
+                        .map(survey => {
+                          const cleanPhone = survey.phone?.replace(/[^0-9]/g, '');
+                          const isApproved = survey.surveyStatus === 'approved';
+
+                          return (
+                            <div 
+                              key={survey.id} 
+                              className={`p-4 sm:p-5 rounded-2xl border-2 transition-all shadow-xs space-y-3.5 ${
+                                isApproved 
+                                  ? 'bg-white border-slate-200' 
+                                  : 'bg-amber-50/30 border-amber-300'
+                              }`}
+                            >
+                              {/* Header */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-extrabold text-sm text-slate-900">
+                                    {survey.size || '1 Room Set'} {survey.category === 'room' ? 'Room Set' : survey.category}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                    survey.purpose === 'rent' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
+                                  }`}>
+                                    {survey.purpose === 'rent' ? 'For Rent' : 'For Sale'}
+                                  </span>
+                                  <span className="text-[10px] font-mono text-slate-400">{survey.id}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  {isApproved ? (
+                                    <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                      <span>Approved & Live</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                                      <Clock className="w-3 h-3 text-amber-700" />
+                                      <span>Pending Owner Approval</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Surveyor & Date Info */}
+                              <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+                                <div className="flex items-center gap-1.5">
+                                  <UserCheck className="w-4 h-4 text-emerald-600" />
+                                  <span>Surveyed by: <strong className="text-slate-800">{survey.surveyorName || 'Field Executive'}</strong></span>
+                                </div>
+                                <div className="text-[11px] text-slate-400">
+                                  {survey.createdAt ? new Date(survey.createdAt).toLocaleString('en-IN') : 'Recent'}
+                                </div>
+                              </div>
+
+                              {/* GPS Verification Badge */}
+                              {survey.googleMapsUrl ? (
+                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                      <MapPin className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                                        <span>Proof of Physical Visit Verified (GPS Geotagged)</span>
+                                        <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 inline" />
+                                      </div>
+                                      {survey.gpsCoordinates && (
+                                        <div className="text-[11px] text-emerald-800 font-mono">
+                                          Coordinates: {survey.gpsCoordinates.latitude}, {survey.gpsCoordinates.longitude} (±{survey.gpsCoordinates.accuracy}m accuracy)
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <a
+                                    href={survey.googleMapsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                    <span>Verify on Google Maps</span>
+                                  </a>
+                                </div>
+                              ) : (
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-500 flex items-center gap-2">
+                                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                                  <span>No GPS coordinates tagged for this survey.</span>
+                                </div>
+                              )}
+
+                              {/* Details Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700 bg-slate-50/70 p-3 rounded-xl border border-slate-200/60">
+                                <div className="space-y-1.5">
+                                  <div>
+                                    <strong>Landlord / Owner:</strong> <span className="font-bold text-slate-900">{survey.name}</span>
+                                  </div>
+                                  <div>
+                                    <strong>Locality:</strong> <span className="font-semibold text-slate-900">{survey.locality}</span> {survey.subArea ? `(${survey.subArea})` : ''}
+                                  </div>
+                                  <div>
+                                    <strong>Expected {survey.purpose === 'rent' ? 'Rent' : 'Price'}:</strong>{' '}
+                                    <span className="font-black text-emerald-700 text-sm">
+                                      ₹{Number(survey.price || 0).toLocaleString('en-IN')}{survey.purpose === 'rent' ? '/month' : ''}
+                                    </span>{' '}
+                                    {survey.isNegotiable ? '(Negotiable)' : '(Fixed)'}
+                                  </div>
+                                  {survey.purpose === 'rent' && survey.securityDeposit && (
+                                    <div><strong>Security Deposit:</strong> {survey.securityDeposit}</div>
+                                  )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                  {survey.purpose === 'rent' && (
+                                    <>
+                                      <div><strong>Electricity:</strong> {survey.electricityMeter || 'Sub-Meter'}</div>
+                                      <div><strong>Water Supply:</strong> {survey.waterSupply || '24x7 Submersible'}</div>
+                                      <div><strong>Parking:</strong> {survey.parking || 'Available'}</div>
+                                      <div><strong>Tenant Preference:</strong> {survey.tenantPreference || 'Family or Working'}</div>
+                                    </>
+                                  )}
+                                  {survey.exactLocation && (
+                                    <div><strong>Exact House / Street:</strong> {survey.exactLocation}</div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {survey.notes && (
+                                <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs text-slate-600 italic">
+                                  "{survey.notes}"
+                                </div>
+                              )}
+
+                              {/* Photos Grid */}
+                              {survey.images && survey.images.length > 0 && (
+                                <div>
+                                  <div className="text-[10px] uppercase font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                                    <Camera className="w-3.5 h-3.5 text-blue-600" />
+                                    <span>Field Photos ({survey.images.length} Photos Captured)</span>
+                                  </div>
+                                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                                    {survey.images.map((img, idx) => (
+                                      <a
+                                        key={idx}
+                                        href={img}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-slate-900 shadow-2xs block"
+                                      >
+                                        <img src={img} alt={`Field photo ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Action Row */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                                <div className="flex items-center gap-2">
+                                  <a
+                                    href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello ${survey.name}, I am contacting you from Gurdaspur Property Consultants regarding your ${survey.size || 'property'} for ${survey.purpose === 'rent' ? 'rent' : 'sale'} in ${survey.locality} surveyed by our executive.`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5 fill-white text-emerald-600" />
+                                    <span>WhatsApp Landlord</span>
+                                  </a>
+
+                                  <a
+                                    href={`tel:${survey.phone}`}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs"
+                                  >
+                                    <Phone className="w-3.5 h-3.5 text-slate-600" />
+                                    <span>Call</span>
+                                  </a>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {!isApproved && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleApproveSurveyLead(survey)}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/30 cursor-pointer transition-all hover:scale-[1.02]"
+                                      >
+                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                        <span>✓ Approve & Publish Live</span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => handleConvertSurveyToForm(survey)}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-bold text-xs cursor-pointer"
+                                      >
+                                        <Edit3 className="w-3.5 h-3.5" />
+                                        <span>Customize & Publish</span>
+                                      </button>
+                                    </>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteLead(survey.id)}
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-bold text-xs cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              </div>
+
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: WEBSITE LEADS */}
               {activeTab === 'leads' && (
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-bold text-sm text-slate-800">Customer & Seller Leads</h3>
-                      <p className="text-xs text-slate-400">People who posted property or requested site visits</p>
+                      <h3 className="font-bold text-sm text-slate-800">Website Customer & Seller Leads</h3>
+                      <p className="text-xs text-slate-400">Direct inquiries & submissions from www.gurdaspurproperty.in</p>
                     </div>
                   </div>
 
-                  {leads.length === 0 ? (
+                  {webLeads.length === 0 ? (
                     <div className="text-center py-12 text-slate-400 text-xs">
-                      No leads received yet. As soon as a user submits the "Post Property" form, it will appear here.
+                      No website leads received yet. As soon as a user submits the "Post Property" form, it will appear here.
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {leads.map(lead => {
+                      {webLeads.map(lead => {
                         const cleanLeadPhone = lead.phone?.replace(/[^0-9]/g, '');
                         return (
                           <div key={lead.id} className="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 transition-all shadow-xs space-y-3">
@@ -1212,6 +1761,13 @@ export default function AdminModal({
                 </div>
               )}
 
+              {/* TAB: STAFF ID BADGE & VISITING CARDS */}
+              {activeTab === 'id_cards' && (
+                <div>
+                  <ExecutiveIdCardKit settings={settings} />
+                </div>
+              )}
+
               {/* TAB 3: PORTAL SETTINGS */}
               {activeTab === 'settings' && (
                 <div className="max-w-xl">
@@ -1284,15 +1840,32 @@ export default function AdminModal({
 
                       <div>
                         <label className="block text-xs font-bold uppercase text-slate-500 mb-1">
-                          Admin PIN Code
+                          Master Admin PIN Code
                         </label>
                         <input
                           type="text"
                           value={settingsForm.adminPin}
                           onChange={(e) => setSettingsForm({ ...settingsForm, adminPin: e.target.value })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800"
                         />
+                        <span className="text-[10px] text-slate-400 block mt-1">Default: 4051# (Owner master control)</span>
                       </div>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                      <label className="block text-xs font-bold uppercase text-emerald-800 mb-1 flex items-center gap-1.5">
+                        <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Field Surveyor PIN Code (Door-to-Door Staff)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={settingsForm.surveyorPin || '2026#'}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, surveyorPin: e.target.value })}
+                        className="w-full max-w-xs bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800"
+                      />
+                      <p className="text-[11px] text-slate-500 mt-1.5">
+                        Give this PIN to your field executive. It unlocks only the mobile survey form with GPS proof and camera uploads, keeping your financial settings and live website listings protected.
+                      </p>
                     </div>
 
                     <div className="pt-2 flex items-center justify-between">

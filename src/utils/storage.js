@@ -12,7 +12,8 @@ export const defaultSettings = {
   officeAddress: "Travelx, Batala Road, Gurdaspur (Near Vishal Mega Mart), Punjab 143521",
   email: "navkiransharma@gmail.com",
   workingHours: "9:00 AM - 8:00 PM (Monday - Sunday)",
-  adminPin: "4051#"
+  adminPin: "4051#",
+  surveyorPin: "2026#"
 };
 
 export const getProperties = () => {
@@ -76,9 +77,12 @@ export const getSettings = () => {
       if (parsed.adminPin === "1234" || parsed.adminPin === "4051") {
         parsed.adminPin = "4051#";
       }
+      if (!parsed.surveyorPin) {
+        parsed.surveyorPin = "2026#";
+      }
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
     }
-    return { ...defaultSettings, ...parsed };
+    return { ...defaultSettings, ...parsed, surveyorPin: parsed.surveyorPin || "2026#" };
   } catch (e) {
     return defaultSettings;
   }
