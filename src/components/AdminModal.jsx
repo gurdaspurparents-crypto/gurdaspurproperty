@@ -263,7 +263,7 @@ export default function AdminModal({
       amenities: amenities,
       imageUrl: images[0],
       images: images,
-      videoUrl: survey.videoUrl || '',
+      videoUrl: survey.videoUrl || (survey.videoFile?.dataUrl ? survey.videoFile.dataUrl : ''),
       badge: 'Field Verified',
       verified: true,
       facing: 'East',
@@ -1187,21 +1187,24 @@ export default function AdminModal({
 
                               {/* GPS Verification Badge */}
                               {survey.googleMapsUrl ? (
-                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                                      <MapPin className="w-4 h-4" />
+                                <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-400 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                                  <div className="flex items-start sm:items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                                      <MapPin className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                      <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                                        <span>Proof of Physical Visit Verified (GPS Geotagged)</span>
-                                        <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 inline" />
+                                      <div className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                                        <span>PHYSICAL ON-SITE VISIT PROOF (GPS SATELLITE TAGGED)</span>
+                                        <BadgeCheck className="w-4 h-4 text-emerald-600 inline" />
                                       </div>
                                       {survey.gpsCoordinates && (
-                                        <div className="text-[11px] text-emerald-800 font-mono">
-                                          Coordinates: {survey.gpsCoordinates.latitude}, {survey.gpsCoordinates.longitude} (±{survey.gpsCoordinates.accuracy}m accuracy)
+                                        <div className="text-[11px] text-emerald-800 font-mono mt-0.5">
+                                          Coordinates: <strong>{survey.gpsCoordinates.latitude}, {survey.gpsCoordinates.longitude}</strong> (Accuracy: ±{survey.gpsCoordinates.accuracy} meters)
                                         </div>
                                       )}
+                                      <div className="text-[11px] text-slate-600 mt-0.5">
+                                        📍 Proves executive stood physically at this property. Click button to inspect on Google Maps.
+                                      </div>
                                     </div>
                                   </div>
 
@@ -1209,10 +1212,10 @@ export default function AdminModal({
                                     href={survey.googleMapsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all shrink-0 hover:scale-[1.02]"
                                   >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                    <span>Verify on Google Maps</span>
+                                    <MapPin className="w-4 h-4 text-emerald-200" />
+                                    <span>Open Exact Pin in Google Maps ↗</span>
                                   </a>
                                 </div>
                               ) : (
@@ -1227,6 +1230,7 @@ export default function AdminModal({
                                 <div className="space-y-1.5">
                                   <div>
                                     <strong>Landlord / Owner:</strong> <span className="font-bold text-slate-900">{survey.name}</span>
+                                    {survey.ownerRole && <span className="text-[10px] text-slate-500 ml-1.5">({survey.ownerRole})</span>}
                                   </div>
                                   <div>
                                     <strong>Locality:</strong> <span className="font-semibold text-slate-900">{survey.locality}</span> {survey.subArea ? `(${survey.subArea})` : ''}
@@ -1241,6 +1245,9 @@ export default function AdminModal({
                                   {survey.purpose === 'rent' && survey.securityDeposit && (
                                     <div><strong>Security Deposit:</strong> {survey.securityDeposit}</div>
                                   )}
+                                  {survey.roadWidth && (
+                                    <div><strong>Road Width / Facing:</strong> {survey.roadWidth} • {survey.facing || 'East'}</div>
+                                  )}
                                 </div>
 
                                 <div className="space-y-1.5">
@@ -1250,6 +1257,9 @@ export default function AdminModal({
                                       <div><strong>Water Supply:</strong> {survey.waterSupply || '24x7 Submersible'}</div>
                                       <div><strong>Parking:</strong> {survey.parking || 'Available'}</div>
                                       <div><strong>Tenant Preference:</strong> {survey.tenantPreference || 'Family or Working'}</div>
+                                      {survey.kitchenWashroom && (
+                                        <div><strong>Kitchen & Bath:</strong> {survey.kitchenWashroom}</div>
+                                      )}
                                     </>
                                   )}
                                   {survey.exactLocation && (
@@ -1284,6 +1294,52 @@ export default function AdminModal({
                                       </a>
                                     ))}
                                   </div>
+                                </div>
+                              )}
+
+                              {/* Walkthrough Video Player / Link */}
+                              {(survey.videoFile || survey.videoUrl) && (
+                                <div className="space-y-2 bg-rose-50/70 p-3.5 rounded-2xl border border-rose-200">
+                                  <div className="text-[10px] uppercase font-bold text-rose-800 flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5">
+                                      <Video className="w-3.5 h-3.5 text-rose-600" />
+                                      <span>Walkthrough Video Recorded on Field:</span>
+                                    </div>
+                                    <span className="bg-rose-200 text-rose-900 text-[9px] px-2 py-0.5 rounded-full font-bold">
+                                      Video Available
+                                    </span>
+                                  </div>
+
+                                  {survey.videoFile?.dataUrl && (
+                                    <div className="bg-white p-2.5 rounded-xl border border-rose-200 space-y-1.5">
+                                      <div className="flex items-center justify-between text-xs text-slate-700">
+                                        <span className="font-bold truncate">{survey.videoFile.name}</span>
+                                        <span className="text-[10px] text-slate-400 font-mono">({survey.videoFile.size})</span>
+                                      </div>
+                                      <video 
+                                        src={survey.videoFile.dataUrl} 
+                                        controls 
+                                        className="w-full max-h-56 rounded-lg bg-black object-contain shadow-inner"
+                                      />
+                                    </div>
+                                  )}
+
+                                  {survey.videoUrl && (
+                                    <div className="flex flex-wrap items-center justify-between gap-2 bg-white p-2.5 rounded-xl border border-rose-200">
+                                      <div className="text-xs text-slate-700 truncate font-mono text-[11px] max-w-sm">
+                                        {survey.videoUrl}
+                                      </div>
+                                      <a
+                                        href={survey.videoUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-lg shrink-0 shadow-xs"
+                                      >
+                                        <Play className="w-3.5 h-3.5 fill-white" />
+                                        <span>Watch Walkthrough Video</span>
+                                      </a>
+                                    </div>
+                                  )}
                                 </div>
                               )}
 
