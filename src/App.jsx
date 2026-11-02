@@ -7,6 +7,7 @@ import PunjabLandCalculator from './components/PunjabLandCalculator';
 import PunjabStampDutyCalculator from './components/PunjabStampDutyCalculator';
 import PostPropertyModal from './components/PostPropertyModal';
 import CustomerAuthModal from './components/CustomerAuthModal';
+import CustomerDashboardModal from './components/CustomerDashboardModal';
 import LocalitiesGuide from './components/LocalitiesGuide';
 import NRIPropertyCorner from './components/NRIPropertyCorner';
 import ConsultantServices from './components/ConsultantServices';
@@ -46,9 +47,11 @@ export default function App() {
   const [properties, setProperties] = useState([]);
   const [settings, setSettings] = useState(getSettings());
   
-  // Customer Authentication Session
+  // Customer Authentication Session & Dashboard
   const [customerUser, setCustomerUser] = useState(getCustomerUser());
   const [isCustomerAuthOpen, setIsCustomerAuthOpen] = useState(false);
+  const [isCustomerDashboardOpen, setIsCustomerDashboardOpen] = useState(false);
+  const [customerAuthIntent, setCustomerAuthIntent] = useState('post'); // 'post' | 'dashboard'
 
   // Modals
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -151,9 +154,19 @@ export default function App() {
 
   // Open Property Posting: Requires Customer OTP Login First
   const handleOpenPostProperty = () => {
-    if (customerUser && customerUser.verified) {
+    if (customerUser && (customerUser.verified || customerUser.phone)) {
       setIsPostPropertyOpen(true);
     } else {
+      setCustomerAuthIntent('post');
+      setIsCustomerAuthOpen(true);
+    }
+  };
+
+  const handleOpenCustomerLoginOnly = () => {
+    if (customerUser && (customerUser.verified || customerUser.phone)) {
+      setIsCustomerDashboardOpen(true);
+    } else {
+      setCustomerAuthIntent('dashboard');
       setIsCustomerAuthOpen(true);
     }
   };
@@ -161,12 +174,17 @@ export default function App() {
   const handleCustomerLoginSuccess = (user) => {
     setCustomerUser(user);
     setIsCustomerAuthOpen(false);
-    setIsPostPropertyOpen(true);
+    if (customerAuthIntent === 'dashboard') {
+      setIsCustomerDashboardOpen(true);
+    } else {
+      setIsPostPropertyOpen(true);
+    }
   };
 
   const handleCustomerLogout = () => {
     clearCustomerUser();
     setCustomerUser(null);
+    setIsCustomerDashboardOpen(false);
   };
 
   const cleanPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
@@ -186,8 +204,9 @@ export default function App() {
         selectedLocality={selectedLocality}
         setSelectedLocality={setSelectedLocality}
         customerUser={customerUser}
-        onOpenCustomerLogin={() => setIsCustomerAuthOpen(true)}
+        onOpenCustomerLogin={handleOpenCustomerLoginOnly}
         onLogoutCustomer={handleCustomerLogout}
+        onOpenCustomerDashboard={() => setIsCustomerDashboardOpen(true)}
       />
 
       {/* Hero Section with 99acres Floating Search Widget */}
@@ -442,6 +461,22 @@ export default function App() {
           onClose={() => setIsPostPropertyOpen(false)}
           settings={settings}
           customerUser={customerUser}
+        />
+      )}
+
+      {/* Customer Dashboard / My Properties & Approval Status Modal */}
+      {isCustomerDashboardOpen && (
+        <CustomerDashboardModal
+          isOpen={isCustomerDashboardOpen}
+          onClose={() => setIsCustomerDashboardOpen(false)}
+          customerUser={customerUser}
+          onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+          onLogout={handleCustomerLogout}
+          settings={settings}
+          onSelectProperty={(id) => {
+            const p = properties.find(prop => prop.id === id);
+            if (p) setSelectedProperty(p);
+          }}
         />
       )}
 

@@ -10,7 +10,8 @@ import {
   RefreshCw, 
   User, 
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from 'lucide-react';
 import { setCustomerUser } from '../utils/storage';
 
@@ -286,8 +287,22 @@ export default function CustomerAuthModal({
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02]"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Verify OTP &amp; Proceed to Input Property</span>
+                <span>Verify OTP &amp; Login</span>
               </button>
+
+              {/* WhatsApp 1-Click Verification Option */}
+              <a
+                href={`https://wa.me/918146526257?text=${encodeURIComponent(
+                  `Hello Gurdaspur Property, please verify my mobile number: +91 ${phone} for my property listing.\nMy OTP Code is: ${generatedOtp}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleAutoFill}
+                className="w-full py-2 px-3 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/40 text-[#128C7E] font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer text-center"
+              >
+                <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                <span>Verify via Office WhatsApp (+91 81465 26257)</span>
+              </a>
 
               {/* Resend Timer */}
               <div className="text-center pt-1">

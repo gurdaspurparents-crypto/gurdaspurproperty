@@ -36,7 +36,8 @@ export default function Navbar({
   setSelectedLocality,
   customerUser,
   onOpenCustomerLogin,
-  onLogoutCustomer
+  onLogoutCustomer,
+  onOpenCustomerDashboard
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
@@ -259,9 +260,20 @@ export default function Navbar({
                         <button
                           onClick={() => {
                             setUserDropdownOpen(false);
+                            if (onOpenCustomerDashboard) onOpenCustomerDashboard();
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-emerald-950 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-2 transition-colors cursor-pointer border border-emerald-200/60"
+                        >
+                          <Home className="w-4 h-4 text-emerald-600" />
+                          <span>📋 My Properties &amp; Status</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setUserDropdownOpen(false);
                             onOpenPostProperty();
                           }}
-                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-emerald-800 hover:bg-emerald-50 flex items-center gap-2 transition-colors cursor-pointer"
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer"
                         >
                           <PlusCircle className="w-4 h-4 text-emerald-600" />
                           <span>+ Post Another Property (Free)</span>
@@ -413,23 +425,36 @@ export default function Navbar({
 
           {/* Customer Logged In Status Banner in Mobile Menu */}
           {customerUser?.phone ? (
-            <div className="p-3 rounded-2xl bg-emerald-950/70 border border-emerald-600/50 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider block">
-                  Customer Logged In
-                </span>
-                <span className="text-xs font-bold text-white">
-                  +91 {customerUser.phone} {customerUser.name ? `(${customerUser.name})` : ''}
-                </span>
+            <div className="p-3 rounded-2xl bg-emerald-950/70 border border-emerald-600/50 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider block">
+                    Customer Logged In
+                  </span>
+                  <span className="text-xs font-bold text-white">
+                    +91 {customerUser.phone} {customerUser.name ? `(${customerUser.name})` : ''}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    if (onLogoutCustomer) onLogoutCustomer();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[11px] font-bold"
+                >
+                  Logout
+                </button>
               </div>
+
               <button
                 onClick={() => {
-                  if (onLogoutCustomer) onLogoutCustomer();
                   setMobileMenuOpen(false);
+                  if (onOpenCustomerDashboard) onOpenCustomerDashboard();
                 }}
-                className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[11px] font-bold"
+                className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
               >
-                Logout
+                <Home className="w-4 h-4" />
+                <span>📋 View My Properties &amp; Status</span>
               </button>
             </div>
           ) : (
