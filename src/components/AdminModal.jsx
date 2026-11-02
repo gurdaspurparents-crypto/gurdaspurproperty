@@ -36,7 +36,10 @@ import {
   Printer,
   UserCheck,
   Download,
-  Shield
+  Shield,
+  Ruler,
+  FileText,
+  FileCheck2
 } from 'lucide-react';
 import { 
   getLeads, 
@@ -52,6 +55,9 @@ import {
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 import FieldSurveyPortal from './FieldSurveyPortal';
 import ExecutiveIdCardKit from './ExecutiveIdCardKit';
+import PropertyParametersSection from './PropertyParametersSection';
+import PropertyDocumentsSection, { DOCUMENT_KEYS, STATUS_OPTIONS } from './PropertyDocumentsSection';
+import PropertyMediaSection from './PropertyMediaSection';
 
 export default function AdminModal({ 
   isOpen, 
@@ -83,6 +89,32 @@ export default function AdminModal({
     size: '',
     unit: 'Marla',
     sqft: '',
+    frontWidth: '',
+    depth: '',
+    dimensions: '',
+    coveredArea: '',
+    openArea: '',
+    bedrooms: '',
+    bathrooms: '',
+    kitchen: '',
+    drawingRoom: '',
+    diningRoom: '',
+    floors: '',
+    floorNumber: '',
+    parking: '',
+    furnishingStatus: '',
+    balcony: '',
+    terrace: '',
+    lift: '',
+    propertyCondition: '',
+    waterSupply: '',
+    electricity: '',
+    sewerage: '',
+    boundaryWall: '',
+    gatedSociety: false,
+    isCorner: false,
+    documents: null,
+    nearbyFacilities: [],
     location: 'Tibri Road',
     cityArea: '',
     description: '',
@@ -176,6 +208,32 @@ export default function AdminModal({
       size: prop.size,
       unit: prop.unit,
       sqft: prop.sqft || '',
+      frontWidth: prop.frontWidth || '',
+      depth: prop.depth || '',
+      dimensions: prop.dimensions || '',
+      coveredArea: prop.coveredArea || '',
+      openArea: prop.openArea || '',
+      bedrooms: prop.bedrooms || '',
+      bathrooms: prop.bathrooms || '',
+      kitchen: prop.kitchen || '',
+      drawingRoom: prop.drawingRoom || '',
+      diningRoom: prop.diningRoom || '',
+      floors: prop.floors || '',
+      floorNumber: prop.floorNumber || '',
+      parking: prop.parking || '',
+      furnishingStatus: prop.furnishingStatus || '',
+      balcony: prop.balcony || '',
+      terrace: prop.terrace || '',
+      lift: prop.lift || '',
+      propertyCondition: prop.propertyCondition || '',
+      waterSupply: prop.waterSupply || '',
+      electricity: prop.electricity || '',
+      sewerage: prop.sewerage || '',
+      boundaryWall: prop.boundaryWall || '',
+      gatedSociety: !!prop.gatedSociety,
+      isCorner: !!prop.isCorner,
+      documents: prop.documents || null,
+      nearbyFacilities: prop.nearbyFacilities || [],
       location: prop.location,
       cityArea: prop.cityArea,
       description: prop.description,
@@ -207,7 +265,7 @@ export default function AdminModal({
       : '/images/properties/gurdaspur_plotted_colony.jpg';
 
     setPropForm({
-      title: `${lead.size || '10 Marla'} ${lead.category === 'plot' ? 'Residential Plot' : lead.category === 'kothi' ? 'Modern Kothi' : lead.category === 'commercial' ? 'Commercial Space' : 'Land'} in ${lead.locality || 'Gurdaspur'}`,
+      title: lead.title || `${lead.size || '10 Marla'} ${lead.category === 'plot' ? 'Residential Plot' : lead.category === 'kothi' ? 'Modern Kothi' : lead.category === 'commercial' ? 'Commercial Space' : 'Land'} in ${lead.locality || 'Gurdaspur'}`,
       category: lead.category || 'plot',
       purpose: lead.purpose || 'buy',
       price: priceNum,
@@ -215,11 +273,37 @@ export default function AdminModal({
       size: sizeNumber,
       unit: unitName,
       sqft: (parseFloat(sizeNumber) || 10) * (unitName === 'Marla' ? 225 : 5445),
+      frontWidth: lead.frontWidth || '',
+      depth: lead.depth || '',
+      dimensions: lead.dimensions || '',
+      coveredArea: lead.coveredArea || '',
+      openArea: lead.openArea || '',
+      bedrooms: lead.bedrooms || '',
+      bathrooms: lead.bathrooms || '',
+      kitchen: lead.kitchen || '',
+      drawingRoom: lead.drawingRoom || '',
+      diningRoom: lead.diningRoom || '',
+      floors: lead.floors || '',
+      floorNumber: lead.floorNumber || '',
+      parking: lead.parking || '',
+      furnishingStatus: lead.furnishingStatus || '',
+      balcony: lead.balcony || '',
+      terrace: lead.terrace || '',
+      lift: lead.lift || '',
+      propertyCondition: lead.propertyCondition || '',
+      waterSupply: lead.waterSupply || '',
+      electricity: lead.electricity || '',
+      sewerage: lead.sewerage || '',
+      boundaryWall: lead.boundaryWall || '',
+      gatedSociety: !!lead.gatedSociety,
+      isCorner: !!lead.isCorner,
+      documents: lead.documents || null,
+      nearbyFacilities: lead.nearbyFacilities || [],
       location: lead.locality || 'Tibri Road',
       cityArea: lead.subArea ? `${lead.subArea}, ${lead.locality}, Gurdaspur` : `Near ${lead.locality}, Gurdaspur`,
       description: lead.notes || `Prime verified ${lead.category || 'property'} located on ${lead.locality}. Road width: ${lead.roadWidth || '30 Feet'}. Clear government registry with authenticated mutation (Inteqaal). Direct deals handled via Travelx Gurdaspur Property Consultants.`,
       amenities: `${lead.roadWidth || '30 Ft Road'}, Immediate Registry, 100% Clear Mutation (Inteqaal), Verified Title`,
-      imageUrl: leadImages.length > 0 ? leadImages[0] : defaultCover,
+      imageUrl: leadImages.length > 0 ? (typeof leadImages[0] === 'string' ? leadImages[0] : leadImages[0].url) : defaultCover,
       images: leadImages.length > 0 ? leadImages : [defaultCover],
       videoUrl: lead.videoUrl || '',
       badge: 'Direct Listing',
@@ -333,26 +417,52 @@ export default function AdminModal({
     if (survey.notes) desc += `${survey.notes}. `;
 
     setPropForm({
-      title: `${sizeStr} for ${isRent ? 'Rent' : 'Sale'} in ${survey.locality}`,
+      title: survey.title || `${sizeStr} for ${isRent ? 'Rent' : 'Sale'} in ${survey.locality}`,
       category: survey.category || 'room',
       purpose: isRent ? 'rent' : 'buy',
       price: priceNum,
       pricePerUnit: isRent
         ? `₹${priceNum.toLocaleString('en-IN')}/month`
         : (priceNum >= 10000000 ? `₹${(priceNum / 10000000).toFixed(2)} Cr` : `₹${(priceNum / 100000).toFixed(2)} Lakh`),
-      size: sizeStr,
-      unit: survey.category === 'room' ? 'Room Set' : 'Marla',
-      sqft: survey.category === 'room' ? 250 : 2250,
+      size: survey.size || sizeStr,
+      unit: survey.unit || (survey.category === 'room' ? 'Room Set' : 'Marla'),
+      sqft: survey.sqft || (survey.category === 'room' ? 250 : 2250),
+      frontWidth: survey.frontWidth || '',
+      depth: survey.depth || '',
+      dimensions: survey.dimensions || '',
+      coveredArea: survey.coveredArea || '',
+      openArea: survey.openArea || '',
+      bedrooms: survey.bedrooms || '',
+      bathrooms: survey.bathrooms || '',
+      kitchen: survey.kitchen || '',
+      drawingRoom: survey.drawingRoom || '',
+      diningRoom: survey.diningRoom || '',
+      floors: survey.floors || '',
+      floorNumber: survey.floorNumber || '',
+      parking: survey.parking || '',
+      furnishingStatus: survey.furnishingStatus || '',
+      balcony: survey.balcony || '',
+      terrace: survey.terrace || '',
+      lift: survey.lift || '',
+      propertyCondition: survey.propertyCondition || '',
+      waterSupply: survey.waterSupply || '',
+      electricity: survey.electricity || '',
+      sewerage: survey.sewerage || '',
+      boundaryWall: survey.boundaryWall || '',
+      gatedSociety: !!survey.gatedSociety,
+      isCorner: !!survey.isCorner,
+      documents: survey.documents || null,
+      nearbyFacilities: survey.nearbyFacilities || [],
       location: survey.locality || 'Tibri Road',
       cityArea: survey.subArea ? `${survey.subArea}, ${survey.locality}, Gurdaspur` : `${survey.locality}, Gurdaspur`,
       description: desc,
       amenities: `${survey.parking || 'Parking'}, ${survey.electricityMeter || 'Sub-Meter'}, Physical GPS Verified Visit, Direct Landlord Deal`,
       imageUrl: images[0],
       images: images,
-      videoUrl: '',
+      videoUrl: survey.videoUrl || (survey.videoFile?.dataUrl ? survey.videoFile.dataUrl : ''),
       badge: 'Field Verified',
       verified: true,
-      facing: 'East'
+      facing: survey.facing || 'East'
     });
     setShowPropertyForm(true);
   };
@@ -1110,6 +1220,20 @@ export default function AdminModal({
                           )}
                         </div>
 
+                        {/* Extended Category-Specific Parameters Section */}
+                        <div className="space-y-3 pt-2">
+                          <PropertyParametersSection
+                            formData={propForm}
+                            onChange={(updated) => setPropForm(updated)}
+                            category={propForm.category}
+                          />
+
+                          <PropertyDocumentsSection
+                            documents={propForm.documents || {}}
+                            onChange={(docs) => setPropForm({ ...propForm, documents: docs })}
+                          />
+                        </div>
+
                         <div>
                           <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Description</label>
                           <textarea
@@ -1450,6 +1574,128 @@ export default function AdminModal({
                                 </div>
                               </div>
 
+                              {/* Parameter Specifications & Dimensions */}
+                              {(survey.frontWidth || survey.coveredArea || survey.bedrooms || survey.propertyCondition || (survey.nearbyFacilities && survey.nearbyFacilities.length > 0)) && (
+                                <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-xs text-slate-700 space-y-2">
+                                  <div className="text-[10px] uppercase font-bold text-blue-800 flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5">
+                                      <Ruler className="w-3.5 h-3.5 text-blue-600" />
+                                      <span>Surveyed Property Parameters & Specifications:</span>
+                                    </div>
+                                    <span className="bg-blue-200 text-blue-900 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase">
+                                      {survey.category || 'Property'}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                                    {(survey.frontWidth || survey.depth || survey.dimensions) && (
+                                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                        <span className="text-slate-400 block text-[9px] font-bold uppercase">Front & Depth</span>
+                                        <span className="font-bold text-slate-800">
+                                          {survey.frontWidth && survey.depth 
+                                            ? `${survey.frontWidth} Ft Front × ${survey.depth} Ft Depth`
+                                            : (survey.dimensions || `${survey.frontWidth || '0'} Ft Frontage`)}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {(survey.coveredArea || survey.openArea) && (
+                                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                        <span className="text-slate-400 block text-[9px] font-bold uppercase">Covered / Open Area</span>
+                                        <span className="font-bold text-slate-800">
+                                          {survey.coveredArea ? `${survey.coveredArea} Sq.Ft` : ''} 
+                                          {survey.openArea ? ` • Open: ${survey.openArea} Sq.Ft` : ''}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {(survey.bedrooms || survey.bathrooms || survey.kitchen || survey.drawingRoom) && (
+                                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                        <span className="text-slate-400 block text-[9px] font-bold uppercase">Room Layout</span>
+                                        <span className="font-bold text-slate-800">
+                                          {survey.bedrooms ? `${survey.bedrooms} Bed` : ''} 
+                                          {survey.bathrooms ? ` • ${survey.bathrooms} Bath` : ''} 
+                                          {survey.kitchen ? ` • ${survey.kitchen}` : ''}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {(survey.furnishingStatus || survey.propertyCondition) && (
+                                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                        <span className="text-slate-400 block text-[9px] font-bold uppercase">Furnishing & Condition</span>
+                                        <span className="font-bold text-slate-800">
+                                          {survey.furnishingStatus || ''} {survey.propertyCondition ? `(${survey.propertyCondition})` : ''}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {(survey.floors || survey.lift || survey.parking) && (
+                                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                        <span className="text-slate-400 block text-[9px] font-bold uppercase">Floors / Parking / Lift</span>
+                                        <span className="font-bold text-slate-800">
+                                          {survey.floors ? `${survey.floors} Floors` : ''} 
+                                          {survey.parking ? ` • ${survey.parking}` : ''} 
+                                          {survey.lift ? ` • Lift: ${survey.lift}` : ''}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {(survey.waterSupply || survey.electricity || survey.sewerage || survey.boundaryWall) && (
+                                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                        <span className="text-slate-400 block text-[9px] font-bold uppercase">Utilities & Wall</span>
+                                        <span className="font-bold text-slate-800">
+                                          {survey.waterSupply || ''} 
+                                          {survey.boundaryWall ? ` • Wall: ${survey.boundaryWall}` : ''}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Badges for Gated Society, Corner, Facilities */}
+                                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                    {survey.isCorner && (
+                                      <span className="text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full">
+                                        Corner Property
+                                      </span>
+                                    )}
+                                    {survey.gatedSociety && (
+                                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                        Gated Society
+                                      </span>
+                                    )}
+                                    {survey.nearbyFacilities && survey.nearbyFacilities.map((fac, idx) => (
+                                      <span key={idx} className="text-[10px] font-medium bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-full shadow-2xs">
+                                        ✓ {fac}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Property Document Verification Checklist */}
+                              {survey.documents && (
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                                  <div className="text-[10px] uppercase font-bold text-slate-600 flex items-center justify-between">
+                                    <span className="flex items-center gap-1.5">
+                                      <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+                                      Document Availability Status (Checked by Field Executive)
+                                    </span>
+                                    <span className="text-[9px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono font-bold">
+                                      8 Documents
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    {DOCUMENT_KEYS.map(doc => {
+                                      const status = survey.documents[doc.id] || 'Not Checked';
+                                      const opt = STATUS_OPTIONS.find(o => o.value === status) || STATUS_OPTIONS[2];
+                                      return (
+                                        <div key={doc.id} className="bg-white p-2 rounded-lg border border-slate-200 text-[11px] flex flex-col justify-between">
+                                          <div className="text-slate-600 font-semibold truncate">{doc.name}</div>
+                                          <span className={`inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded border text-center ${opt.badgeClass}`}>
+                                            {status}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+
                               {survey.notes && (
                                 <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs text-slate-600 italic">
                                   "{survey.notes}"
@@ -1464,17 +1710,26 @@ export default function AdminModal({
                                     <span>Field Photos ({survey.images.length} Photos Captured)</span>
                                   </div>
                                   <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                                    {survey.images.map((img, idx) => (
-                                      <a
-                                        key={idx}
-                                        href={img}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-slate-900 shadow-2xs block"
-                                      >
-                                        <img src={img} alt={`Field photo ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                      </a>
-                                    ))}
+                                    {survey.images.map((img, idx) => {
+                                      const imgUrl = typeof img === 'string' ? img : (img.url || img.dataUrl);
+                                      const imgTag = typeof img === 'object' ? img.tag : '';
+                                      return (
+                                        <a
+                                          key={idx}
+                                          href={imgUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-slate-900 shadow-2xs block"
+                                        >
+                                          <img src={imgUrl} alt={`Field photo ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                          {imgTag && (
+                                            <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] text-white text-center font-bold px-1 py-0.5 truncate">
+                                              {imgTag}
+                                            </span>
+                                          )}
+                                        </a>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
@@ -1655,6 +1910,125 @@ export default function AdminModal({
 
                             </div>
 
+                            {/* Extended Parameters & Dimensions Breakdown */}
+                            {(lead.frontWidth || lead.coveredArea || lead.bedrooms || lead.propertyCondition || (lead.nearbyFacilities && lead.nearbyFacilities.length > 0)) && (
+                              <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-xs text-slate-700 space-y-2">
+                                <div className="text-[10px] uppercase font-bold text-blue-800 flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    <Ruler className="w-3.5 h-3.5 text-blue-600" />
+                                    <span>Detailed Parameters & Living Space:</span>
+                                  </div>
+                                  <span className="bg-blue-200 text-blue-900 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase">
+                                    {lead.category || 'Property'}
+                                  </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                                  {(lead.frontWidth || lead.depth || lead.dimensions) && (
+                                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                      <span className="text-slate-400 block text-[9px] font-bold uppercase">Front & Depth</span>
+                                      <span className="font-bold text-slate-800">
+                                        {lead.frontWidth && lead.depth 
+                                          ? `${lead.frontWidth} Ft Front × ${lead.depth} Ft Depth` 
+                                          : (lead.dimensions || `${lead.frontWidth || '0'} Ft Frontage`)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {(lead.coveredArea || lead.openArea) && (
+                                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                      <span className="text-slate-400 block text-[9px] font-bold uppercase">Covered / Open</span>
+                                      <span className="font-bold text-slate-800">
+                                        {lead.coveredArea ? `${lead.coveredArea} Sq.Ft` : ''}
+                                        {lead.openArea ? ` • Open: ${lead.openArea} Sq.Ft` : ''}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {(lead.bedrooms || lead.bathrooms || lead.kitchen) && (
+                                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                      <span className="text-slate-400 block text-[9px] font-bold uppercase">Rooms</span>
+                                      <span className="font-bold text-slate-800">
+                                        {lead.bedrooms ? `${lead.bedrooms} Bed` : ''}
+                                        {lead.bathrooms ? ` • ${lead.bathrooms} Bath` : ''}
+                                        {lead.kitchen ? ` • ${lead.kitchen}` : ''}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {(lead.furnishingStatus || lead.propertyCondition) && (
+                                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                      <span className="text-slate-400 block text-[9px] font-bold uppercase">Condition</span>
+                                      <span className="font-bold text-slate-800">
+                                        {lead.furnishingStatus || ''} {lead.propertyCondition ? `(${lead.propertyCondition})` : ''}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {(lead.floors || lead.lift || lead.parking) && (
+                                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                      <span className="text-slate-400 block text-[9px] font-bold uppercase">Floors / Parking</span>
+                                      <span className="font-bold text-slate-800">
+                                        {lead.floors ? `${lead.floors} Floors` : ''}
+                                        {lead.parking ? ` • ${lead.parking}` : ''}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {(lead.waterSupply || lead.electricity || lead.sewerage || lead.boundaryWall) && (
+                                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                                      <span className="text-slate-400 block text-[9px] font-bold uppercase">Utilities</span>
+                                      <span className="font-bold text-slate-800">
+                                        {lead.waterSupply || ''} {lead.boundaryWall ? ` • Wall: ${lead.boundaryWall}` : ''}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                  {lead.isCorner && (
+                                    <span className="text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full">
+                                      Corner Property
+                                    </span>
+                                  )}
+                                  {lead.gatedSociety && (
+                                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                      Gated Society
+                                    </span>
+                                  )}
+                                  {lead.nearbyFacilities && lead.nearbyFacilities.map((fac, idx) => (
+                                    <span key={idx} className="text-[10px] font-medium bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded-full shadow-2xs">
+                                      ✓ {fac}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Property Documents Checklist */}
+                            {lead.documents && (
+                              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                                <div className="text-[10px] uppercase font-bold text-slate-600 flex items-center justify-between">
+                                  <span className="flex items-center gap-1.5">
+                                    <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    Property Legal Documents Status (Submitted by Seller)
+                                  </span>
+                                  <span className="text-[9px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono font-bold">
+                                    8 Documents
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                  {DOCUMENT_KEYS.map(doc => {
+                                    const status = lead.documents[doc.id] || 'Not Checked';
+                                    const opt = STATUS_OPTIONS.find(o => o.value === status) || STATUS_OPTIONS[2];
+                                    return (
+                                      <div key={doc.id} className="bg-white p-2 rounded-lg border border-slate-200 text-[11px] flex flex-col justify-between">
+                                        <div className="text-slate-600 font-semibold truncate">{doc.name}</div>
+                                        <span className={`inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded border text-center ${opt.badgeClass}`}>
+                                          {status}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
                             {lead.notes && (
                               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs text-slate-600 italic">
                                 "{lead.notes}"
@@ -1697,18 +2071,23 @@ export default function AdminModal({
                                       className="relative aspect-square rounded-lg overflow-hidden border border-slate-300 shadow-2xs group bg-slate-900"
                                     >
                                       <a 
-                                        href={img} 
+                                        href={typeof img === 'string' ? img : (img?.url || img?.dataUrl || '')} 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
                                         className="block w-full h-full"
                                         title={`View Photo #${i + 1} in full resolution`}
                                       >
-                                        <img src={img} alt={`Upload ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                        <img src={typeof img === 'string' ? img : (img?.url || img?.dataUrl || '')} alt={`Upload ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                                       </a>
                                       
                                       <span className="absolute bottom-0.5 left-0.5 bg-black/75 text-[8px] text-white px-1 rounded font-mono">
                                         #{i + 1}
                                       </span>
+                                      {typeof img === 'object' && img?.tag && (
+                                        <span className="absolute bottom-0 inset-x-0 bg-black/85 text-[7px] text-white text-center font-bold px-0.5 py-0.5 truncate">
+                                          {img.tag}
+                                        </span>
+                                      )}
 
                                       {/* Delete Photo Button (Top Right) */}
                                       <button

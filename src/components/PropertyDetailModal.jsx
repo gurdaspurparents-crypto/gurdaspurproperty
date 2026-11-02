@@ -10,20 +10,40 @@ import {
   Calendar, 
   Compass, 
   CheckCircle2, 
-  Share2,
-  FileCheck,
-  Check,
-  Play,
-  Video,
-  Calculator,
-  Navigation,
-  Clock,
-  Sparkles,
-  FileText,
-  FileCheck2
+  Share2, 
+  FileCheck, 
+  Check, 
+  Play, 
+  Video, 
+  Calculator, 
+  Navigation, 
+  Clock, 
+  Sparkles, 
+  FileText, 
+  FileCheck2,
+  Bed,
+  Bath,
+  UtensilsCrossed,
+  Sofa,
+  Tv,
+  Layers,
+  Car,
+  Zap,
+  Droplets,
+  Warehouse,
+  AlertCircle,
+  HelpCircle,
+  MinusCircle,
+  Building2,
+  Scale,
+  Landmark,
+  Ruler,
+  Trees,
+  CheckCheck
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 import { sendCustomerInquiryNotification } from '../utils/notificationService';
+import { DOCUMENT_KEYS, STATUS_OPTIONS } from './PropertyDocumentsSection';
 
 export default function PropertyDetailModal({ 
   property, 
@@ -32,6 +52,7 @@ export default function PropertyDetailModal({
   onOpenCalculator
 }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [inquirySubmitted, setInquirySubmitted] = useState(false);
@@ -84,9 +105,33 @@ export default function PropertyDetailModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const images = property.images && property.images.length > 0 ? property.images : [
-    "/images/properties/gurdaspur_real_kothi.jpg"
-  ];
+  // Process & normalize images (supporting both string URLs and { url, tag } objects)
+  const rawImages = (property.images && property.images.length > 0) 
+    ? property.images 
+    : [property.imageUrl || "/images/properties/gurdaspur_real_kothi.jpg"];
+
+  const normalizedImages = rawImages.map(img => {
+    if (typeof img === 'string') {
+      return { url: img, tag: '' };
+    }
+    return {
+      url: img.url || img.dataUrl || '',
+      tag: img.tag || ''
+    };
+  }).filter(img => Boolean(img.url));
+
+  const images = normalizedImages.length > 0 
+    ? normalizedImages 
+    : [{ url: "/images/properties/gurdaspur_real_kothi.jpg", tag: "" }];
+
+  // Unique category tags from uploaded photos
+  const availableTags = Array.from(new Set(images.map(img => img.tag).filter(Boolean)));
+
+  const filteredImages = selectedCategoryFilter === 'All'
+    ? images
+    : images.filter(img => img.tag === selectedCategoryFilter);
+
+  const currentDisplayImage = filteredImages[activeImageIndex] || filteredImages[0] || images[0];
 
   const getNearbyLandmarks = (loc) => {
     switch (loc) {
@@ -164,9 +209,22 @@ export default function PropertyDetailModal({
 
   const loanInfo = calculateLoanBreakdown(property.price, property.purpose);
 
+  const whatsappMessage = encodeURIComponent(
+    `Hello! I am interested in ${property.title} (ID: ${property.id}) located at ${property.cityArea || property.location}.\nPrice: ${property.pricePerUnit || formatPrice(property.price, property.purpose)}.\nPlease arrange a site visit and share details.`
+  );
+
   const whatsappFardMessage = encodeURIComponent(
     `Hello! I want the Jamabandi Fard & Video Walkthrough for:\n\n*${property.title}*\n• ID: ${property.id}\n• Location: ${property.location} (${property.cityArea})\n• Price: ${property.pricePerUnit || formatPrice(property.price, property.purpose)}\n\nPlease share the revenue mutation papers & video.`
   );
+
+  const isResidential = property.category === 'kothi' || property.category === 'room' || property.category === 'rent' || Boolean(property.bedrooms);
+  const isPlotOrLand = property.category === 'plot' || property.category === 'land';
+  const isCommercial = property.category === 'commercial';
+
+  // Area & Dimensions formulation
+  const displayDimensions = property.frontWidth && property.depth
+    ? `${property.frontWidth} Ft Front × ${property.depth} Ft Depth`
+    : (property.dimensions || (property.frontWidth ? `${property.frontWidth} Ft Frontage` : 'Standard Demarcation'));
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
@@ -177,7 +235,7 @@ export default function PropertyDetailModal({
         
         {/* Sticky Header with Close */}
         <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded">
               {property.id}
             </span>
@@ -188,6 +246,16 @@ export default function PropertyDetailModal({
               <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
                 Verified Title
+              </span>
+            )}
+            {property.isCorner && (
+              <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                Corner Property
+              </span>
+            )}
+            {property.gatedSociety && (
+              <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                Gated Society
               </span>
             )}
           </div>
@@ -214,29 +282,75 @@ export default function PropertyDetailModal({
 
           {/* Image Showcase */}
           <div className="mb-6">
-            <div className="relative h-72 sm:h-96 rounded-2xl overflow-hidden bg-slate-100 shadow-md">
+            <div className="relative h-72 sm:h-96 rounded-2xl overflow-hidden bg-slate-900 shadow-md">
               <img 
-                src={images[activeImageIndex]} 
+                src={currentDisplayImage.url} 
                 alt={property.title}
                 className="w-full h-full object-cover transition-all duration-300"
               />
-              <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full">
-                {activeImageIndex + 1} / {images.length}
+              
+              {/* Category Tag Badge */}
+              {currentDisplayImage.tag && (
+                <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-lg border border-white/20 shadow-xs flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{currentDisplayImage.tag}</span>
+                </div>
+              )}
+
+              <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full font-mono">
+                {activeImageIndex + 1} / {filteredImages.length}
               </div>
             </div>
 
+            {/* Category Filter Pills (if multiple categories available) */}
+            {availableTags.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-3 overflow-x-auto pb-1">
+                <span className="text-[11px] font-bold uppercase text-slate-400 shrink-0 mr-1">Views:</span>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedCategoryFilter('All'); setActiveImageIndex(0); }}
+                  className={`text-xs px-2.5 py-1 rounded-lg font-bold transition-all shrink-0 cursor-pointer ${
+                    selectedCategoryFilter === 'All' 
+                      ? 'bg-slate-900 text-white shadow-xs' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  All ({images.length})
+                </button>
+                {availableTags.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => { setSelectedCategoryFilter(tag); setActiveImageIndex(0); }}
+                    className={`text-xs px-2.5 py-1 rounded-lg font-bold transition-all shrink-0 cursor-pointer ${
+                      selectedCategoryFilter === tag 
+                        ? 'bg-emerald-600 text-white shadow-xs' 
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {tag} ({images.filter(i => i.tag === tag).length})
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Thumbnail list */}
-            {images.length > 1 && (
-              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                {images.map((img, idx) => (
+            {filteredImages.length > 1 && (
+              <div className="flex gap-2 mt-2.5 overflow-x-auto pb-1">
+                {filteredImages.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`w-20 h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
-                      activeImageIndex === idx ? 'border-emerald-600 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
+                    className={`relative w-20 h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                      activeImageIndex === idx ? 'border-emerald-600 scale-105 shadow-xs' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="thumb" className="w-full h-full object-cover" />
+                    <img src={img.url} alt="thumb" className="w-full h-full object-cover" />
+                    {img.tag && (
+                      <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] text-white text-center font-semibold truncate px-0.5">
+                        {img.tag}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -251,7 +365,7 @@ export default function PropertyDetailModal({
                   </div>
                   <div>
                     <div className="text-xs font-bold text-purple-950">Property Video Walkthrough Available</div>
-                    <div className="text-[10px] text-purple-700">Watch verified virtual tour of this property</div>
+                    <div className="text-[10px] text-purple-700">Watch full recorded walkthrough virtual tour</div>
                   </div>
                 </div>
                 <a
@@ -272,7 +386,7 @@ export default function PropertyDetailModal({
             <div>
               <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold mb-1">
                 <MapPin className="w-4 h-4 text-emerald-600" />
-                <span>{property.cityArea}</span>
+                <span>{property.cityArea || `${property.location}, Gurdaspur`}</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-bold font-['Outfit'] text-slate-900">
                 {property.title}
@@ -296,10 +410,10 @@ export default function PropertyDetailModal({
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
               <div className="text-xs text-slate-400 font-bold uppercase">Land / Plot Size</div>
               <div className="text-base font-black text-slate-800 mt-0.5">
-                {property.size} {property.unit}
+                {property.size} {property.unit || 'Marla'}
               </div>
               <div className="text-[11px] text-slate-500">
-                {property.sqft ? `${property.sqft.toLocaleString()} Sq.Ft` : 'Approx. dimensions'}
+                {property.sqft ? `${Number(property.sqft).toLocaleString()} Sq.Ft` : 'Standard area'}
               </div>
             </div>
 
@@ -320,11 +434,293 @@ export default function PropertyDetailModal({
             </div>
 
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
-              <div className="text-xs text-slate-400 font-bold uppercase">Loan Eligibility</div>
-              <div className="text-base font-bold text-slate-800 mt-0.5">
-                Up to 80%
+              <div className="text-xs text-slate-400 font-bold uppercase">Road Width</div>
+              <div className="text-base font-bold text-slate-800 mt-0.5 truncate">
+                {property.roadWidth || '30 Feet Road'}
               </div>
-              <div className="text-[11px] text-slate-500">Major Banks (SBI, HDFC)</div>
+              <div className="text-[11px] text-slate-500">Wide Vehicle Access</div>
+            </div>
+          </div>
+
+          {/* COMPREHENSIVE PROPERTY SPECIFICATIONS */}
+          <div className="mb-8 p-5 bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl border border-slate-200/80 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 font-['Outfit'] flex items-center gap-2">
+                <Ruler className="w-4 h-4 text-blue-600" />
+                <span>Property Parameters & Dimensions</span>
+              </h3>
+              <span className="text-[10px] font-bold uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                {property.category} Specifications
+              </span>
+            </div>
+
+            {/* Dimensions & Area Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Dimensions</span>
+                <span className="text-xs font-bold text-slate-800 mt-0.5 block">{displayDimensions}</span>
+              </div>
+
+              {(property.coveredArea || property.openArea) ? (
+                <>
+                  {property.coveredArea && (
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Covered Area</span>
+                      <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.coveredArea} Sq.Ft</span>
+                    </div>
+                  )}
+                  {property.openArea && (
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Open Area / Lawn</span>
+                      <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.openArea} Sq.Ft</span>
+                    </div>
+                  )}
+                </>
+              ) : null}
+
+              {property.frontWidth && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Road Frontage</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.frontWidth} Feet</span>
+                </div>
+              )}
+
+              {property.depth && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Plot Depth</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.depth} Feet</span>
+                </div>
+              )}
+
+              {property.floors && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Total Storeys</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.floors}</span>
+                </div>
+              )}
+
+              {property.floorNumber && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Floor Number</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.floorNumber}</span>
+                </div>
+              )}
+
+              {property.parking && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Parking</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.parking}</span>
+                </div>
+              )}
+
+              {property.furnishingStatus && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Furnishing</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.furnishingStatus}</span>
+                </div>
+              )}
+
+              {property.propertyCondition && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Condition</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.propertyCondition}</span>
+                </div>
+              )}
+
+              {property.constructionYear && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Built Year</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.constructionYear}</span>
+                </div>
+              )}
+
+              {property.lift && (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Lift Facility</span>
+                  <span className="text-xs font-bold text-slate-800 mt-0.5 block">{property.lift}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Room Layout Row (When residential layout is available) */}
+            {(property.bedrooms || property.bathrooms || property.kitchen || property.drawingRoom || property.diningRoom) && (
+              <div className="pt-2 border-t border-slate-200/80">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 block">
+                  Living & Room Configuration
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                  {property.bedrooms && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200">
+                      <Bed className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Bedrooms</div>
+                        <div className="font-bold text-slate-800">{property.bedrooms}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {property.bathrooms && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200">
+                      <Bath className="w-4 h-4 text-blue-600 shrink-0" />
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Bathrooms</div>
+                        <div className="font-bold text-slate-800">{property.bathrooms}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {property.kitchen && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200">
+                      <UtensilsCrossed className="w-4 h-4 text-amber-600 shrink-0" />
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Kitchen</div>
+                        <div className="font-bold text-slate-800">{property.kitchen}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {property.drawingRoom && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200">
+                      <Sofa className="w-4 h-4 text-purple-600 shrink-0" />
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Drawing Room</div>
+                        <div className="font-bold text-slate-800">{property.drawingRoom}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {property.diningRoom && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200">
+                      <UtensilsCrossed className="w-4 h-4 text-teal-600 shrink-0" />
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Dining Room</div>
+                        <div className="font-bold text-slate-800">{property.diningRoom}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Utilities & Infrastructure Row */}
+            {(property.waterSupply || property.electricity || property.sewerage || property.boundaryWall) && (
+              <div className="pt-2 border-t border-slate-200/80">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 block">
+                  Infrastructure & Utilities
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  {property.waterSupply && (
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                      <div className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                        <Droplets className="w-3 h-3 text-blue-500" />
+                        <span>Water Supply</span>
+                      </div>
+                      <div className="font-bold text-slate-800 mt-0.5">{property.waterSupply}</div>
+                    </div>
+                  )}
+                  {property.electricity && (
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                      <div className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-amber-500" />
+                        <span>Electricity</span>
+                      </div>
+                      <div className="font-bold text-slate-800 mt-0.5">{property.electricity}</div>
+                    </div>
+                  )}
+                  {property.sewerage && (
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">Sewerage</div>
+                      <div className="font-bold text-slate-800 mt-0.5">{property.sewerage}</div>
+                    </div>
+                  )}
+                  {property.boundaryWall && (
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">Boundary Wall</div>
+                      <div className="font-bold text-slate-800 mt-0.5">{property.boundaryWall}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Nearby Facilities Tags */}
+            {property.nearbyFacilities && property.nearbyFacilities.length > 0 && (
+              <div className="pt-2 border-t border-slate-200/80">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 block">
+                  Nearby Facilities & Conveniences
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {property.nearbyFacilities.map((facility, idx) => (
+                    <span 
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 shadow-2xs"
+                    >
+                      <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{facility}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* PROPERTY LEGAL DOCUMENT PARAMETERS STATUS CHECKLIST */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600 font-['Outfit'] flex items-center gap-1.5">
+                <FileCheck2 className="w-4 h-4 text-emerald-600" />
+                <span>Property Document Verification & Legal Status</span>
+              </h3>
+              <span className="text-[10px] text-emerald-800 bg-emerald-100 font-bold px-2.5 py-0.5 rounded-full">
+                8-Point Document Checklist
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {DOCUMENT_KEYS.map((doc) => {
+                // Determine document status: read explicit documents object or provide verified defaults
+                const status = property.documents?.[doc.id] || (
+                  doc.id === 'registry' || doc.id === 'ownershipProof'
+                    ? (property.verified ? 'Available' : 'Not Checked')
+                    : doc.id === 'legalDispute'
+                    ? 'Available'
+                    : doc.id === 'bankLoan'
+                    ? (property.price ? 'Available' : 'Not Checked')
+                    : 'Not Checked'
+                );
+
+                const opt = STATUS_OPTIONS.find(o => o.value === status) || STATUS_OPTIONS[2];
+                const StatusIcon = status === 'Available' 
+                  ? CheckCircle2 
+                  : status === 'Not Available' 
+                  ? AlertCircle 
+                  : status === 'Not Checked' 
+                  ? HelpCircle 
+                  : MinusCircle;
+
+                return (
+                  <div 
+                    key={doc.id} 
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/90 hover:border-emerald-300 transition-colors flex flex-col justify-between space-y-2 shadow-2xs"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-slate-800 line-clamp-1">{doc.name}</span>
+                        <doc.icon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{doc.punjabiDesc}</p>
+                    </div>
+
+                    <div className="pt-1.5 border-t border-slate-200/60 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Status:</span>
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border ${opt.badgeClass}`}>
+                        <StatusIcon className="w-3 h-3" />
+                        <span>{status}</span>
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -339,19 +735,21 @@ export default function PropertyDetailModal({
           </div>
 
           {/* Key Amenities */}
-          <div className="mb-8">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 font-['Outfit']">
-              Features & Amenities
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {property.amenities?.map((amenity, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100 text-xs font-semibold text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{amenity}</span>
-                </div>
-              ))}
+          {property.amenities && property.amenities.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 font-['Outfit']">
+                Features & Amenities
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {property.amenities.map((amenity, idx) => (
+                  <div key={idx} className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100 text-xs font-semibold text-slate-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{amenity}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* MagicBricks & 99acres Signature: Nearby Landmarks & Driving Distances Widget */}
           <div className="mb-8">

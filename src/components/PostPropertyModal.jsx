@@ -26,12 +26,57 @@ import {
 import { addLead } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 import { sendPropertyPostNotification } from '../utils/notificationService';
+import PropertyParametersSection from './PropertyParametersSection';
+import PropertyDocumentsSection from './PropertyDocumentsSection';
+import PropertyMediaSection from './PropertyMediaSection';
 
 export default function PostPropertyModal({ isOpen, onClose, settings }) {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoFile, setVideoFile] = useState(null); // { name, size, dataUrl }
+  const [propertyParams, setPropertyParams] = useState({
+    title: '',
+    size: '10',
+    unit: 'Marla',
+    frontWidth: '30 Ft',
+    depth: '75 Ft',
+    coveredArea: '2250',
+    openArea: '400',
+    facing: 'East',
+    roadWidth: '30 Feet Wide Road',
+    isCorner: false,
+    bedrooms: '3',
+    bathrooms: '3',
+    kitchen: 'Modular Kitchen',
+    drawingRoom: 'Separate Drawing Room',
+    diningRoom: 'Attached Dining Area',
+    floors: 'Double Story (G+1)',
+    floorNumber: 'Full Independent House',
+    parking: 'Covered Car Porch + 2-Wheeler',
+    furnishingStatus: 'Semi-Furnished',
+    balcony: 'Front Balcony',
+    terrace: 'Private Independent Terrace',
+    lift: 'Not Available',
+    propertyCondition: 'Brand New / Ready to Move',
+    waterSupply: '24x7 Submersible / Borewell',
+    electricity: 'Domestic 24x7 Connection',
+    sewerage: 'Underground Municipal Sewerage',
+    boundaryWall: 'Four-Wall Constructed',
+    gatedSociety: false,
+    nearbyFacilities: ['School (within 1km)', 'Main Bus Stand']
+  });
+
+  const [documents, setDocuments] = useState({
+    registry: 'Available',
+    ownershipProof: 'Available',
+    approvedMap: 'Not Checked',
+    noc: 'Not Checked',
+    propertyTax: 'Not Checked',
+    electricityConnection: 'Available',
+    bankLoan: 'Available',
+    legalDispute: 'Available'
+  });
   const [formData, setFormData] = useState({
     // Basic Property Details
     purpose: 'sell', // 'sell' | 'rent'
@@ -160,12 +205,17 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       alert("Please enter your full name and phone number.");
       return;
     }
-    if (!formData.size || !formData.expectedPrice) {
+    const effectiveSize = propertyParams.size || formData.size;
+    if (!effectiveSize || !formData.expectedPrice) {
       alert("Please enter the property size and expected price.");
       return;
     }
 
     setIsSubmitting(true);
+
+    const finalDimensions = propertyParams.frontWidth && propertyParams.depth 
+      ? `${propertyParams.frontWidth} Front × ${propertyParams.depth} Depth` 
+      : formData.dimensions;
 
     const leadPayload = {
       name: formData.sellerName,
@@ -177,10 +227,37 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       locality: formData.locality,
       subArea: formData.subArea,
       exactLocation: formData.exactLocation || 'Shared on Call/WhatsApp',
-      size: `${formData.size} ${formData.unit}`,
-      dimensions: formData.dimensions,
-      roadWidth: formData.roadWidth,
-      facing: formData.facing,
+      title: propertyParams.title?.trim() || `${effectiveSize} ${propertyParams.unit || formData.unit} ${formData.category} in ${formData.locality}`,
+      size: `${effectiveSize} ${propertyParams.unit || formData.unit}`,
+      unit: propertyParams.unit || formData.unit,
+      frontWidth: propertyParams.frontWidth || '',
+      depth: propertyParams.depth || '',
+      dimensions: finalDimensions,
+      coveredArea: propertyParams.coveredArea || '',
+      openArea: propertyParams.openArea || '',
+      bedrooms: propertyParams.bedrooms || '',
+      bathrooms: propertyParams.bathrooms || '',
+      kitchen: propertyParams.kitchen || '',
+      drawingRoom: propertyParams.drawingRoom || '',
+      diningRoom: propertyParams.diningRoom || '',
+      floors: propertyParams.floors || '',
+      floorNumber: propertyParams.floorNumber || '',
+      parking: propertyParams.parking || '',
+      furnishingStatus: propertyParams.furnishingStatus || '',
+      balcony: propertyParams.balcony || '',
+      terrace: propertyParams.terrace || '',
+      lift: propertyParams.lift || '',
+      propertyCondition: propertyParams.propertyCondition || '',
+      waterSupply: propertyParams.waterSupply || '',
+      electricity: propertyParams.electricity || '',
+      sewerage: propertyParams.sewerage || '',
+      boundaryWall: propertyParams.boundaryWall || '',
+      gatedSociety: !!propertyParams.gatedSociety,
+      isCorner: !!propertyParams.isCorner,
+      nearbyFacilities: propertyParams.nearbyFacilities || [],
+      documents: documents,
+      roadWidth: propertyParams.roadWidth || formData.roadWidth,
+      facing: propertyParams.facing || formData.facing,
       registryStatus: formData.registryStatus,
       price: formData.expectedPrice,
       isNegotiable: formData.isNegotiable,
@@ -429,55 +506,13 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                 </div>
               </div>
 
-              {/* SECTION 2: Specifications & Pricing */}
+              {/* SECTION 2: Pricing & Commercial Terms */}
               <div className="space-y-4">
                 <div className="border-b border-slate-100 pb-2">
                   <h3 className="text-sm font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
-                    <Maximize2 className="w-4 h-4 text-[#005ca8]" />
-                    <span>Specifications & Pricing</span>
+                    <IndianRupee className="w-4 h-4 text-[#005ca8]" />
+                    <span>Price Demand & Terms</span>
                   </h3>
-                </div>
-
-                {/* Size & Dimensions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Property Size *
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        required
-                        placeholder="e.g. 10 or 1500"
-                        value={formData.size}
-                        onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
-                      />
-                      <select
-                        value={formData.unit}
-                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                        className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
-                      >
-                        <option value="Marla">Marla</option>
-                        <option value="Kanal">Kanal</option>
-                        <option value="Sq.Yd">Sq. Yards (Gaj)</option>
-                        <option value="Sq.Ft">Sq. Feet</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Dimensions (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 30 x 75 ft"
-                      value={formData.dimensions}
-                      onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
                 </div>
 
                 {/* Price */}
@@ -511,71 +546,14 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                   </div>
                 </div>
 
-                {/* Road Width, Facing & Registry Status */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Road Width in Front
-                    </label>
-                    <select
-                      value={formData.roadWidth}
-                      onChange={(e) => setFormData({ ...formData, roadWidth: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
-                    >
-                      <option value="30 Feet Wide Road">30 Feet Road</option>
-                      <option value="35 Feet Wide Road">35 Feet Road</option>
-                      <option value="40 Feet Wide Road">40 Feet Road</option>
-                      <option value="60+ Feet Main Highway">60+ Feet Highway Road</option>
-                      <option value="20-25 Feet Colony Road">20-25 Feet Colony Road</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                      <Compass className="w-3.5 h-3.5 text-blue-600" />
-                      Facing Direction
-                    </label>
-                    <select
-                      value={formData.facing}
-                      onChange={(e) => setFormData({ ...formData, facing: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
-                    >
-                      <option value="East">East (Sunlight)</option>
-                      <option value="North">North (Vastu)</option>
-                      <option value="North-East">North-East</option>
-                      <option value="West">West</option>
-                      <option value="South">South</option>
-                      <option value="North-West">North-West</option>
-                      <option value="South-East">South-East</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                      <FileCheck2 className="w-3.5 h-3.5 text-blue-600" />
-                      Registry Status
-                    </label>
-                    <select
-                      value={formData.registryStatus}
-                      onChange={(e) => setFormData({ ...formData, registryStatus: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
-                    >
-                      <option value="100% Clean Registry & Mutation">Clear Registry & Mutation</option>
-                      <option value="Colony Demarcation (Plot Pillars Done)">Colony Demarcation & Pillars</option>
-                      <option value="Direct Registry from Landlord">Direct Landlord Registry</option>
-                      <option value="Power of Attorney (POA)">Power of Attorney (POA)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Additional Remarks */}
+                {/* Remarks */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Property Description & Remarks (Optional)
                   </label>
                   <textarea
                     rows="2"
-                    placeholder="e.g. Corner plot, 2 sides open, borewell connection, modular kitchen, immediate possession..."
+                    placeholder="e.g. Corner property, 2 sides open, borewell connection, modular kitchen, immediate possession..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
@@ -583,176 +561,35 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                 </div>
               </div>
 
-              {/* SECTION 3: Photos & Video Walkthrough */}
+              {/* SECTION 3: Detailed Property Parameters (Smart Category Filtered) */}
               <div className="space-y-4">
-                <div className="border-b border-slate-100 pb-2">
-                  <h3 className="text-sm font-extrabold text-slate-900 font-['Outfit'] flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-[#005ca8]" />
-                    <span>Property Photos & Video</span>
-                  </h3>
-                </div>
+                <PropertyParametersSection
+                  formData={propertyParams}
+                  onChange={setPropertyParams}
+                  category={formData.category}
+                />
+              </div>
 
-                {/* Photo Upload Area */}
-                <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-1.5">
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <ImageIcon className="w-4 h-4 text-[#005ca8]" />
-                      <span>Upload Property Photos</span>
-                    </label>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full">
-                      {uploadedImages.length} / {MAX_PHOTOS} Photos Added
-                    </span>
-                  </div>
+              {/* SECTION 4: Property Document Status Checklist */}
+              <div className="space-y-4">
+                <PropertyDocumentsSection
+                  documents={documents}
+                  onChange={setDocuments}
+                />
+              </div>
 
-                  <p className="text-[11px] text-slate-500">
-                    Add clear photos of the front elevation, road view, interiors, or boundary pillars. Listings with photos receive up to 5x higher buyer interest.
-                  </p>
-
-                  <div className="flex items-center gap-3">
-                    <label className={`flex-1 flex items-center justify-center gap-2 border-2 border-dashed rounded-xl p-3 transition-all cursor-pointer ${
-                      uploadedImages.length >= MAX_PHOTOS 
-                        ? 'border-slate-200 bg-slate-100 cursor-not-allowed opacity-60' 
-                        : 'border-blue-300 hover:border-blue-500 bg-blue-50/50 hover:bg-blue-50'
-                    }`}>
-                      {isCompressing ? (
-                        <>
-                          <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
-                          <span className="text-xs font-bold text-blue-700">Processing Photos...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 text-blue-600" />
-                          <span className="text-xs font-bold text-blue-700">
-                            {uploadedImages.length >= MAX_PHOTOS ? "15 Photo Limit Reached" : "Select Photos From Device"}
-                          </span>
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        disabled={uploadedImages.length >= MAX_PHOTOS || isCompressing}
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-
-                  {/* Thumbnail Gallery Preview Grid */}
-                  {uploadedImages.length > 0 && (
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 pt-2">
-                      {uploadedImages.map((img, idx) => (
-                        <div key={idx} className="relative aspect-4/3 rounded-xl overflow-hidden border border-slate-300 shadow-2xs group">
-                          <img 
-                            src={img} 
-                            alt={`Upload ${idx + 1}`} 
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(idx)}
-                            className="absolute top-1 right-1 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center opacity-90 hover:opacity-100 hover:scale-110 transition-all text-xs shadow-sm cursor-pointer"
-                            title="Remove Photo"
-                          >
-                            ×
-                          </button>
-                          <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-md">
-                            #{idx + 1}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-100">
-                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Photos in your gallery? You can also forward them directly to our consultant on WhatsApp after submission.</span>
-                  </div>
-                </div>
-
-                {/* Video Walkthrough Module */}
-                <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-1.5">
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <Video className="w-4 h-4 text-rose-600" />
-                      <span>Property Video Walkthrough</span>
-                    </label>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full">
-                      High Buyer Response
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] text-slate-500">
-                    Add a walkthrough video clip or link. Properties with video receive 3x faster buyer inquiries.
-                  </p>
-
-                  {/* Option 1: Walkthrough Video Link */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
-                      <ExternalLink className="w-3 h-3 text-[#005ca8]" />
-                      <span>Walkthrough Video Link (YouTube / Google Drive / Reels):</span>
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://youtu.be/... or Google Drive video link"
-                      value={formData.videoUrl}
-                      onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  {/* Option 2: Upload Video File or Send on WhatsApp */}
-                  <div className="pt-2 border-t border-slate-200/70">
-                    <div className="text-[11px] font-bold text-slate-700 mb-2 flex items-center gap-1">
-                      <FileVideo className="w-3 h-3 text-purple-600" />
-                      <span>Or Attach Video File Directly:</span>
-                    </div>
-
-                    {videoFile ? (
-                      <div className="bg-white p-3 rounded-xl border border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
-                        <div className="flex items-center gap-2.5 overflow-hidden w-full">
-                          <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
-                            <Film className="w-5 h-5" />
-                          </div>
-                          <div className="overflow-hidden">
-                            <div className="text-xs font-bold text-slate-900 truncate">{videoFile.name}</div>
-                            <div className="text-[10px] text-slate-500 font-medium">{videoFile.size} • Video clip attached successfully</div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleRemoveVideo}
-                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors shrink-0 cursor-pointer"
-                        >
-                          Remove Video
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <label className="flex items-center justify-center gap-2 border border-slate-300 hover:border-purple-500 rounded-xl p-3 bg-white hover:bg-purple-50/30 transition-all cursor-pointer">
-                          <Upload className="w-4 h-4 text-purple-600 shrink-0" />
-                          <span className="text-xs font-bold text-slate-700">Upload Video (Max 25MB)</span>
-                          <input
-                            type="file"
-                            accept="video/*"
-                            onChange={handleVideoUpload}
-                            className="hidden"
-                          />
-                        </label>
-
-                        <a
-                          href={`https://wa.me/${cleanAdminPhone}?text=${encodeURIComponent(`Hello! I want to share my property video walkthrough directly on WhatsApp for listing on GurdaspurProperty.in.`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 border border-emerald-200 hover:border-emerald-500 rounded-xl p-3 bg-emerald-50/50 hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-all text-center"
-                        >
-                          <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Send Video on WhatsApp</span>
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
+              {/* SECTION 5: Categorized Photos & Walkthrough Video */}
+              <div className="space-y-4">
+                <PropertyMediaSection
+                  images={uploadedImages}
+                  onImagesChange={setUploadedImages}
+                  videoFile={videoFile}
+                  onVideoFileChange={setVideoFile}
+                  videoUrl={formData.videoUrl}
+                  onVideoUrlChange={(val) => setFormData({ ...formData, videoUrl: val })}
+                  category={formData.category}
+                  maxImages={15}
+                />
               </div>
 
               {/* SECTION 4: Contact Information */}

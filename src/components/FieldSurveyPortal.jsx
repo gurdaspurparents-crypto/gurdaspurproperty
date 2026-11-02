@@ -31,6 +31,9 @@ import {
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 import { addLead } from '../utils/storage';
 import { sendFieldSurveyNotification } from '../utils/notificationService';
+import PropertyParametersSection from './PropertyParametersSection';
+import PropertyDocumentsSection from './PropertyDocumentsSection';
+import PropertyMediaSection from './PropertyMediaSection';
 
 export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogout }) {
   // Executive Identity
@@ -59,11 +62,50 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
   const [alternatePhone, setAlternatePhone] = useState('');
   const [ownerRole, setOwnerRole] = useState('Direct Landlord / Owner');
 
-  // Specifications
-  const [size, setSize] = useState('1 Room Set');
-  const [dimensions, setDimensions] = useState('');
-  const [roadWidth, setRoadWidth] = useState('30 Feet Road');
-  const [facing, setFacing] = useState('East');
+  // Comprehensive Property Parameters
+  const [propertyParams, setPropertyParams] = useState({
+    title: '',
+    size: '1 Room Set',
+    unit: 'Room Set',
+    frontWidth: '15 Ft',
+    depth: '25 Ft',
+    coveredArea: '375',
+    openArea: '',
+    facing: 'East',
+    roadWidth: '30 Feet Wide Road',
+    isCorner: false,
+    bedrooms: '1',
+    bathrooms: '1',
+    kitchen: 'Attached Kitchen',
+    drawingRoom: 'None',
+    diningRoom: 'None',
+    floors: 'Single Story (Ground)',
+    floorNumber: 'Ground Floor',
+    parking: '2-Wheeler Covered',
+    furnishingStatus: 'Semi-Furnished',
+    balcony: 'None',
+    terrace: 'Shared Terrace',
+    lift: 'Not Available',
+    propertyCondition: 'Well Maintained (1-5 Years)',
+    waterSupply: '24x7 Submersible / Borewell',
+    electricity: 'Domestic 24x7 Connection',
+    sewerage: 'Underground Municipal Sewerage',
+    boundaryWall: 'Four-Wall Constructed',
+    gatedSociety: false,
+    nearbyFacilities: ['Main Bus Stand', 'Local Market / Chowk']
+  });
+
+  // Property Documents Verification Checklist
+  const [documents, setDocuments] = useState({
+    registry: 'Available',
+    ownershipProof: 'Available',
+    approvedMap: 'Not Checked',
+    noc: 'Not Checked',
+    propertyTax: 'Not Checked',
+    electricityConnection: 'Available',
+    bankLoan: 'Available',
+    legalDispute: 'Available'
+  });
   const [expectedPrice, setExpectedPrice] = useState('');
   const [isNegotiable, setIsNegotiable] = useState(true);
 
@@ -222,6 +264,11 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
 
     setIsSubmitting(true);
 
+    const finalTitle = propertyParams.title?.trim() || `${propertyParams.size || '10 Marla'} ${purpose === 'rent' ? 'for Rent' : 'for Sale'} in ${locality}`;
+    const finalDimensions = propertyParams.frontWidth && propertyParams.depth 
+      ? `${propertyParams.frontWidth} Front × ${propertyParams.depth} Depth` 
+      : dimensions.trim();
+
     const surveyData = {
       name: ownerName.trim(),
       phone: ownerPhone.trim(),
@@ -237,16 +284,41 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
       locality,
       subArea: subArea.trim(),
       exactLocation: exactLocation.trim() || subArea.trim() || locality,
-      size,
-      dimensions: dimensions.trim(),
-      roadWidth,
-      facing,
+      title: finalTitle,
+      size: propertyParams.size || '10 Marla',
+      unit: propertyParams.unit || (category === 'land' ? 'Kanal' : 'Marla'),
+      frontWidth: propertyParams.frontWidth || '',
+      depth: propertyParams.depth || '',
+      dimensions: finalDimensions,
+      coveredArea: propertyParams.coveredArea || '',
+      openArea: propertyParams.openArea || '',
+      bedrooms: propertyParams.bedrooms || '',
+      bathrooms: propertyParams.bathrooms || '',
+      kitchen: propertyParams.kitchen || kitchenWashroom || '',
+      drawingRoom: propertyParams.drawingRoom || '',
+      diningRoom: propertyParams.diningRoom || '',
+      floors: propertyParams.floors || '',
+      floorNumber: propertyParams.floorNumber || '',
+      parking: propertyParams.parking || parking || '',
+      furnishingStatus: propertyParams.furnishingStatus || '',
+      balcony: propertyParams.balcony || '',
+      terrace: propertyParams.terrace || '',
+      lift: propertyParams.lift || '',
+      propertyCondition: propertyParams.propertyCondition || '',
+      waterSupply: propertyParams.waterSupply || waterSupply || '',
+      electricity: propertyParams.electricity || electricityMeter || '',
+      sewerage: propertyParams.sewerage || '',
+      boundaryWall: propertyParams.boundaryWall || '',
+      gatedSociety: !!propertyParams.gatedSociety,
+      isCorner: !!propertyParams.isCorner,
+      nearbyFacilities: propertyParams.nearbyFacilities || [],
+      documents: documents,
+      roadWidth: propertyParams.roadWidth || roadWidth,
+      facing: propertyParams.facing || facing,
       price: expectedPrice,
       isNegotiable,
       securityDeposit: purpose === 'rent' ? securityDeposit : null,
       electricityMeter: purpose === 'rent' ? electricityMeter : null,
-      waterSupply: purpose === 'rent' ? waterSupply : null,
-      parking,
       tenantPreference: purpose === 'rent' ? tenantPreference : null,
       kitchenWashroom: purpose === 'rent' ? kitchenWashroom : null,
       availableFrom,
@@ -389,7 +461,7 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
                 <User className="w-3.5 h-3.5 text-emerald-600" />
                 Step 1: Executive ID & On-Site GPS Proof
               </span>
-              <span className="text-[10px] text-slate-400">1 of 5</span>
+              <span className="text-[10px] text-slate-400">1 of 7</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -474,7 +546,7 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
                 <Home className="w-3.5 h-3.5 text-blue-600" />
                 Step 2: Listing Purpose, Category & Price
               </span>
-              <span className="text-[10px] text-slate-400">2 of 5</span>
+              <span className="text-[10px] text-slate-400">2 of 7</span>
             </div>
 
             {/* Purpose: Rent vs Sell */}
@@ -725,14 +797,69 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
             )}
           </div>
 
-          {/* Section 3: Landlord / Owner Contact & Exact Address */}
+          {/* Section 3: Detailed Property Parameters (Smart Category Filtered) */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-blue-600" />
+                Step 3: Property Specifications & Amenities
+              </span>
+              <span className="text-[10px] text-slate-400">3 of 7</span>
+            </div>
+
+            <PropertyParametersSection 
+              formData={propertyParams} 
+              onChange={setPropertyParams} 
+              category={category} 
+            />
+          </div>
+
+          {/* Section 4: Property Document Verification Parameters */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                Step 4: Legal Documents & Title Verification
+              </span>
+              <span className="text-[10px] text-slate-400">4 of 7</span>
+            </div>
+
+            <PropertyDocumentsSection 
+              documents={documents} 
+              onChange={setDocuments} 
+            />
+          </div>
+
+          {/* Section 5: MEDIA CAPTURE — CATEGORIZED PHOTOS & WALKTHROUGH VIDEO */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-rose-500" />
+                Step 5: Categorized Photos & Walkthrough Video
+              </span>
+              <span className="text-[10px] text-slate-400">5 of 7</span>
+            </div>
+
+            <PropertyMediaSection
+              images={uploadedImages}
+              onImagesChange={setUploadedImages}
+              videoFile={videoFile}
+              onVideoFileChange={setVideoFile}
+              videoUrl={videoUrl}
+              onVideoUrlChange={setVideoUrl}
+              category={category}
+              maxImages={15}
+            />
+          </div>
+
+          {/* Section 6: Landlord / Owner Contact & Exact Address */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                Step 3: Landlord Contact & Location
+                Step 6: Landlord Contact & Location
               </span>
-              <span className="text-[10px] text-slate-400">3 of 5</span>
+              <span className="text-[10px] text-slate-400">6 of 7</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -842,165 +969,14 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
             </div>
           </div>
 
-          {/* Section 4: MEDIA CAPTURE — BOTH PHOTOS & WALKTHROUGH VIDEO */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                <Camera className="w-3.5 h-3.5 text-rose-500" />
-                Step 4: Media Capture (Photos & Video)
-              </span>
-              <span className="text-[10px] text-slate-400">4 of 5</span>
-            </div>
-
-            {/* Part A: Photos */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Camera className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Property Photos (Camera / Gallery)</span>
-                </label>
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full">
-                  {uploadedImages.length} / 12 Photos
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 mb-2">
-                Snap photos of the front gate, room interior, bathroom, and street.
-              </p>
-
-              <div className="flex flex-wrap gap-2.5 items-center">
-                <label className="w-24 h-24 rounded-2xl border-2 border-dashed border-blue-300 hover:border-blue-500 bg-blue-50/50 flex flex-col items-center justify-center text-blue-700 cursor-pointer transition-colors shrink-0">
-                  <Camera className="w-6 h-6 mb-1 text-blue-600" />
-                  <span className="text-[10px] font-bold">+ Add Photo</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                </label>
-
-                {uploadedImages.map((imgUrl, i) => (
-                  <div key={i} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-xs shrink-0 group">
-                    <img src={imgUrl} alt={`Photo ${i}`} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePhoto(i)}
-                      className="absolute top-1 right-1 p-1 bg-red-600/90 text-white rounded-full hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
-                      title="Delete photo"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                    <span className="absolute bottom-1 left-1 bg-slate-900/80 text-white text-[9px] px-1 rounded font-bold">
-                      #{i + 1}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {isUploading && (
-                <div className="flex items-center gap-2 text-xs text-blue-700 mt-2">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Compressing photos for fast mobile upload...</span>
-                </div>
-              )}
-            </div>
-
-            {/* Part B: Walkthrough Video Module */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Video className="w-4 h-4 text-rose-600" />
-                  <span>Walkthrough Video Recording / Upload</span>
-                </label>
-                <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full">
-                  High Buyer Response
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Record a 30-60 second mobile walkthrough of the rooms or upload an existing clip.
-              </p>
-
-              {/* Video File Upload */}
-              {!videoFile ? (
-                <div>
-                  <label className="flex items-center justify-center gap-2 border-2 border-dashed border-rose-300 hover:border-rose-500 bg-rose-50/50 hover:bg-rose-50 rounded-xl p-3 transition-all cursor-pointer">
-                    {isVideoUploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 text-rose-600 animate-spin" />
-                        <span className="text-xs font-bold text-rose-700">Attaching video file...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Video className="w-4 h-4 text-rose-600" />
-                        <span className="text-xs font-bold text-rose-800">
-                          + Record / Upload Video File (Max 25MB)
-                        </span>
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoUpload}
-                      disabled={isVideoUploading}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              ) : (
-                /* Video File Preview */
-                <div className="bg-white border border-rose-200 rounded-xl p-3 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-slate-800 truncate">
-                      <FileVideo className="w-4 h-4 text-rose-600 shrink-0" />
-                      <span className="truncate">{videoFile.name}</span>
-                      <span className="text-slate-400 font-normal">({videoFile.size})</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveVideo}
-                      className="text-red-600 hover:underline text-[11px] font-bold cursor-pointer"
-                    >
-                      Remove Video
-                    </button>
-                  </div>
-
-                  {videoFile.dataUrl && (
-                    <video
-                      src={videoFile.dataUrl}
-                      controls
-                      className="w-full max-h-48 rounded-lg bg-black object-contain shadow-inner"
-                    />
-                  )}
-                </div>
-              )}
-
-              {/* Video Link Option (YouTube / Drive / Reel) */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
-                  <ExternalLink className="w-3 h-3 text-blue-600" />
-                  <span>Or Paste Video Link (YouTube / Google Drive / Instagram Reel):</span>
-                </label>
-                <input
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://youtu.be/... or Google Drive video link"
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-rose-500"
-                />
-              </div>
-            </div>
-
-          </div>
-
-          {/* Section 5: Visit Notes & Handover Terms */}
+          {/* Section 7: Visit Notes & Handover Terms */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 text-teal-600" />
-                Step 5: Visit Notes & Agreement Conditions
+                Step 7: Visit Notes & Agreement Conditions
               </span>
-              <span className="text-[10px] text-slate-400">5 of 5</span>
+              <span className="text-[10px] text-slate-400">7 of 7</span>
             </div>
 
             <div>
