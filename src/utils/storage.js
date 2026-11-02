@@ -379,3 +379,34 @@ export const resetToDefault = () => {
   safeSetLocalStorage(PROPERTIES_KEY, JSON.stringify(initialProperties));
   safeSetLocalStorage(SETTINGS_KEY, JSON.stringify(defaultSettings));
 };
+
+const CUSTOMER_USER_KEY = "gp_customer_user_v1";
+
+export const getCustomerUser = () => {
+  try {
+    const data = localStorage.getItem(CUSTOMER_USER_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+export const setCustomerUser = (user) => {
+  try {
+    if (user) {
+      localStorage.setItem(CUSTOMER_USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(CUSTOMER_USER_KEY);
+    }
+  } catch (e) {
+    console.error("Error saving customer session", e);
+  }
+};
+
+export const clearCustomerUser = () => {
+  try {
+    localStorage.removeItem(CUSTOMER_USER_KEY);
+  } catch (e) {
+    console.error(e);
+  }
+};

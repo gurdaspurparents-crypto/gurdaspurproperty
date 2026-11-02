@@ -73,6 +73,7 @@ export default function AdminModal({
   const [pinError, setPinError] = useState(false);
   const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'surveys' | 'leads' | 'id_cards' | 'settings'
   const [surveyFilter, setSurveyFilter] = useState('all'); // 'all' | 'pending' | 'approved'
+  const [leadFilter, setLeadFilter] = useState('all'); // 'all' | 'pending' | 'approved'
   const [leads, setLeads] = useState([]);
   const [editingLeadId, setEditingLeadId] = useState(null);
   const [editLeadForm, setEditLeadForm] = useState(null);
@@ -160,6 +161,7 @@ export default function AdminModal({
   const surveys = leads.filter(l => l.isSurvey || l.type === 'field_survey');
   const webLeads = leads.filter(l => !l.isSurvey && l.type !== 'field_survey');
   const pendingSurveysCount = surveys.filter(s => s.surveyStatus !== 'approved').length;
+  const pendingLeadsCount = webLeads.filter(l => l.surveyStatus !== 'approved' && l.status !== 'approved').length;
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -385,6 +387,88 @@ export default function AdminModal({
     setLeads(updatedLeads);
 
     alert(`✅ Survey Approved & Published Successfully!\n\nListing ID: ${newId}\n"${newProp.title}" is now LIVE on www.gurdaspurproperty.in!`);
+  };
+
+  const handleApproveCustomerSubmission = (lead) => {
+    const isRent = lead.purpose === 'rent';
+    const priceNum = parseFloat(lead.price) || 0;
+    const sizeStr = lead.size || (lead.category === 'room' ? '1 Room Set' : '10 Marla');
+    const newId = `GP-${Math.floor(100 + Math.random() * 900)}`;
+
+    const defaultCover = lead.category === 'kothi' 
+      ? '/images/properties/gurdaspur_real_kothi.jpg'
+      : lead.category === 'commercial'
+      ? '/images/properties/gurdaspur_commercial_sco.jpg'
+      : lead.category === 'land'
+      ? '/images/properties/punjab_tubewell_farm.jpg'
+      : '/images/properties/gurdaspur_plotted_colony.jpg';
+
+    const images = (lead.images && lead.images.length > 0)
+      ? lead.images.map(img => typeof img === 'string' ? img : (img.url || img.dataUrl || defaultCover))
+      : [defaultCover];
+
+    let desc = lead.notes || `${sizeStr} available for ${isRent ? 'immediate rent' : 'sale'} in ${lead.locality}, Gurdaspur. Clear title verified with Punjab revenue records. Direct deals handled via Travelx Gurdaspur Property Consultants.`;
+
+    const newProp = {
+      id: newId,
+      title: lead.title || `${sizeStr} ${lead.category} in ${lead.locality}`,
+      category: lead.category || 'plot',
+      purpose: lead.purpose || 'buy',
+      price: priceNum,
+      pricePerUnit: isRent
+        ? `₹${priceNum.toLocaleString('en-IN')}/month`
+        : (priceNum >= 10000000 ? `₹${(priceNum / 10000000).toFixed(2)} Cr` : `₹${(priceNum / 100000).toFixed(2)} Lakh`),
+      size: lead.size || sizeStr,
+      unit: lead.unit || (lead.category === 'land' ? 'Kanal' : 'Marla'),
+      sqft: lead.sqft || (parseFloat(lead.size) || 10) * (lead.unit === 'Kanal' ? 5445 : 225),
+      frontWidth: lead.frontWidth || '',
+      depth: lead.depth || '',
+      dimensions: lead.dimensions || '',
+      coveredArea: lead.coveredArea || '',
+      openArea: lead.openArea || '',
+      bedrooms: lead.bedrooms || '',
+      bathrooms: lead.bathrooms || '',
+      kitchen: lead.kitchen || '',
+      drawingRoom: lead.drawingRoom || '',
+      diningRoom: lead.diningRoom || '',
+      floors: lead.floors || '',
+      floorNumber: lead.floorNumber || '',
+      parking: lead.parking || '',
+      furnishingStatus: lead.furnishingStatus || '',
+      balcony: lead.balcony || '',
+      terrace: lead.terrace || '',
+      lift: lead.lift || '',
+      propertyCondition: lead.propertyCondition || '',
+      waterSupply: lead.waterSupply || '',
+      electricity: lead.electricity || '',
+      sewerage: lead.sewerage || '',
+      boundaryWall: lead.boundaryWall || '',
+      gatedSociety: !!lead.gatedSociety,
+      isCorner: !!lead.isCorner,
+      documents: lead.documents || null,
+      nearbyFacilities: lead.nearbyFacilities || [],
+      location: lead.locality || 'Tibri Road',
+      cityArea: lead.subArea ? `${lead.subArea}, ${lead.locality}, Gurdaspur` : `${lead.locality}, Gurdaspur`,
+      description: desc,
+      amenities: lead.amenities ? (Array.isArray(lead.amenities) ? lead.amenities : lead.amenities.split(',').map(a => a.trim())) : ['Verified Title', 'Direct Deal', 'Tehsil Registry Ready'],
+      imageUrl: images[0],
+      images: images,
+      videoUrl: lead.videoUrl || (lead.videoFile?.dataUrl ? lead.videoFile.dataUrl : ''),
+      badge: 'Owner Verified',
+      verified: true,
+      facing: lead.facing || 'East',
+      status: 'available',
+      dateAdded: new Date().toISOString().split('T')[0]
+    };
+
+    const updatedProps = [newProp, ...properties];
+    setProperties(updatedProps);
+    saveProperties(updatedProps);
+
+    const updatedLeads = updateLead(lead.id, { surveyStatus: 'approved', status: 'approved' });
+    setLeads(updatedLeads);
+
+    alert(`✅ Customer Property Approved & Published!\n\nListing ID: ${newId}\n"${newProp.title}" is now LIVE on www.gurdaspurproperty.in!`);
   };
 
   const handleConvertSurveyToForm = (survey) => {
@@ -956,7 +1040,12 @@ export default function AdminModal({
                   }`}
                 >
                   <Users className="w-4 h-4" />
-                  Website Leads ({webLeads.length})
+                  <span>Website Leads &amp; Submissions ({webLeads.length})</span>
+                  {pendingLeadsCount > 0 && (
+                    <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-full animate-pulse ml-0.5">
+                      {pendingLeadsCount} Pending
+                    </span>
+                  )}
                 </button>
 
                 <button
@@ -1844,42 +1933,109 @@ export default function AdminModal({
                 </div>
               )}
 
-              {/* TAB 2: WEBSITE LEADS */}
+              {/* TAB 2: WEBSITE LEADS & CUSTOMER SUBMISSIONS */}
               {activeTab === 'leads' && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-50/70 border border-blue-200/80 p-4 rounded-2xl">
                     <div>
-                      <h3 className="font-bold text-sm text-slate-800">Website Customer & Seller Leads</h3>
-                      <p className="text-xs text-slate-400">Direct inquiries & submissions from www.gurdaspurproperty.in</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-blue-200 text-blue-900 px-2 py-0.5 rounded-full">
+                          Customer Portal
+                        </span>
+                        <h3 className="font-extrabold text-sm text-slate-900 font-['Outfit']">
+                          Website Customer &amp; Seller Submissions
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Verify OTP-authenticated listings &amp; 1-click publish to www.gurdaspurproperty.in
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-blue-200 shadow-2xs shrink-0">
+                      <button
+                        onClick={() => setLeadFilter('all')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          leadFilter === 'all' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        All ({webLeads.length})
+                      </button>
+                      <button
+                        onClick={() => setLeadFilter('pending')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          leadFilter === 'pending' ? 'bg-amber-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        Pending ({pendingLeadsCount})
+                      </button>
+                      <button
+                        onClick={() => setLeadFilter('approved')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          leadFilter === 'approved' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        Live ({webLeads.length - pendingLeadsCount})
+                      </button>
                     </div>
                   </div>
 
                   {webLeads.length === 0 ? (
                     <div className="text-center py-12 text-slate-400 text-xs">
-                      No website leads received yet. As soon as a user submits the "Post Property" form, it will appear here.
+                      No website leads received yet. As soon as a user verifies their phone with OTP and submits the "Post Property" form, it will appear here for your approval.
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {webLeads.map(lead => {
-                        const cleanLeadPhone = lead.phone?.replace(/[^0-9]/g, '');
-                        return (
-                          <div key={lead.id} className="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-slate-300 transition-all shadow-xs space-y-3">
-                            
-                            {/* Top Badge & ID Row */}
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                              <div className="flex items-center gap-2">
-                                <span className="font-extrabold text-sm text-slate-900">{lead.name}</span>
-                                <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                                  {lead.ownerRole || 'Owner'}
-                                </span>
-                                <span className="text-[10px] font-mono text-slate-400">{lead.id}</span>
-                              </div>
+                      {webLeads
+                        .filter(l => {
+                          if (leadFilter === 'pending') return l.surveyStatus !== 'approved' && l.status !== 'approved';
+                          if (leadFilter === 'approved') return l.surveyStatus === 'approved' || l.status === 'approved';
+                          return true;
+                        })
+                        .map(lead => {
+                          const cleanLeadPhone = lead.phone?.replace(/[^0-9]/g, '');
+                          const isApproved = lead.surveyStatus === 'approved' || lead.status === 'approved';
+                          return (
+                            <div 
+                              key={lead.id} 
+                              className={`p-4 rounded-2xl border-2 transition-all shadow-xs space-y-3 ${
+                                isApproved ? 'bg-white border-slate-200' : 'bg-amber-50/20 border-amber-300'
+                              }`}
+                            >
+                              
+                              {/* Top Badge & ID Row */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-extrabold text-sm text-slate-900">{lead.name}</span>
+                                  <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                    {lead.ownerRole || 'Owner'}
+                                  </span>
+                                  {lead.otpVerified && (
+                                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                      <span>OTP Verified Phone (+91 {lead.phone})</span>
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] font-mono text-slate-400">{lead.id}</span>
+                                </div>
 
-                              <span className="text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                                <Lock className="w-3 h-3 text-rose-600" />
-                                <span>Confidential Lead • Admin Only</span>
-                              </span>
-                            </div>
+                                <div className="flex items-center gap-2">
+                                  {isApproved ? (
+                                    <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                      <span>Approved &amp; Live on Website</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                                      <Clock className="w-3 h-3 text-amber-700" />
+                                      <span>Pending Owner Approval</span>
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                    <Lock className="w-3 h-3 text-rose-600" />
+                                    <span>Confidential Lead</span>
+                                  </span>
+                                </div>
+                              </div>
 
                             {/* Middle Details Grid */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700">
@@ -2309,6 +2465,18 @@ export default function AdminModal({
                               </div>
 
                               <div className="flex flex-wrap items-center gap-2">
+                                {!isApproved && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveCustomerSubmission(lead)}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all hover:scale-105 cursor-pointer"
+                                    title="Approve and immediately publish this listing live to www.gurdaspurproperty.in"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>✅ 1-Click Approve &amp; Publish Live</span>
+                                  </button>
+                                )}
+
                                 <button
                                   type="button"
                                   onClick={() => handleStartEditLead(lead)}
@@ -2323,10 +2491,10 @@ export default function AdminModal({
                                   type="button"
                                   onClick={() => handleConvertLeadToProperty(lead)}
                                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-[#005ca8] hover:bg-blue-100 border border-blue-200 font-bold text-xs transition-colors cursor-pointer"
-                                  title="Add to website without customer phone or private house number"
+                                  title="Open in Property Form for review"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
-                                  <span>+ Publish to Website</span>
+                                  <span>Review in Form</span>
                                 </button>
 
                                 <button

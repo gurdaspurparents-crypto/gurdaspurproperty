@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   CheckCircle2, 
@@ -21,7 +21,9 @@ import {
   ExternalLink, 
   FileVideo, 
   Loader2,
-  Mail 
+  Mail,
+  Clock,
+  ShieldCheck
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
@@ -30,7 +32,7 @@ import PropertyParametersSection from './PropertyParametersSection';
 import PropertyDocumentsSection from './PropertyDocumentsSection';
 import PropertyMediaSection from './PropertyMediaSection';
 
-export default function PostPropertyModal({ isOpen, onClose, settings }) {
+export default function PostPropertyModal({ isOpen, onClose, settings, customerUser }) {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,6 +107,16 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
 
   const [submitted, setSubmitted] = useState(false);
   const [lastSubmittedLead, setLastSubmittedLead] = useState(null);
+
+  useEffect(() => {
+    if (customerUser && isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        phone: customerUser.phone || prev.phone,
+        sellerName: customerUser.name && customerUser.name !== 'Property Owner' ? customerUser.name : prev.sellerName
+      }));
+    }
+  }, [customerUser, isOpen]);
 
   if (!isOpen) return null;
 
@@ -218,9 +230,13 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
       : formData.dimensions;
 
     const leadPayload = {
-      name: formData.sellerName,
-      phone: formData.phone,
+      name: formData.sellerName || customerUser?.name || 'Property Owner',
+      phone: formData.phone || customerUser?.phone || '',
       type: 'seller_listing',
+      isCustomerSubmission: true,
+      surveyStatus: 'pending_approval',
+      status: 'pending_approval',
+      otpVerified: true,
       ownerRole: formData.ownerRole,
       purpose: formData.purpose,
       category: formData.category,
@@ -358,23 +374,34 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                Listing Received
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full flex items-center gap-1.5 w-fit mx-auto">
+                <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
+                <span>Submitted for Owner Review &amp; Approval</span>
               </span>
 
               <h3 className="text-2xl font-black text-slate-900 font-['Outfit'] mt-3">
-                Property Successfully Submitted!
+                Listing Awaiting Owner Approval
               </h3>
 
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 my-4 max-w-md mx-auto text-xs text-emerald-950 text-left flex items-start gap-3">
-                <Mail className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-extrabold text-emerald-900">
-                    Instant Email Alert Sent to Admin
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 my-4 max-w-md mx-auto text-xs text-emerald-950 text-left space-y-2.5">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-extrabold text-emerald-900 flex items-center gap-1.5">
+                      <span>OTP Verified Submission</span>
+                      <span className="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded font-mono">
+                        +91 {formData.phone}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-emerald-800 mt-1 leading-relaxed">
+                      Your property listing has been queued securely in the Owner Admin Panel. Consultant <strong>Navkiran Sharma</strong> verifies all customer submissions to ensure authentic ownership records before approving them live on <strong>www.gurdaspurproperty.in</strong>.
+                    </div>
                   </div>
-                  <div className="text-[11px] text-emerald-800 mt-0.5">
-                    Your complete listing specifications have been forwarded to <strong>navkiransharma@gmail.com</strong> and saved in the priority verification queue.
-                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-emerald-200/80 flex items-center justify-between text-[11px]">
+                  <span className="text-emerald-800 font-medium">Estimated approval time:</span>
+                  <span className="font-bold text-emerald-950">Within 2 to 4 Hours</span>
                 </div>
               </div>
               
@@ -618,17 +645,30 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                      Mobile / WhatsApp Number *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Mobile / WhatsApp Number *</span>
+                      </label>
+                      {customerUser?.phone && (
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>OTP Verified</span>
+                        </span>
+                      )}
+                    </div>
                     <input
                       type="tel"
                       required
-                      placeholder="e.g. +91 98765 43210"
+                      placeholder="e.g. 98888 26257"
                       value={formData.phone}
+                      readOnly={Boolean(customerUser?.phone)}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-black text-slate-900 focus:outline-none focus:border-emerald-600"
+                      className={`w-full border rounded-xl px-3 py-2.5 text-xs font-black text-slate-900 focus:outline-none ${
+                        customerUser?.phone 
+                          ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900' 
+                          : 'bg-slate-50 border-slate-200 focus:border-emerald-600'
+                      }`}
                     />
                   </div>
                 </div>
@@ -680,7 +720,8 @@ export default function PostPropertyModal({ isOpen, onClose, settings }) {
                   ) : (
                     <>
                       <CheckCircle2 className="w-5 h-5" />
-                      <span>Post Property Listing (FREE)</span>
+                      <span>Submit Property for Owner Approval</span>
+                      <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>

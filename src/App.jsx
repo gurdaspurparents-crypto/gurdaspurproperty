@@ -6,6 +6,7 @@ import PropertyDetailModal from './components/PropertyDetailModal';
 import PunjabLandCalculator from './components/PunjabLandCalculator';
 import PunjabStampDutyCalculator from './components/PunjabStampDutyCalculator';
 import PostPropertyModal from './components/PostPropertyModal';
+import CustomerAuthModal from './components/CustomerAuthModal';
 import LocalitiesGuide from './components/LocalitiesGuide';
 import NRIPropertyCorner from './components/NRIPropertyCorner';
 import ConsultantServices from './components/ConsultantServices';
@@ -19,7 +20,9 @@ import {
   getSettings, 
   saveProperties, 
   saveSettings,
-  syncCloudData 
+  syncCloudData,
+  getCustomerUser,
+  clearCustomerUser
 } from './utils/storage';
 import { PROPERTY_TYPES, GURDASPUR_LOCALITIES } from './data/initialProperties';
 import { 
@@ -43,6 +46,10 @@ export default function App() {
   const [properties, setProperties] = useState([]);
   const [settings, setSettings] = useState(getSettings());
   
+  // Customer Authentication Session
+  const [customerUser, setCustomerUser] = useState(getCustomerUser());
+  const [isCustomerAuthOpen, setIsCustomerAuthOpen] = useState(false);
+
   // Modals
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -142,6 +149,26 @@ export default function App() {
     setSortBy('featured');
   };
 
+  // Open Property Posting: Requires Customer OTP Login First
+  const handleOpenPostProperty = () => {
+    if (customerUser && customerUser.verified) {
+      setIsPostPropertyOpen(true);
+    } else {
+      setIsCustomerAuthOpen(true);
+    }
+  };
+
+  const handleCustomerLoginSuccess = (user) => {
+    setCustomerUser(user);
+    setIsCustomerAuthOpen(false);
+    setIsPostPropertyOpen(true);
+  };
+
+  const handleCustomerLogout = () => {
+    clearCustomerUser();
+    setCustomerUser(null);
+  };
+
   const cleanPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
 
   return (
@@ -150,7 +177,7 @@ export default function App() {
       {/* Navigation (99acres Top Bar) */}
       <Navbar
         settings={settings}
-        onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+        onOpenPostProperty={handleOpenPostProperty}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
         onOpenAdmin={() => setIsAdminOpen(true)}
@@ -158,6 +185,9 @@ export default function App() {
         setActiveFilter={setSelectedCategory}
         selectedLocality={selectedLocality}
         setSelectedLocality={setSelectedLocality}
+        customerUser={customerUser}
+        onOpenCustomerLogin={() => setIsCustomerAuthOpen(true)}
+        onLogoutCustomer={handleCustomerLogout}
       />
 
       {/* Hero Section with 99acres Floating Search Widget */}
@@ -174,14 +204,14 @@ export default function App() {
         setBudgetRange={setBudgetRange}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
-        onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+        onOpenPostProperty={handleOpenPostProperty}
       />
 
       {/* 99acres Iconic "GET STARTED WITH EXPLORING REAL ESTATE OPTIONS" Carousel */}
       <ExploringRealEstateOptions
         onSelectCategory={setSelectedCategory}
         onSelectPurpose={setSelectedPurpose}
-        onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+        onOpenPostProperty={handleOpenPostProperty}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
       />
@@ -334,7 +364,7 @@ export default function App() {
         onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenStampDuty={() => setIsStampDutyOpen(true)}
-        onOpenPostProperty={() => setIsPostPropertyOpen(true)}
+        onOpenPostProperty={handleOpenPostProperty}
         setSelectedLocality={(loc) => {
           setSelectedLocality(loc);
           setSelectedCategory('all');
@@ -391,11 +421,27 @@ export default function App() {
         />
       )}
 
+      {/* Customer Mobile + OTP Authentication Modal */}
+      {isCustomerAuthOpen && (
+        <CustomerAuthModal
+          isOpen={isCustomerAuthOpen}
+          onClose={() => setIsCustomerAuthOpen(false)}
+          onSuccess={handleCustomerLoginSuccess}
+          onSwitchToEmployeeLogin={() => {
+            setIsCustomerAuthOpen(false);
+            setIsAdminOpen(true);
+          }}
+          intentMessage="Enter your 10-digit mobile number to post your property on Gurdaspur Property."
+        />
+      )}
+
+      {/* Property Post Form Modal (Pre-populated & Gated with Verified Customer Info) */}
       {isPostPropertyOpen && (
         <PostPropertyModal
           isOpen={isPostPropertyOpen}
           onClose={() => setIsPostPropertyOpen(false)}
           settings={settings}
+          customerUser={customerUser}
         />
       )}
 
