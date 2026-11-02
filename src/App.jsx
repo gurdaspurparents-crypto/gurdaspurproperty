@@ -80,12 +80,31 @@ export default function App() {
     });
 
     const checkHash = () => {
+      const hash = (window.location.hash || '').toLowerCase();
+      const pathname = (window.location.pathname || '').toLowerCase();
+
       if (
-        window.location.hash === '#survey' || 
-        window.location.hash === '#staff' || 
-        window.location.hash === '#admin'
+        hash === '#survey' || 
+        hash === '#staff' || 
+        hash === '#admin'
       ) {
         setIsAdminOpen(true);
+      } else if (
+        hash === '#post' ||
+        hash === '#post-property' ||
+        hash === '#add' ||
+        hash === '#add-property' ||
+        hash === '#sell' ||
+        pathname === '/post' ||
+        pathname === '/post-property'
+      ) {
+        const curUser = getCustomerUser();
+        if (curUser && (curUser.verified || curUser.phone)) {
+          setIsPostPropertyOpen(true);
+        } else {
+          setCustomerAuthIntent('post');
+          setIsCustomerAuthOpen(true);
+        }
       }
     };
     checkHash();

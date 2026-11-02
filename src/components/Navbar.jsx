@@ -21,7 +21,8 @@ import {
   CheckCircle2,
   KeyRound,
   ShieldAlert,
-  Home
+  Home,
+  Share2
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
@@ -282,6 +283,19 @@ export default function Navbar({
 
                         <button
                           onClick={() => {
+                            const link = `https://gurdaspurproperty.in/#post`;
+                            navigator.clipboard.writeText(link);
+                            alert(`✅ Direct Link Copied!\n\n${link}\n\nAap ise WhatsApp par kisi bhi property owner ko bhej sakte hain. Link kholte hi unka form khul jayega.`);
+                            setUserDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-teal-800 bg-teal-50/70 hover:bg-teal-100 flex items-center gap-2 transition-colors cursor-pointer"
+                        >
+                          <Share2 className="w-4 h-4 text-teal-600" />
+                          <span>📲 Copy Seller Share Link</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
                             setUserDropdownOpen(false);
                             if (onLogoutCustomer) onLogoutCustomer();
                           }}
@@ -384,6 +398,27 @@ export default function Navbar({
                               </span>
                             </div>
                           </div>
+                        </button>
+                      </div>
+
+                      {/* Option 3: Quick Share Listing Link with Seller / Client */}
+                      <div className="p-2 pt-1 border-t border-slate-100">
+                        <button
+                          onClick={() => {
+                            const link = `https://gurdaspurproperty.in/#post`;
+                            navigator.clipboard.writeText(link);
+                            alert(`✅ Direct Link Copied!\n\n${link}\n\nAap ise WhatsApp par kisi bhi property owner ko bhej sakte hain. Link open karte hi unka property form khul jayega.`);
+                            setUserDropdownOpen(false);
+                          }}
+                          className="w-full text-left p-2.5 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-950 border border-emerald-200 transition-all flex items-center justify-between text-xs font-bold cursor-pointer"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Share2 className="w-4 h-4 text-emerald-600" />
+                            <span>Share Post Link with Owner</span>
+                          </span>
+                          <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-extrabold">
+                            Copy Link
+                          </span>
                         </button>
                       </div>
                     </>
