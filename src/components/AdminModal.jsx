@@ -58,6 +58,7 @@ import ExecutiveIdCardKit from './ExecutiveIdCardKit';
 import PropertyParametersSection from './PropertyParametersSection';
 import PropertyDocumentsSection, { DOCUMENT_KEYS, STATUS_OPTIONS } from './PropertyDocumentsSection';
 import PropertyMediaSection from './PropertyMediaSection';
+import ErrorBoundary from './ErrorBoundary';
 
 export default function AdminModal({ 
   isOpen, 
@@ -556,50 +557,6 @@ export default function AdminModal({
     setShowPropertyForm(true);
   };
 
-  const handleCreateDemoSurvey = async () => {
-    setIsSyncingCloud(true);
-    const demoSurvey = {
-      name: 'Sardar Manjit Singh',
-      phone: '9888826257',
-      alternatePhone: '8146526257',
-      ownerRole: 'Direct Landlord',
-      type: 'field_survey',
-      isSurvey: true,
-      surveyStatus: 'pending_approval',
-      surveyorName: 'Field Executive 1',
-      surveyorPhone: '8146526257',
-      purpose: 'rent',
-      category: 'room',
-      locality: 'Jail Road',
-      subArea: 'Near Civil Hospital',
-      exactLocation: 'House No. 42, Gali No. 3, Jail Road',
-      size: '1 BHK Independent Floor',
-      dimensions: '18 x 25 Ft',
-      roadWidth: '30 Ft Wide Road',
-      facing: 'North-East',
-      price: '9500',
-      isNegotiable: true,
-      securityDeposit: '1 Month Rent (₹9,500)',
-      electricityMeter: 'Separate Sub-Meter',
-      waterSupply: '24x7 Submersible Water',
-      parking: 'Car & 2-Wheeler Covered Parking',
-      tenantPreference: 'Family or Working Professionals',
-      kitchenWashroom: 'Attached Modular Kitchen & Western Washroom',
-      availableFrom: 'Immediate',
-      notes: 'Independent unit with separate entrance gate. 2 minutes from Civil Hospital.',
-      images: [
-        '/images/properties/gurdaspur_real_kothi.jpg'
-      ],
-      videoUrl: '',
-      gpsCoordinates: { latitude: '32.041680', longitude: '75.405210', accuracy: 8 },
-      googleMapsUrl: 'https://www.google.com/maps?q=32.041680,75.405210',
-      createdAt: new Date().toISOString()
-    };
-    await addLead(demoSurvey);
-    await performCloudSync();
-    setActiveTab('surveys');
-  };
-
   const handleSaveProperty = (e) => {
     e.preventDefault();
     const amenitiesArray = propForm.amenities.split(',').map(a => a.trim()).filter(Boolean);
@@ -965,15 +922,17 @@ export default function AdminModal({
               </form>
             </div>
           ) : authRole === 'surveyor' ? (
-            <FieldSurveyPortal 
-              settings={settings} 
-              onSurveySubmitted={() => setLeads(getLeads())}
-              onLogout={() => {
-                setIsAuthenticated(false);
-                setAuthRole(null);
-                setPinInput('');
-              }}
-            />
+            <ErrorBoundary>
+              <FieldSurveyPortal 
+                settings={settings} 
+                onSurveySubmitted={() => setLeads(getLeads())}
+                onLogout={() => {
+                  setIsAuthenticated(false);
+                  setAuthRole(null);
+                  setPinInput('');
+                }}
+              />
+            </ErrorBoundary>
           ) : (
             <div>
               {/* Executive Field Surveys Alert Banner */}
@@ -1507,20 +1466,12 @@ export default function AdminModal({
 
                       <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                         <button
-                          onClick={handleCreateDemoSurvey}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer hover:scale-105"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Generate 1-Click Test Field Survey</span>
-                        </button>
-
-                        <button
                           onClick={() => performCloudSync(true)}
                           disabled={isSyncingCloud}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
                         >
                           <RefreshCcw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
-                          <span>Check Cloud for New Submissions</span>
+                          <span>{isSyncingCloud ? 'Checking Cloud...' : 'Check Cloud for Field Submissions'}</span>
                         </button>
                       </div>
                     </div>

@@ -80,6 +80,12 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
   const [alternatePhone, setAlternatePhone] = useState('');
   const [ownerRole, setOwnerRole] = useState('Direct Landlord / Owner');
 
+  // Specs & Dimensions State
+  const [size, setSize] = useState('1 Room Set');
+  const [dimensions, setDimensions] = useState('');
+  const [roadWidth, setRoadWidth] = useState('30 Feet Wide Road');
+  const [facing, setFacing] = useState('East');
+
   // Comprehensive Property Parameters
   const [propertyParams, setPropertyParams] = useState({
     title: '',

@@ -4,8 +4,31 @@ import { saveMediaItem } from "./mediaDb";
 const PROPERTIES_KEY = "gp_properties_v2";
 const LEADS_KEY = "gp_seller_leads_v1";
 const SETTINGS_KEY = "gp_settings_v1";
+const DELETED_LEADS_KEY = "gp_deleted_leads_v2";
 const CLOUD_SYNC_BIN = "https://extendsclass.com/api/json-storage/bin/fbcbeeb";
 const API_SYNC_ENDPOINT = "/api/sync";
+
+export const getDeletedLeadIds = () => {
+  try {
+    const data = localStorage.getItem(DELETED_LEADS_KEY);
+    const parsed = data ? JSON.parse(data) : [];
+    // Ensure test/demo lead IDs are permanently blacklisted
+    const hardcoded = ["LEAD-123456", "DEMO-SURVEY-01", "SURVEY-DEMO"];
+    return Array.from(new Set([...parsed, ...hardcoded]));
+  } catch (e) {
+    return ["LEAD-123456", "DEMO-SURVEY-01", "SURVEY-DEMO"];
+  }
+};
+
+export const markLeadDeleted = (leadId) => {
+  try {
+    const list = getDeletedLeadIds();
+    if (!list.includes(leadId)) {
+      list.push(leadId);
+      localStorage.setItem(DELETED_LEADS_KEY, JSON.stringify(list));
+    }
+  } catch (e) {}
+};
 
 export const defaultSettings = {
   consultantName: "Gurdaspur Property Consultants",
@@ -131,7 +154,20 @@ export const saveSettings = (newSettings) => {
 export const getLeads = () => {
   try {
     const data = localStorage.getItem(LEADS_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    const deletedIds = getDeletedLeadIds();
+    // Filter out deleted IDs and test/demo entries
+    const cleaned = (Array.isArray(parsed) ? parsed : []).filter(l => 
+      l && 
+      !deletedIds.includes(l.id) && 
+      l.id !== "LEAD-123456" && 
+      !l.name?.toLowerCase().includes("manjit singh")
+    );
+    if (cleaned.length !== parsed.length) {
+      safeSetLocalStorage(LEADS_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (e) {
     return [];
   }
@@ -141,9 +177,12 @@ export const getLeads = () => {
 export async function pushCloudData(leadsToPush, propertiesToPush) {
   try {
     const rawLeads = leadsToPush || getLeads();
+    const deletedIds = getDeletedLeadIds();
     
     // Sanitize leads to keep JSON size safely under 85KB (ExtendsClass limit: 100KB)
-    const sanitizedLeads = rawLeads.slice(0, 25).map(l => {
+    const sanitizedLeads = rawLeads
+      .filter(l => l && !deletedIds.includes(l.id) && l.id !== 'LEAD-123456' && !l.name?.toLowerCase().includes('manjit singh'))
+      .slice(0, 25).map(l => {
       const copy = { ...l };
       
       // Strip large video dataUrl from cloud sync (preserved in IndexedDB & local device)
@@ -194,6 +233,7 @@ export async function pushCloudData(leadsToPush, propertiesToPush) {
     let payload = {
       leads: sanitizedLeads,
       properties: customProps,
+      deletedIds: deletedIds,
       updatedAt: new Date().toISOString()
     };
 
@@ -283,9 +323,17 @@ export async function syncCloudData() {
 
     if (!cloudData) return { leads: getLeads(), properties: getProperties() };
 
-    // 1. Merge Cloud Leads with Local Leads
-    const localLeads = getLeads();
-    const cloudLeads = Array.isArray(cloudData.leads) ? cloudData.leads : [];
+    // 1. Merge Cloud Leads with Local Leads, filtering out all deleted/blacklisted IDs
+    const deletedIds = new Set([
+      ...getDeletedLeadIds(),
+      ...(Array.isArray(cloudData.deletedIds) ? cloudData.deletedIds : [])
+    ]);
+    localStorage.setItem(DELETED_LEADS_KEY, JSON.stringify(Array.from(deletedIds)));
+
+    const localLeads = getLeads().filter(l => l && !deletedIds.has(l.id));
+    const cloudLeads = (Array.isArray(cloudData.leads) ? cloudData.leads : []).filter(
+      cl => cl && !deletedIds.has(cl.id) && cl.id !== 'LEAD-123456' && !cl.name?.toLowerCase().includes('manjit singh')
+    );
     
     const mergedLeadsMap = new Map();
     localLeads.forEach(l => mergedLeadsMap.set(l.id, l));
@@ -298,9 +346,9 @@ export async function syncCloudData() {
       }
     });
 
-    const mergedLeads = Array.from(mergedLeadsMap.values()).sort(
-      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-    );
+    const mergedLeads = Array.from(mergedLeadsMap.values())
+      .filter(l => l && !deletedIds.has(l.id) && l.id !== 'LEAD-123456' && !l.name?.toLowerCase().includes('manjit singh'))
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     safeSetLocalStorage(LEADS_KEY, JSON.stringify(mergedLeads));
 
     // 2. Merge Cloud Properties with Local Properties
@@ -463,6 +511,7 @@ export const updateLead = (leadId, updatedFields) => {
 
 export const deleteLead = (leadId) => {
   try {
+    markLeadDeleted(leadId);
     const leads = getLeads().filter((l) => l.id !== leadId);
     safeSetLocalStorage(LEADS_KEY, JSON.stringify(leads));
     pushCloudData(leads);
