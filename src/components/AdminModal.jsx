@@ -39,7 +39,8 @@ import {
   Shield,
   Ruler,
   FileText,
-  FileCheck2
+  FileCheck2,
+  Smartphone
 } from 'lucide-react';
 import { 
   getLeads, 

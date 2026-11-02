@@ -20,7 +20,8 @@ import {
   Smartphone,
   CheckCircle2,
   KeyRound,
-  ShieldAlert
+  ShieldAlert,
+  Home
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 
