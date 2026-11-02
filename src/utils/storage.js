@@ -253,7 +253,10 @@ export async function pushCloudData(leadsToPush, propertiesToPush) {
         headers: { "Content-Type": "application/json" },
         body: payloadStr
       });
-      if (apiRes.ok) pushed = true;
+      if (apiRes.ok) {
+        const json = await apiRes.json();
+        if (json.success) pushed = true;
+      }
     } catch (e) {
       // Fallback to direct bin
     }
@@ -365,6 +368,11 @@ export async function syncCloudData() {
       safeSetLocalStorage(PROPERTIES_KEY, JSON.stringify(currentProps));
     }
 
+    // IF local device has surveys/leads missing in cloud, immediately sync them to cloud
+    if (mergedLeads.length > cloudLeads.length) {
+      pushCloudData(mergedLeads, currentProps);
+    }
+
     return { leads: mergedLeads, properties: currentProps };
   } catch (err) {
     console.warn("Cloud sync failed or offline:", err);
@@ -473,8 +481,8 @@ export const addLead = async (lead) => {
     leads.unshift(newLead);
     safeSetLocalStorage(LEADS_KEY, JSON.stringify(leads));
 
-    // Asynchronously push to cloud for cross-device visibility
-    pushCloudData(leads);
+    // Await cloud push for cross-device visibility
+    await pushCloudData(leads);
 
     return newLead;
   } catch (e) {

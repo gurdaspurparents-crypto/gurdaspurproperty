@@ -3,6 +3,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -12,15 +13,17 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const response = await fetch(PRIMARY_BIN);
+      const response = await fetch(PRIMARY_BIN, {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (!response.ok) {
-        return res.status(200).json({ leads: [], properties: [] });
+        return res.status(200).json({ leads: [], properties: [], _error: `Upstream GET status ${response.status}` });
       }
       const data = await response.json();
       return res.status(200).json(data);
     } catch (err) {
       console.error("API Sync GET Error:", err);
-      return res.status(200).json({ leads: [], properties: [] });
+      return res.status(200).json({ leads: [], properties: [], _error: err.message });
     }
   }
 
@@ -36,15 +39,29 @@ export default async function handler(req, res) {
       
       const response = await fetch(PRIMARY_BIN, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        },
         body: payloadStr
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        console.warn("Upstream storage returned status:", response.status);
+        return res.status(502).json({ 
+          success: false, 
+          status: response.status, 
+          upstreamError: responseText 
+        });
       }
 
-      return res.status(200).json({ success: true, timestamp: new Date().toISOString() });
+      return res.status(200).json({ 
+        success: true, 
+        upstreamStatus: response.status,
+        upstreamBody: responseText.slice(0, 100),
+        timestamp: new Date().toISOString() 
+      });
     } catch (err) {
       console.error("API Sync POST Error:", err);
       return res.status(500).json({ success: false, error: err.message });

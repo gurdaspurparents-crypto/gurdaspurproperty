@@ -135,6 +135,58 @@ export default function AdminModal({
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(null);
 
+  // Quick Manual / Email Import State
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importForm, setImportForm] = useState({
+    name: '',
+    phone: '',
+    locality: 'Batala Road',
+    subArea: '',
+    price: '',
+    size: '10 Marla',
+    category: 'residential',
+    purpose: 'sell',
+    surveyorName: 'Field Executive',
+    notes: ''
+  });
+
+  const handleImportSubmission = async (e) => {
+    e.preventDefault();
+    if (!importForm.name.trim() || !importForm.phone.trim()) {
+      alert("Please provide at least the owner/seller name and mobile number.");
+      return;
+    }
+    const newSurvey = {
+      ...importForm,
+      name: importForm.name.trim(),
+      phone: importForm.phone.trim(),
+      subArea: importForm.subArea.trim(),
+      price: importForm.price.trim(),
+      notes: importForm.notes.trim(),
+      isSurvey: true,
+      type: 'field_survey',
+      surveyStatus: 'pending_approval',
+      title: `${importForm.size} ${importForm.category.toUpperCase()} in ${importForm.locality}`,
+      createdAt: new Date().toISOString()
+    };
+    await addLead(newSurvey);
+    setLeads(getLeads());
+    setShowImportModal(false);
+    setImportForm({
+      name: '',
+      phone: '',
+      locality: 'Batala Road',
+      subArea: '',
+      price: '',
+      size: '10 Marla',
+      category: 'residential',
+      purpose: 'sell',
+      surveyorName: 'Field Executive',
+      notes: ''
+    });
+    alert("✅ Submission successfully added to queue! You can now review and 1-click approve it.");
+  };
+
   const performCloudSync = async (showNotification = false) => {
     setIsSyncingCloud(true);
     try {
@@ -158,7 +210,14 @@ export default function AdminModal({
     if (isOpen) {
       setLeads(getLeads());
       setSettingsForm({ ...settings });
-      performCloudSync();
+      performCloudSync(false);
+
+      // Auto-poll cloud every 10 seconds while admin panel is open
+      const pollTimer = setInterval(() => {
+        performCloudSync(false);
+      }, 10000);
+
+      return () => clearInterval(pollTimer);
     }
   }, [isOpen, settings]);
 
@@ -1441,6 +1500,13 @@ export default function AdminModal({
 
                     <div className="flex items-center gap-2">
                       <button
+                        onClick={() => setShowImportModal(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>📥 Import from Email</span>
+                      </button>
+                      <button
                         onClick={() => performCloudSync(true)}
                         disabled={isSyncingCloud}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
@@ -1450,6 +1516,154 @@ export default function AdminModal({
                       </button>
                     </div>
                   </div>
+
+                  {/* Quick Import from Email Modal / Drawer */}
+                  {showImportModal && (
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-400 p-4 sm:p-5 rounded-2xl shadow-md space-y-4 animate-in fade-in">
+                      <div className="flex items-center justify-between pb-2 border-b border-blue-200">
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-600 font-extrabold text-sm">📥 Quick Import from Email / WhatsApp</span>
+                        </div>
+                        <button
+                          onClick={() => setShowImportModal(false)}
+                          className="text-xs text-slate-500 hover:text-slate-800 font-bold px-2 py-1 bg-white rounded-lg border border-slate-200"
+                        >
+                          ✕ Close
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-slate-600">
+                        If an executive submitted a survey or lead and you received the email at <strong>navkiransharma@gmail.com</strong>, you can quickly enter or paste the details here to add it straight to your approval queue:
+                      </p>
+
+                      <form onSubmit={handleImportSubmission} className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Landlord / Owner Name *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Harpreet Singh"
+                            value={importForm.name}
+                            onChange={(e) => setImportForm({ ...importForm, name: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Mobile / WhatsApp Number *</label>
+                          <input
+                            type="tel"
+                            required
+                            placeholder="e.g. 98888 26257"
+                            value={importForm.phone}
+                            onChange={(e) => setImportForm({ ...importForm, phone: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Locality</label>
+                          <select
+                            value={importForm.locality}
+                            onChange={(e) => setImportForm({ ...importForm, locality: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          >
+                            <option value="Batala Road">Batala Road</option>
+                            <option value="Tibri Road">Tibri Road</option>
+                            <option value="Jail Road">Jail Road</option>
+                            <option value="Hardochhani Road">Hardochhani Road</option>
+                            <option value="Kalanaur Road">Kalanaur Road</option>
+                            <option value="Civil Lines">Civil Lines</option>
+                            <option value="Trimmu Road">Trimmu Road</option>
+                            <option value="Other Area">Other Gurdaspur Area</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Colony / Landmark Address</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Near Vishal Mega Mart"
+                            value={importForm.subArea}
+                            onChange={(e) => setImportForm({ ...importForm, subArea: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Property Size & Unit</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 10 Marla or 2 Kanal"
+                            value={importForm.size}
+                            onChange={(e) => setImportForm({ ...importForm, size: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Expected Price / Rent (₹)</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 45 Lakh or 12000"
+                            value={importForm.price}
+                            onChange={(e) => setImportForm({ ...importForm, price: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Purpose</label>
+                          <select
+                            value={importForm.purpose}
+                            onChange={(e) => setImportForm({ ...importForm, purpose: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          >
+                            <option value="sell">For Sale (Sell)</option>
+                            <option value="rent">For Rent</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Surveyor / Executive Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Executive 1"
+                            value={importForm.surveyorName}
+                            onChange={(e) => setImportForm({ ...importForm, surveyorName: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="block font-bold text-slate-700 mb-1">Additional Notes from Email</label>
+                          <textarea
+                            rows={2}
+                            placeholder="Paste any extra specifications or notes from email..."
+                            value={importForm.notes}
+                            onChange={(e) => setImportForm({ ...importForm, notes: e.target.value })}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2 flex justify-end gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowImportModal(false)}
+                            className="px-4 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-700"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-md cursor-pointer"
+                          >
+                            Add to Approval Queue
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
 
                   {/* Surveys List */}
                   {surveys.length === 0 ? (
@@ -1465,6 +1679,13 @@ export default function AdminModal({
                       </div>
 
                       <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <button
+                          onClick={() => setShowImportModal(true)}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>📥 Import from Email / WhatsApp</span>
+                        </button>
                         <button
                           onClick={() => performCloudSync(true)}
                           disabled={isSyncingCloud}

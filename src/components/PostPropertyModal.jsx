@@ -284,8 +284,8 @@ export default function PostPropertyModal({ isOpen, onClose, settings, customerU
       isConfidential: true
     };
 
-    // Save lead into Admin local database
-    const saved = addLead(leadPayload);
+    // Save lead into Admin local database & cloud
+    const saved = await addLead(leadPayload);
 
     // Dispatch email alert to navkiransharma@gmail.com
     await sendPropertyPostNotification(
