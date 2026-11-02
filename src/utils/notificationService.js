@@ -107,3 +107,39 @@ export async function sendFieldSurveyNotification(survey, targetEmail = NOTIFICA
   }
 }
 
+export async function sendCustomerInquiryNotification(inquiry, targetEmail = NOTIFICATION_EMAIL) {
+  const recipient = targetEmail || NOTIFICATION_EMAIL;
+
+  const payload = {
+    _subject: `🔔 [BUYER INQUIRY] Customer inquiry for ${inquiry.propertyTitle || inquiry.propertyId || 'Listing'}`,
+    _template: "table",
+    _captcha: "false",
+    "Customer Name": inquiry.name || 'Website Inquirer',
+    "Customer Phone / WhatsApp": inquiry.phone || 'N/A',
+    "Interested Property ID": inquiry.propertyId || 'N/A',
+    "Property Title": inquiry.propertyTitle || 'N/A',
+    "Location": inquiry.location || 'Gurdaspur',
+    "Price / Rent Demand": inquiry.price ? `₹${inquiry.price}` : 'N/A',
+    "Customer Note": inquiry.notes || 'Interested in property',
+    "Inquiry Date & Time": new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    "Action Required": "Please contact customer via Call or WhatsApp directly."
+  };
+
+  try {
+    const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipient)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to dispatch customer inquiry email:", error);
+    return { success: false, error };
+  }
+}
+

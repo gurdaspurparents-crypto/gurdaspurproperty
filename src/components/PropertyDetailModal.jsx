@@ -23,6 +23,7 @@ import {
   FileCheck2
 } from 'lucide-react';
 import { addLead } from '../utils/storage';
+import { sendCustomerInquiryNotification } from '../utils/notificationService';
 
 export default function PropertyDetailModal({ 
   property, 
@@ -51,7 +52,7 @@ export default function PropertyDetailModal({
     e.preventDefault();
     if (!inquiryPhone) return;
 
-    addLead({
+    const leadData = {
       name: inquiryName || 'Website Inquirer',
       phone: inquiryPhone,
       type: 'inquiry',
@@ -60,7 +61,12 @@ export default function PropertyDetailModal({
       price: property.price,
       location: property.location,
       notes: `Interested in ${property.id}: ${property.title}`
-    });
+    };
+
+    addLead(leadData);
+
+    // Also dispatch instant email notification to owner
+    sendCustomerInquiryNotification(leadData, settings.email);
 
     setInquirySubmitted(true);
     setTimeout(() => {

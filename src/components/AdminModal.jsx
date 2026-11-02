@@ -34,7 +34,9 @@ import {
   Zap,
   Droplets,
   Printer,
-  UserCheck
+  UserCheck,
+  Download,
+  Shield
 } from 'lucide-react';
 import { 
   getLeads, 
@@ -606,6 +608,57 @@ export default function AdminModal({
       resetToDefault();
       window.location.reload();
     }
+  };
+
+  const handleDownloadBackup = () => {
+    const backupData = {
+      portal: "Gurdaspur Property Consultants (www.gurdaspurproperty.in)",
+      exportTimestamp: new Date().toISOString(),
+      propertiesCount: properties.length,
+      leadsCount: leads.length,
+      properties: properties,
+      leads: leads,
+      settings: settings
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `GurdaspurProperty_FullBackup_${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleRestoreBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.properties && Array.isArray(parsed.properties)) {
+          setProperties(parsed.properties);
+          saveProperties(parsed.properties);
+        }
+        if (parsed.leads && Array.isArray(parsed.leads)) {
+          setLeads(parsed.leads);
+          localStorage.setItem("gp_seller_leads_v1", JSON.stringify(parsed.leads));
+          pushCloudData(parsed.leads);
+        }
+        if (parsed.settings) {
+          setSettings(parsed.settings);
+          saveSettings(parsed.settings);
+        }
+        alert("✅ Backup Restored Successfully!\nAll properties, door surveys, and leads have been reinstated.");
+      } catch (err) {
+        alert("Failed to restore backup: Invalid JSON file format.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   return (
@@ -2041,6 +2094,47 @@ export default function AdminModal({
                       <p className="text-[11px] text-slate-600 leading-relaxed">
                         When enabled, any property surveyed by your executive on mobile will publish directly to www.gurdaspurproperty.in immediately without waiting for manual approval.
                       </p>
+                    </div>
+
+                    {/* Database Backup & Disaster Recovery Control */}
+                    <div className="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-emerald-400" />
+                          <h4 className="text-xs font-black uppercase tracking-wider text-white">
+                            Data Protection & Disaster Recovery
+                          </h4>
+                        </div>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                          Cloud + Email Protected
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        Every post, survey & inquiry is auto-emailed to <strong>{settings.email || 'navkiransharma@gmail.com'}</strong> and synced to the cloud bin. You can also download an offline backup file anytime.
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={handleDownloadBackup}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer hover:scale-[1.02]"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download Offline Backup (.JSON)</span>
+                        </button>
+
+                        <label className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+                          <Upload className="w-3.5 h-3.5 text-blue-400" />
+                          <span>Restore From Backup File</span>
+                          <input
+                            type="file"
+                            accept=".json"
+                            onChange={handleRestoreBackup}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
                     </div>
 
                     <div className="pt-2 flex items-center justify-between">
