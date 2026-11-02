@@ -140,8 +140,12 @@ export const getLeads = () => {
 export async function pushCloudData(leadsToPush, propertiesToPush) {
   try {
     const rawLeads = leadsToPush || getLeads();
-    const sanitizedLeads = rawLeads.slice(0, 30).map(l => {
+    
+    // Sanitize leads to keep JSON size safely under 85KB (ExtendsClass limit: 100KB)
+    const sanitizedLeads = rawLeads.slice(0, 25).map(l => {
       const copy = { ...l };
+      
+      // Strip large video dataUrl from cloud sync (preserved in IndexedDB & local device)
       if (copy.videoFile && copy.videoFile.dataUrl) {
         copy.videoFile = {
           name: copy.videoFile.name,
@@ -150,8 +154,24 @@ export async function pushCloudData(leadsToPush, propertiesToPush) {
           mediaId: copy.id + '_video'
         };
       }
-      if (copy.images && copy.images.length > 4) {
-        copy.images = copy.images.slice(0, 4);
+      
+      // Filter out heavy base64 strings so total cloud payload never exceeds quota
+      if (copy.images && Array.isArray(copy.images)) {
+        copy.images = copy.images.slice(0, 3).map(img => {
+          if (typeof img === 'string') {
+            // Keep normal asset URLs
+            if (!img.startsWith('data:')) return img;
+            // Only keep if under 20KB
+            return img.length < 20000 ? img : null;
+          } else if (img && typeof img === 'object') {
+            const url = img.url || img.dataUrl || '';
+            if (url.startsWith('data:') && url.length > 20000) {
+              return { ...img, dataUrl: null, url: null, note: 'Photo on executive device' };
+            }
+            return img;
+          }
+          return img;
+        }).filter(Boolean);
       }
       return copy;
     });
@@ -159,19 +179,64 @@ export async function pushCloudData(leadsToPush, propertiesToPush) {
     const allProps = propertiesToPush || getProperties();
     const customProps = allProps.filter(
       p => !initialProperties.some(ip => ip.id === p.id)
-    );
+    ).slice(0, 15).map(p => {
+      const copy = { ...p };
+      if (copy.images && Array.isArray(copy.images)) {
+        copy.images = copy.images.slice(0, 2).filter(img => typeof img === 'string' && (!img.startsWith('data:') || img.length < 20000));
+      }
+      if (copy.imageUrl && copy.imageUrl.startsWith('data:') && copy.imageUrl.length > 20000) {
+        copy.imageUrl = '/images/properties/gurdaspur_plotted_colony.jpg';
+      }
+      return copy;
+    });
 
-    const payload = {
+    let payload = {
       leads: sanitizedLeads,
       properties: customProps,
       updatedAt: new Date().toISOString()
     };
 
-    await fetch(CLOUD_SYNC_BIN, {
+    // Strict size safeguard: if over 85KB, strip photos to guarantee survey delivery
+    let payloadStr = JSON.stringify(payload);
+    if (payloadStr.length > 85000) {
+      sanitizedLeads.forEach(l => { l.images = []; });
+      payload.leads = sanitizedLeads;
+      payloadStr = JSON.stringify(payload);
+    }
+
+    const res = await fetch(CLOUD_SYNC_BIN, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: payloadStr
     });
+
+    if (!res.ok) {
+      console.warn("Cloud push response status:", res.status);
+      // Emergency fallback with minimal text only
+      if (res.status === 413) {
+        const miniLeads = sanitizedLeads.slice(0, 15).map(l => ({
+          id: l.id,
+          name: l.name,
+          phone: l.phone,
+          type: l.type,
+          isSurvey: l.isSurvey,
+          surveyStatus: l.surveyStatus,
+          surveyorName: l.surveyorName,
+          locality: l.locality,
+          price: l.price,
+          size: l.size,
+          category: l.category,
+          purpose: l.purpose,
+          googleMapsUrl: l.googleMapsUrl,
+          createdAt: l.createdAt
+        }));
+        await fetch(CLOUD_SYNC_BIN, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ leads: miniLeads, properties: [], updatedAt: new Date().toISOString() })
+        });
+      }
+    }
   } catch (err) {
     console.warn("Failed pushing cloud update:", err);
   }

@@ -26,7 +26,8 @@ import {
   Compass,
   FileVideo,
   Layers,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
 import { addLead } from '../utils/storage';
@@ -442,13 +443,36 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
             )}
           </div>
 
-          <button
-            onClick={handleResetForNext}
-            className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>+ Survey Next House / Room</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <a
+              href={`https://wa.me/918146526257?text=${encodeURIComponent(
+                `📋 *FIELD PROPERTY SURVEY LOGGED*\n\n` +
+                `👤 *Surveyor:* ${surveyorName} (${surveyorPhone || 'Field Team'})\n` +
+                `📍 *Locality:* ${locality} (${subArea || 'Gurdaspur'})\n` +
+                `🏠 *Exact Location:* ${exactLocation || 'Recorded on-site'}\n` +
+                `👤 *Landlord:* ${ownerName} (📞 ${ownerPhone})\n` +
+                `📐 *Specs:* ${propertyParams.size || ''} ${category.toUpperCase()} (${purpose === 'rent' ? 'For Rent' : 'For Sale'})\n` +
+                `💰 *Demand:* ₹${expectedPrice}\n` +
+                (googleMapsUrl ? `📍 *GPS Google Maps:* ${googleMapsUrl}\n` : '') +
+                `📸 *Photos:* ${uploadedImages.length} attached\n\n` +
+                `_Check Door Surveys tab in Admin Panel (PIN: 4051#) to 1-Click Approve & Publish Live._`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
+              <span>Send Summary to Owner WhatsApp</span>
+            </a>
+
+            <button
+              onClick={handleResetForNext}
+              className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Survey Next House / Room</span>
+            </button>
+          </div>
         </div>
       ) : (
         /* Active Field Survey Form */
