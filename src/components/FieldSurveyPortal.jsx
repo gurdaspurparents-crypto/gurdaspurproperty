@@ -27,10 +27,11 @@ import {
   FileVideo,
   Layers,
   AlertCircle,
-  MessageCircle
+  MessageCircle,
+  RefreshCcw
 } from 'lucide-react';
 import { GURDASPUR_LOCALITIES } from '../data/initialProperties';
-import { addLead } from '../utils/storage';
+import { addLead, getLeads, pushCloudData } from '../utils/storage';
 import { sendFieldSurveyNotification } from '../utils/notificationService';
 import PropertyParametersSection from './PropertyParametersSection';
 import PropertyDocumentsSection from './PropertyDocumentsSection';
@@ -44,6 +45,22 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
   const [surveyorPhone, setSurveyorPhone] = useState(
     localStorage.getItem('gp_surveyor_phone') || ''
   );
+  const [isSyncingPhone, setIsSyncingPhone] = useState(false);
+  const [phoneSurveysCount, setPhoneSurveysCount] = useState(0);
+
+  // Auto-sync any existing local surveys on executive's phone to the owner cloud bin
+  useEffect(() => {
+    try {
+      const all = getLeads();
+      const mySurveys = all.filter(l => l.isSurvey || l.type === 'field_survey');
+      setPhoneSurveysCount(mySurveys.length);
+      if (all.length > 0) {
+        pushCloudData(all);
+      }
+    } catch (e) {
+      console.warn("Auto-sync error on executive portal load:", e);
+    }
+  }, []);
 
   // GPS Geotag
   const [gpsLocation, setGpsLocation] = useState(null);
@@ -390,6 +407,35 @@ export default function FieldSurveyPortal({ settings, onSurveySubmitted, onLogou
           <span>Exit</span>
         </button>
       </div>
+
+      {/* Phone Surveys Sync Banner */}
+      {phoneSurveysCount > 0 && (
+        <div className="bg-emerald-950/90 border border-emerald-500/50 rounded-2xl p-3 mb-4 text-white flex items-center justify-between text-xs shadow-md">
+          <div>
+            <div className="font-extrabold text-emerald-300 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Surveys Logged on this Phone: {phoneSurveysCount}</span>
+            </div>
+            <div className="text-[11px] text-slate-300 mt-0.5">
+              Tap below to ensure all entries appear in the Owner Admin Panel.
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={isSyncingPhone}
+            onClick={async () => {
+              setIsSyncingPhone(true);
+              await pushCloudData();
+              setIsSyncingPhone(false);
+              alert("✅ Synced! All surveys on this phone are now transmitted to the Owner Admin Panel.");
+            }}
+            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-extrabold rounded-xl cursor-pointer text-xs flex items-center gap-1.5 shadow-sm transition-all shrink-0"
+          >
+            <RefreshCcw className={`w-3.5 h-3.5 ${isSyncingPhone ? 'animate-spin' : ''}`} />
+            <span>{isSyncingPhone ? 'Syncing...' : 'Sync to Owner'}</span>
+          </button>
+        </div>
+      )}
 
       {submitted ? (
         /* Success Confirmation Screen */

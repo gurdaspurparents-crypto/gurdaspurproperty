@@ -134,15 +134,20 @@ export default function AdminModal({
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(null);
 
-  const performCloudSync = async () => {
+  const performCloudSync = async (showNotification = false) => {
     setIsSyncingCloud(true);
     try {
       const { leads: syncedLeads, properties: syncedProps } = await syncCloudData();
       if (syncedLeads) setLeads(syncedLeads);
       if (syncedProps && syncedProps.length > 0) setProperties(syncedProps);
       setLastSyncTime(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
+      if (showNotification) {
+        const surveyCount = (syncedLeads || []).filter(l => l.isSurvey || l.type === 'field_survey').length;
+        alert(`✅ Cloud Sync Complete!\n\nField Surveys in Queue: ${surveyCount}\nTotal Properties: ${(syncedProps || properties).length}`);
+      }
     } catch (err) {
       console.warn("Cloud sync error in admin modal:", err);
+      if (showNotification) alert("Cloud sync encountered a network issue. Please check your internet connection.");
     } finally {
       setIsSyncingCloud(false);
     }
@@ -1477,7 +1482,7 @@ export default function AdminModal({
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={performCloudSync}
+                        onClick={() => performCloudSync(true)}
                         disabled={isSyncingCloud}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
                       >
@@ -1510,7 +1515,7 @@ export default function AdminModal({
                         </button>
 
                         <button
-                          onClick={performCloudSync}
+                          onClick={() => performCloudSync(true)}
                           disabled={isSyncingCloud}
                           className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
                         >

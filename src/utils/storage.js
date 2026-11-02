@@ -5,6 +5,7 @@ const PROPERTIES_KEY = "gp_properties_v2";
 const LEADS_KEY = "gp_seller_leads_v1";
 const SETTINGS_KEY = "gp_settings_v1";
 const CLOUD_SYNC_BIN = "https://extendsclass.com/api/json-storage/bin/fbcbeeb";
+const API_SYNC_ENDPOINT = "/api/sync";
 
 export const defaultSettings = {
   consultantName: "Gurdaspur Property Consultants",
@@ -204,37 +205,52 @@ export async function pushCloudData(leadsToPush, propertiesToPush) {
       payloadStr = JSON.stringify(payload);
     }
 
-    const res = await fetch(CLOUD_SYNC_BIN, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: payloadStr
-    });
+    // 1. Primary Sync: Same-origin Vercel API endpoint (avoids all CORS/preflight blocks)
+    let pushed = false;
+    try {
+      const apiRes = await fetch(API_SYNC_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payloadStr
+      });
+      if (apiRes.ok) pushed = true;
+    } catch (e) {
+      // Fallback to direct bin
+    }
 
-    if (!res.ok) {
-      console.warn("Cloud push response status:", res.status);
-      // Emergency fallback with minimal text only
-      if (res.status === 413) {
-        const miniLeads = sanitizedLeads.slice(0, 15).map(l => ({
-          id: l.id,
-          name: l.name,
-          phone: l.phone,
-          type: l.type,
-          isSurvey: l.isSurvey,
-          surveyStatus: l.surveyStatus,
-          surveyorName: l.surveyorName,
-          locality: l.locality,
-          price: l.price,
-          size: l.size,
-          category: l.category,
-          purpose: l.purpose,
-          googleMapsUrl: l.googleMapsUrl,
-          createdAt: l.createdAt
-        }));
-        await fetch(CLOUD_SYNC_BIN, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ leads: miniLeads, properties: [], updatedAt: new Date().toISOString() })
-        });
+    // 2. Direct Bin Fallback if API is unreachable
+    if (!pushed) {
+      const res = await fetch(CLOUD_SYNC_BIN, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: payloadStr
+      });
+
+      if (!res.ok) {
+        console.warn("Direct bin push status:", res.status);
+        if (res.status === 413) {
+          const miniLeads = sanitizedLeads.slice(0, 15).map(l => ({
+            id: l.id,
+            name: l.name,
+            phone: l.phone,
+            type: l.type,
+            isSurvey: l.isSurvey,
+            surveyStatus: l.surveyStatus,
+            surveyorName: l.surveyorName,
+            locality: l.locality,
+            price: l.price,
+            size: l.size,
+            category: l.category,
+            purpose: l.purpose,
+            googleMapsUrl: l.googleMapsUrl,
+            createdAt: l.createdAt
+          }));
+          await fetch(CLOUD_SYNC_BIN, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ leads: miniLeads, properties: [], updatedAt: new Date().toISOString() })
+          });
+        }
       }
     }
   } catch (err) {
@@ -245,12 +261,27 @@ export async function pushCloudData(leadsToPush, propertiesToPush) {
 // Sync latest leads & properties from cloud bin across all devices
 export async function syncCloudData() {
   try {
-    const res = await fetch(CLOUD_SYNC_BIN, {
-      method: "GET",
-      headers: { "Cache-Control": "no-cache" }
-    });
-    if (!res.ok) return { leads: getLeads(), properties: getProperties() };
-    const cloudData = await res.json();
+    let cloudData = null;
+
+    // 1. Primary Sync: Same-origin Vercel API (CORS-free)
+    try {
+      const apiRes = await fetch(API_SYNC_ENDPOINT);
+      if (apiRes.ok) {
+        cloudData = await apiRes.json();
+      }
+    } catch (e) {
+      // Fallback
+    }
+
+    // 2. Fallback: Direct bin without custom headers (avoids CORS preflight failure)
+    if (!cloudData || !Array.isArray(cloudData.leads)) {
+      const res = await fetch(CLOUD_SYNC_BIN);
+      if (res.ok) {
+        cloudData = await res.json();
+      }
+    }
+
+    if (!cloudData) return { leads: getLeads(), properties: getProperties() };
 
     // 1. Merge Cloud Leads with Local Leads
     const localLeads = getLeads();
