@@ -2820,6 +2820,34 @@ export default function AdminModal({
                       </p>
                     </div>
 
+                    {/* Fast2SMS Gateway Configuration */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold uppercase text-slate-800 flex items-center gap-1.5">
+                          <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Fast2SMS API Key (Real Cellular SMS OTP)</span>
+                        </label>
+                        <a 
+                          href="https://www.fast2sms.com" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] font-bold text-emerald-700 hover:underline flex items-center gap-0.5"
+                        >
+                          <span>Get Free Fast2SMS Key ↗</span>
+                        </a>
+                      </div>
+                      <input
+                        type="password"
+                        placeholder="Paste your Fast2SMS authorization API key here..."
+                        value={settingsForm.fast2smsApiKey || ''}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, fast2smsApiKey: e.target.value })}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800"
+                      />
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        To deliver real physical 4-digit SMS OTPs directly to Indian mobile phone numbers (+91), register free on <strong>fast2sms.com</strong>, copy your API Key, and paste it here. If left empty, customers verify via 1-click WhatsApp or demo OTP.
+                      </p>
+                    </div>
+
                     {/* Database Backup & Disaster Recovery Control */}
                     <div className="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-3">
                       <div className="flex items-center justify-between">

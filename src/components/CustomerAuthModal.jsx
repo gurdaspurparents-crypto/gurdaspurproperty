@@ -20,7 +20,8 @@ export default function CustomerAuthModal({
   onClose, 
   onSuccess, 
   onSwitchToEmployeeLogin,
-  intentMessage = "Please login with your mobile number to post your property."
+  intentMessage = "Please login with your mobile number to post your property.",
+  settings
 }) {
   const [step, setStep] = useState('phone'); // 'phone' | 'otp'
   const [name, setName] = useState('');
@@ -31,6 +32,8 @@ export default function CustomerAuthModal({
   const [canResend, setCanResend] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showSmsBanner, setShowSmsBanner] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isRealSms, setIsRealSms] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -50,7 +53,7 @@ export default function CustomerAuthModal({
 
   if (!isOpen) return null;
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     setErrorMsg('');
     const cleanNumber = phone.replace(/[^0-9]/g, '');
@@ -60,14 +63,39 @@ export default function CustomerAuthModal({
       return;
     }
 
+    setIsSending(true);
     // Generate random 4-digit OTP
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     setGeneratedOtp(code);
-    setStep('otp');
-    setCountdown(30);
-    setCanResend(false);
-    setShowSmsBanner(true);
-    setOtpInput('');
+
+    try {
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: cleanNumber,
+          otp: code,
+          apiKey: settings?.fast2smsApiKey || ''
+        })
+      });
+      const data = await res.json();
+      if (data.realSmsSent) {
+        setIsRealSms(true);
+        setShowSmsBanner(false);
+      } else {
+        setIsRealSms(false);
+        setShowSmsBanner(true);
+      }
+    } catch (err) {
+      setIsRealSms(false);
+      setShowSmsBanner(true);
+    } finally {
+      setIsSending(false);
+      setStep('otp');
+      setCountdown(30);
+      setCanResend(false);
+      setOtpInput('');
+    }
   };
 
   const handleVerifyOtp = (e) => {
@@ -201,9 +229,10 @@ export default function CustomerAuthModal({
 
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02]"
+                disabled={isSending}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] disabled:opacity-50"
               >
-                <span>Send Verification OTP</span>
+                <span>{isSending ? 'Sending OTP Code...' : 'Send Verification OTP'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -221,30 +250,43 @@ export default function CustomerAuthModal({
             /* STEP 2: Enter & Verify OTP */
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               
+              {/* Real SMS Dispatched Alert */}
+              {isRealSms && (
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-500 shadow-sm space-y-1.5 animate-in fade-in">
+                  <div className="flex items-center gap-2 text-emerald-950 font-extrabold text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Real SMS OTP Dispatched to Your Phone!</span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    A 4-digit verification code has been dispatched via cellular network to <strong>+91 {phone}</strong>. Please check your SMS inbox.
+                  </p>
+                </div>
+              )}
+
               {/* Simulated SMS Notification Banner */}
-              {showSmsBanner && (
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-400 shadow-sm space-y-2 animate-in fade-in slide-in-from-top-1">
+              {!isRealSms && showSmsBanner && (
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-400 shadow-sm space-y-2 animate-in fade-in slide-in-from-top-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-emerald-950 flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4 text-emerald-600" />
-                      <span>Simulated SMS Delivery</span>
+                    <span className="font-extrabold text-amber-950 flex items-center gap-1.5">
+                      <MessageSquare className="w-4 h-4 text-amber-600" />
+                      <span>Simulated Testing Mode</span>
                     </span>
-                    <span className="text-[9px] bg-emerald-200 text-emerald-900 font-mono font-bold px-1.5 py-0.5 rounded">
-                      Just Now
+                    <span className="text-[9px] bg-amber-200 text-amber-900 font-mono font-bold px-1.5 py-0.5 rounded">
+                      Gateway Key Inactive
                     </span>
                   </div>
 
                   <p className="text-xs text-slate-700 leading-snug">
-                    "Your verification OTP for <strong>GurdaspurProperty.in</strong> is <strong className="font-mono text-base text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-300 ml-1">{generatedOtp}</strong>. Valid for 10 minutes."
+                    Websites require a connected SMS Gateway (Fast2SMS / 2Factor) to send cellular SMS. For testing, your code is: <strong className="font-mono text-base text-amber-800 bg-white px-2 py-0.5 rounded border border-amber-300 ml-1">{generatedOtp}</strong>
                   </p>
 
                   <button
                     type="button"
                     onClick={handleAutoFill}
-                    className="w-full py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full py-1.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Click Here to Auto-Fill Code ({generatedOtp})</span>
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+                    <span>Auto-Fill Code ({generatedOtp})</span>
                   </button>
                 </div>
               )}

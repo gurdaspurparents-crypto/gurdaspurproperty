@@ -451,6 +451,7 @@ export default function App() {
             setIsAdminOpen(true);
           }}
           intentMessage="Enter your 10-digit mobile number to post your property on Gurdaspur Property."
+          settings={settings}
         />
       )}
 
