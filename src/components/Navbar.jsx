@@ -65,17 +65,17 @@ export default function Navbar({
 
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 sm:h-20 gap-3">
+        <div className="flex items-center justify-between h-18 sm:h-20 gap-2 xl:gap-4">
           
           {/* Left: Brand Logo & City Selector Dropdown */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
             
             {/* Logo */}
             <a href="#" className="flex items-center gap-2 group shrink-0">
               <img 
                 src="/logo.svg" 
                 alt="Gurdaspur Property" 
-                className="h-12 sm:h-14 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform drop-shadow-[0_2px_8px_rgba(16,185,129,0.2)]" 
+                className="h-10 sm:h-12 xl:h-13 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform drop-shadow-[0_2px_8px_rgba(16,185,129,0.2)]" 
               />
             </a>
 
@@ -83,7 +83,7 @@ export default function Navbar({
             <div className="relative hidden md:block shrink-0">
               <button
                 onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/50 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/50 shadow-sm transition-all cursor-pointer whitespace-nowrap"
               >
                 <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>{selectedLocality && selectedLocality !== "All Localities" ? selectedLocality : "Gurdaspur"}</span>
@@ -126,8 +126,8 @@ export default function Navbar({
 
           </div>
 
-          {/* Center Links (99acres-Style: For Buyers | For Tenants | For Owners | NRI Desk | Insights) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-medium text-slate-300 shrink min-w-0">
+          {/* Center Links (99acres-Style: For Buyers | For Tenants | For Owners | Land Converter | NRI Desk) */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-medium text-slate-300 shrink-0">
             
             <button
               onClick={() => {
@@ -159,39 +159,41 @@ export default function Navbar({
               For Tenants
             </button>
 
+            {/* "For Owners" is visible on 2xl since "Post Property FREE" is already right next to it */}
             <button
               onClick={onOpenPostProperty}
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer whitespace-nowrap"
+              className="hidden 2xl:block px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer whitespace-nowrap"
             >
               For Owners
             </button>
 
-            {/* Land Converter (visible on xl screens to maintain clean spacing) */}
-            <button
-              onClick={onOpenCalculator}
-              className="hidden xl:flex px-3 py-1.5 rounded-full text-slate-300 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Land Converter</span>
-            </button>
-
+            {/* NRI Desk (visible on xl and above) */}
             <a
               href="#nri-desk"
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:text-teal-300 hover:bg-teal-500/10 transition-all flex items-center gap-1.5 whitespace-nowrap"
+              className="hidden xl:flex px-3 py-1.5 rounded-full text-slate-300 hover:text-teal-300 hover:bg-teal-500/10 transition-all items-center gap-1.5 whitespace-nowrap"
             >
               <Globe2 className="w-3.5 h-3.5 text-teal-400" />
               <span>NRI Desk</span>
             </a>
 
+            {/* Land Converter (visible on 2xl screens to prevent any overlap on laptops) */}
+            <button
+              onClick={onOpenCalculator}
+              className="hidden 2xl:flex px-3 py-1.5 rounded-full text-slate-300 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Land Converter</span>
+            </button>
+
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             
             {/* Highlighted "Post Property FREE" Glowing Button */}
             <button
               onClick={onOpenPostProperty}
-              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 border-2 border-emerald-300 ring-2 ring-emerald-400/30 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 xl:px-4 py-2 rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 border-2 border-emerald-300 ring-2 ring-emerald-400/30 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               title="Post Your Property (100% Free)"
             >
               <PlusCircle className="w-4 h-4 text-slate-950 shrink-0" />
